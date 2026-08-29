@@ -1,17 +1,28 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/common/Navbar.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Organiza tu Colección">
+  <Navbar />
+  
+  <main class="flex-1 max-w-7xl mx-auto px-4 py-12 flex flex-col items-center justify-center text-center">
+    <span class="px-3 py-1 text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full mb-6">
+      Tu biblioteca de videojuegos personalizada
+    </span>
+    
+    <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight max-w-3xl leading-tight">
+      Lleva el control de tus <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">juegos, horas y logros</span> en un solo lugar.
+    </h1>
+    
+    <p class="mt-4 text-lg text-slate-400 max-w-xl">
+      Organiza tus títulos por consola, tienda o estado de avance. Compatible con Steam, Epic Games, PlayStation y más.
+    </p>
+
+    <div class="mt-8 flex gap-4">
+      <a href="/login" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-all shadow-lg shadow-indigo-500/25">
+        Comenzar gratis
+      </a>
+    </div>
+  </main>
+</Layout>
