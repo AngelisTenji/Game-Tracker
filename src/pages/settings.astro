@@ -1,0 +1,103 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/common/Navbar.astro';
+import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
+---
+
+<Layout title="Ajustes">
+  <Navbar />
+
+  <main class="flex-1 max-w-xl w-full mx-auto px-4 py-8">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-white tracking-tight">Ajustes</h1>
+      <p class="text-xs text-slate-400 mt-0.5">Personaliza la apariencia y preferencias de tu cuenta</p>
+    </div>
+
+    <!-- Sección de Apariencia -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl">
+      <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-800">
+        <div class="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
+          <Palette class="w-4 h-4" />
+        </div>
+        <div>
+          <h2 class="text-sm font-bold text-white">Tema Visual</h2>
+          <p class="text-[11px] text-slate-400">Selecciona el esquema de colores de la interfaz</p>
+        </div>
+      </div>
+
+      <!-- Retícula Horizontal Compacta -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <!-- Legacy Dark -->
+        <button
+          type="button"
+          data-theme="legacy"
+          class="theme-opt active p-3 rounded-xl border-2 border-indigo-500 bg-indigo-950/40 text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer"
+        >
+          <div class="flex items-center justify-between">
+            <Moon class="w-4 h-4 text-indigo-400" />
+            <span class="check-icon text-indigo-400"><Check class="w-3.5 h-3.5" /></span>
+          </div>
+          <div>
+            <span class="block text-xs font-bold text-white">Legacy Dark</span>
+            <span class="block text-[10px] text-slate-400">Azul oscuro</span>
+          </div>
+        </button>
+
+        <!-- Midnight Black -->
+        <button
+          type="button"
+          data-theme="dark"
+          class="theme-opt p-3 rounded-xl border border-slate-800 bg-slate-950/50 text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-slate-700"
+        >
+          <div class="flex items-center justify-between">
+            <Monitor class="w-4 h-4 text-slate-400" />
+            <span class="check-icon hidden text-indigo-400"><Check class="w-3.5 h-3.5" /></span>
+          </div>
+          <div>
+            <span class="block text-xs font-bold text-slate-300">Midnight</span>
+            <span class="block text-[10px] text-slate-500">Oscuro puro</span>
+          </div>
+        </button>
+
+        <!-- Modo Claro -->
+        <button
+          type="button"
+          data-theme="light"
+          class="theme-opt p-3 rounded-xl border border-slate-800 bg-slate-950/50 text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-slate-700"
+        >
+          <div class="flex items-center justify-between">
+            <Sun class="w-4 h-4 text-slate-400" />
+            <span class="check-icon hidden text-indigo-400"><Check class="w-3.5 h-3.5" /></span>
+          </div>
+          <div>
+            <span class="block text-xs font-bold text-slate-300">Modo Claro</span>
+            <span class="block text-[10px] text-slate-500">Luminoso</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.theme-opt');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Limpiar estados de todas las tarjetas
+      buttons.forEach(b => {
+        b.classList.remove('border-2', 'border-indigo-500', 'bg-indigo-950/40');
+        b.classList.add('border', 'border-slate-800', 'bg-slate-950/50');
+        b.querySelector('.check-icon')?.classList.add('hidden');
+      });
+
+      // Aplicar estado activo a la seleccionada
+      btn.classList.remove('border', 'border-slate-800', 'bg-slate-950/50');
+      btn.classList.add('border-2', 'border-indigo-500', 'bg-indigo-950/40');
+      btn.querySelector('.check-icon')?.classList.remove('hidden');
+
+      const selectedTheme = btn.getAttribute('data-theme');
+      localStorage.setItem('theme', selectedTheme || 'legacy');
+    });
+  });
+</script>

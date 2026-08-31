@@ -27,6 +27,36 @@ import { Gamepad2, Search, Library, LogOut } from 'lucide-astro';
       <a href="/login" class="text-xs font-semibold px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-lg shadow-indigo-500/20">
         Iniciar Sesión
       </a>
+      <button id="nav-logout-btn" class="hidden text-xs font-semibold px-3 py-2 rounded-lg bg-slate-800 hover:bg-red-600/20 hover:text-red-400 text-slate-300 transition-all flex items-center gap-1.5 cursor-pointer">
+        <LogOut class="w-3.5 h-3.5" />
+        <span>Salir</span>
+      </button>
     </div>
   </div>
 </header>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+
+  async function checkUserSession() {
+    const loginBtn = document.getElementById('nav-login-btn');
+    const logoutBtn = document.getElementById('nav-logout-btn');
+
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session) {
+      loginBtn?.classList.add('hidden');
+      logoutBtn?.classList.remove('hidden');
+    } else {
+      loginBtn?.classList.remove('hidden');
+      logoutBtn?.classList.add('hidden');
+    }
+
+    logoutBtn?.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/login';
+    });
+  }
+
+  checkUserSession();
+</script>
