@@ -81,23 +81,35 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
 
 <script>
   const buttons = document.querySelectorAll<HTMLButtonElement>('.theme-opt');
+  const currentTheme = localStorage.getItem('theme') || 'legacy';
 
+  function applyActiveStyles(selectedBtn: HTMLButtonElement) {
+    buttons.forEach(b => {
+      b.classList.remove('border-2', 'border-indigo-500', 'bg-indigo-950/40');
+      b.classList.add('border', 'border-slate-800', 'bg-slate-950/50');
+      b.querySelector('.check-icon')?.classList.add('hidden');
+    });
+
+    selectedBtn.classList.remove('border', 'border-slate-800', 'bg-slate-950/50');
+    selectedBtn.classList.add('border-2', 'border-indigo-500', 'bg-indigo-950/40');
+    selectedBtn.querySelector('.check-icon')?.classList.remove('hidden');
+  }
+
+  // Marcar visualmente el tema cargado actualmente
+  const initialBtn = document.querySelector<HTMLButtonElement>(`.theme-opt[data-theme="${currentTheme}"]`);
+  if (initialBtn) {
+    applyActiveStyles(initialBtn);
+  }
+
+  // Cambiar tema al hacer clic
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
-      // Limpiar estados de todas las tarjetas
-      buttons.forEach(b => {
-        b.classList.remove('border-2', 'border-indigo-500', 'bg-indigo-950/40');
-        b.classList.add('border', 'border-slate-800', 'bg-slate-950/50');
-        b.querySelector('.check-icon')?.classList.add('hidden');
-      });
-
-      // Aplicar estado activo a la seleccionada
-      btn.classList.remove('border', 'border-slate-800', 'bg-slate-950/50');
-      btn.classList.add('border-2', 'border-indigo-500', 'bg-indigo-950/40');
-      btn.querySelector('.check-icon')?.classList.remove('hidden');
-
-      const selectedTheme = btn.getAttribute('data-theme');
-      localStorage.setItem('theme', selectedTheme || 'legacy');
+      applyActiveStyles(btn);
+      const selectedTheme = btn.getAttribute('data-theme') || 'legacy';
+      
+      // Guardar y aplicar globalmente
+      localStorage.setItem('theme', selectedTheme);
+      document.documentElement.setAttribute('data-theme', selectedTheme);
     });
   });
 </script>

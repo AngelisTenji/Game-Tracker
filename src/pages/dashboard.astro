@@ -1,14 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Gamepad2, Clock, Trophy, Plus, Library } from 'lucide-astro';
+import { Gamepad2, Clock, Trophy, Plus, Library, X } from 'lucide-astro';
 ---
 
 <Layout title="Mi Biblioteca">
   <Navbar />
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
-    <!-- Encabezado del Dashboard -->
+    <!-- Encabezado -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
       <div>
         <h1 class="text-3xl font-bold text-white tracking-tight">Mi Biblioteca</h1>
@@ -24,7 +24,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library } from 'lucide-astro';
       </a>
     </div>
 
-    <!-- Tarjetas de Métricas Rápidas -->
+    <!-- Tarjetas de Métricas -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
       <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
         <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
@@ -57,22 +57,106 @@ import { Gamepad2, Clock, Trophy, Plus, Library } from 'lucide-astro';
       </div>
     </div>
 
-    <!-- Contenedor Principal de la Galería / Estado Vacío -->
+    <!-- Pestañas de Filtrado -->
+    <div class="flex items-center gap-2 mb-6 border-b border-slate-800 pb-3 overflow-x-auto">
+      <button data-filter="all" class="filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition-all cursor-pointer">
+        Todos
+      </button>
+      <button data-filter="playing" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer">
+        Jugando
+      </button>
+      <button data-filter="completed" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer">
+        Completados
+      </button>
+      <button data-filter="backlog" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer">
+        Pendientes
+      </button>
+      <button data-filter="on_hold" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer">
+        En Pausa
+      </button>
+    </div>
+
+    <!-- Galería / Contenedor -->
     <div id="library-container" class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
       <div class="p-4 bg-slate-800/50 rounded-2xl mb-4 text-slate-500">
         <Gamepad2 class="w-10 h-10" />
       </div>
       <h3 class="text-lg font-semibold text-white">Tu biblioteca está vacía</h3>
-      <p class="text-sm text-slate-400 max-w-sm mt-1 mb-6">Aún no has agregado ningún juego a tu colección. Empieza buscando tus títulos favoritos.</p>
+      <p class="text-sm text-slate-400 max-w-sm mt-1 mb-6">Aún no has agregado ningún juego a tu colección.</p>
       <a href="/search" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl transition-colors">
         Ir al buscador
       </a>
     </div>
   </main>
+
+  <!-- MODAL DE EDICIÓN ESTILIZADO -->
+  <div id="edit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+        <h3 id="modal-game-title" class="text-lg font-bold text-white truncate">Editar Juego</h3>
+        <button id="close-modal-btn" class="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+
+      <form id="edit-form" class="space-y-4">
+        <input type="hidden" id="edit-game-id" />
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+            Estado de Juego
+          </label>
+          <select id="edit-status" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500">
+            <option value="playing">Jugando</option>
+            <option value="completed">Completado</option>
+            <option value="backlog">Pendiente (Backlog)</option>
+            <option value="on_hold">En Pausa</option>
+            <option value="dropped">Abandonado</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+            Horas Jugadas
+          </label>
+          <input type="number" step="0.5" min="0" id="edit-hours" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" id="cancel-modal-btn" class="flex-1 py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-xl transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </Layout>
 
 <script>
   import { supabase } from '../lib/supabase';
+
+  let allGames: any[] = [];
+  let activeFilter = 'all';
+
+  const modal = document.getElementById('edit-modal') as HTMLDivElement;
+  const closeModalBtn = document.getElementById('close-modal-btn') as HTMLButtonElement;
+  const cancelModalBtn = document.getElementById('cancel-modal-btn') as HTMLButtonElement;
+  const editForm = document.getElementById('edit-form') as HTMLFormElement;
+  const editGameId = document.getElementById('edit-game-id') as HTMLInputElement;
+  const editStatus = document.getElementById('edit-status') as HTMLSelectElement;
+  const editHours = document.getElementById('edit-hours') as HTMLInputElement;
+  const modalGameTitle = document.getElementById('modal-game-title') as HTMLHeadingElement;
+
+  const statusMap: Record<string, string> = {
+    playing: 'Jugando',
+    completed: 'Completado',
+    backlog: 'Pendiente',
+    on_hold: 'En Pausa',
+    dropped: 'Abandonado'
+  };
 
   async function loadLibrary() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -93,90 +177,139 @@ import { Gamepad2, Clock, Trophy, Plus, Library } from 'lucide-astro';
       return;
     }
 
-    const container = document.getElementById('library-container')!;
+    allGames = games || [];
 
-    if (!games || games.length === 0) {
+    // Estadísticas globales siempre basadas en el total de juegos
+    const totalHours = allGames.reduce((acc, curr) => acc + (Number(curr.hours_played) || 0), 0);
+    const completedCount = allGames.filter(g => g.status === 'completed').length;
+
+    document.getElementById('stat-total')!.textContent = allGames.length.toString();
+    document.getElementById('stat-hours')!.textContent = `${totalHours.toFixed(1)}h`;
+    document.getElementById('stat-completed')!.textContent = completedCount.toString();
+
+    renderGrid();
+  }
+
+  // Mapeo de estilos CSS para los Badges
+  const statusBadgeStyles: Record<string, string> = {
+    playing: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    completed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    backlog: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    on_hold: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    dropped: 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+  };
+
+  function renderGrid() {
+    const container = document.getElementById('library-container')!;
+    const filteredGames = activeFilter === 'all' 
+      ? allGames 
+      : allGames.filter(g => g.status === activeFilter);
+
+    if (filteredGames.length === 0) {
       container.className = "bg-slate-900/50 border border-slate-800/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px]";
       container.innerHTML = `
         <div class="p-4 bg-slate-800/50 rounded-2xl mb-4 text-slate-500">
           <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
         </div>
-        <h3 class="text-lg font-semibold text-white">Tu biblioteca está vacía</h3>
-        <p class="text-sm text-slate-400 max-w-sm mt-1 mb-6">Aún no has agregado ningún juego a tu colección.</p>
-        <a href="/search" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl transition-colors">Ir al buscador</a>
+        <h3 class="text-lg font-semibold text-white">No hay juegos en esta categoría</h3>
+        <p class="text-sm text-slate-400 max-w-sm mt-1 mb-6">Prueba seleccionando otra pestaña o agrega nuevos títulos.</p>
       `;
-      document.getElementById('stat-total')!.textContent = '0';
-      document.getElementById('stat-hours')!.textContent = '0.0h';
-      document.getElementById('stat-completed')!.textContent = '0';
       return;
     }
 
-    // Actualizar Estadísticas
-    const totalHours = games.reduce((acc, curr) => acc + (Number(curr.hours_played) || 0), 0);
-    const completedCount = games.filter(g => g.status === 'completed').length;
+container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6";
+    container.innerHTML = filteredGames.map(game => {
+      const badgeClass = statusBadgeStyles[game.status] || 'bg-slate-800 text-slate-300 border-slate-700';
+      const statusText = statusMap[game.status] || game.status;
 
-    document.getElementById('stat-total')!.textContent = games.length.toString();
-    document.getElementById('stat-hours')!.textContent = `${totalHours.toFixed(1)}h`;
-    document.getElementById('stat-completed')!.textContent = completedCount.toString();
-
-    // Renderizar Tarjetas
-    container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6";
-    container.innerHTML = games.map(game => `
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all">
-        <img src="${game.cover_url || '/placeholder.jpg'}" alt="${game.title}" class="w-full h-44 object-cover" />
-        <div class="p-4 flex-1 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-md">
-                ${game.platform}
-              </span>
-              <span class="text-[10px] uppercase font-semibold px-2 py-0.5 bg-slate-800 text-slate-300 rounded-md">
-                ${game.status}
-              </span>
+      return `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all">
+          <img src="${game.cover_url || '/placeholder.jpg'}" alt="${game.title}" class="w-full h-44 object-cover" />
+          <div class="p-4 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-md">
+                  ${game.platform}
+                </span>
+                <span class="text-[10px] uppercase font-bold px-2 py-0.5 border rounded-md ${badgeClass}">
+                  ${statusText}
+                </span>
+              </div>
+              <h3 class="font-bold text-white text-base line-clamp-1">${game.title}</h3>
+              <p class="text-xs text-slate-400 mt-1">Horas: <span class="font-semibold text-slate-200">${game.hours_played}h</span></p>
             </div>
-            <h3 class="font-bold text-white text-base line-clamp-1">${game.title}</h3>
-            <p class="text-xs text-slate-400 mt-1">Horas: <span class="font-semibold text-slate-200">${game.hours_played}h</span></p>
-          </div>
 
-          <div class="flex gap-2 mt-4 pt-3 border-t border-slate-800/80">
-            <button
-              onclick="editGame('${game.id}', ${game.hours_played}, '${game.status}')"
-              class="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
-            >
-              <span>Editar</span>
-            </button>
-            <button
-              onclick="deleteGame('${game.id}', '${game.title.replace(/'/g, "\\'")}')"
-              class="py-1.5 px-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
-            >
-              Eliminar
-            </button>
+            <div class="flex gap-2 mt-4 pt-3 border-t border-slate-800/80">
+              <button
+                onclick="openEditModal('${game.id}', '${game.title.replace(/'/g, "\\'")}', ${game.hours_played}, '${game.status}')"
+                class="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <span>Editar</span>
+              </button>
+              <button
+                onclick="deleteGame('${game.id}', '${game.title.replace(/'/g, "\\'")}')"
+                class="py-1.5 px-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+              >
+                Eliminar
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+  }
+  
+  // Event Listeners para Filtros
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => {
+        b.classList.remove('bg-indigo-600', 'text-white');
+        b.classList.add('bg-slate-900', 'text-slate-400', 'border', 'border-slate-800');
+      });
+
+      btn.classList.remove('bg-slate-900', 'text-slate-400', 'border', 'border-slate-800');
+      btn.classList.add('bg-indigo-600', 'text-white');
+
+      activeFilter = btn.getAttribute('data-filter') || 'all';
+      renderGrid();
+    });
+  });
+
+  // Lógica del Modal
+  (window as any).openEditModal = (id: string, title: string, hours: number, status: string) => {
+    editGameId.value = id;
+    modalGameTitle.textContent = `Editar: ${title}`;
+    editHours.value = hours.toString();
+    editStatus.value = status;
+    modal.classList.remove('hidden');
+  };
+
+  function closeModal() {
+    modal.classList.add('hidden');
   }
 
-  // Funciones de Edición y Eliminación
-  (window as any).editGame = async (id: string, currentHours: number, currentStatus: string) => {
-    const newHoursStr = prompt('Ingresa las horas jugadas:', currentHours.toString());
-    if (newHoursStr === null) return;
-    const newHours = parseFloat(newHoursStr);
+  closeModalBtn?.addEventListener('click', closeModal);
+  cancelModalBtn?.addEventListener('click', closeModal);
 
-    const newStatus = prompt('Ingresa el nuevo estado (playing, completed, on_hold, dropped, backlog):', currentStatus);
-    if (!newStatus) return;
+  editForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = editGameId.value;
+    const hours = parseFloat(editHours.value) || 0;
+    const status = editStatus.value;
 
     const { error } = await supabase
       .from('user_library')
-      .update({ hours_played: newHours, status: newStatus, updated_at: new Date() })
+      .update({ hours_played: hours, status: status, updated_at: new Date() })
       .eq('id', id);
 
     if (error) {
       alert('Error al actualizar: ' + error.message);
     } else {
+      closeModal();
       loadLibrary();
     }
-  };
+  });
 
   (window as any).deleteGame = async (id: string, title: string) => {
     if (!confirm(`¿Seguro que deseas eliminar ${title} de tu biblioteca?`)) return;
