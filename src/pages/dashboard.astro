@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Gamepad2, Clock, Trophy, Plus, Library, X } from 'lucide-astro';
+import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucide-astro';
 ---
 
 <Layout title="Mi Biblioteca">
@@ -26,7 +26,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X } from 'lucide-astro';
 
     <!-- Tarjetas de Métricas -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-      <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
+      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4">
         <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
           <Library class="w-6 h-6" />
         </div>
@@ -36,7 +36,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X } from 'lucide-astro';
         </div>
       </div>
 
-      <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
+      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4">
         <div class="p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-400">
           <Clock class="w-6 h-6" />
         </div>
@@ -46,7 +46,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X } from 'lucide-astro';
         </div>
       </div>
 
-      <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
+      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4">
         <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
           <Trophy class="w-6 h-6" />
         </div>
@@ -57,23 +57,71 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X } from 'lucide-astro';
       </div>
     </div>
 
-    <!-- Pestañas de Filtrado -->
-    <div class="flex items-center gap-2 mb-6 border-b border-slate-800 pb-3 overflow-x-auto">
-      <button data-filter="all" class="filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition-all cursor-pointer">
-        Todos
-      </button>
-      <button data-filter="playing" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer">
-        Jugando
-      </button>
-      <button data-filter="completed" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer">
-        Completados
-      </button>
-      <button data-filter="backlog" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer">
-        Pendientes
-      </button>
-      <button data-filter="on_hold" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer">
-        En Pausa
-      </button>
+    <!-- Buscador Interno y Pestañas de Estado -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4">
+      <!-- Pestañas de Estado -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1">
+        <button data-filter="all" class="filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition-all cursor-pointer whitespace-nowrap">
+          Todos
+        </button>
+        <button data-filter="playing" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer whitespace-nowrap">
+          Jugando
+        </button>
+        <button data-filter="completed" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer whitespace-nowrap">
+          Completados
+        </button>
+        <button data-filter="backlog" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer whitespace-nowrap">
+          Pendientes
+        </button>
+        <button data-filter="on_hold" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer whitespace-nowrap">
+          En Pausa
+        </button>
+      </div>
+
+      <!-- Buscador Interno -->
+      <div class="relative w-full sm:w-64">
+        <Search class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+        <input
+          type="text"
+          id="search-internal"
+          placeholder="Buscar en mi colección..."
+          class="w-full pl-9 pr-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+        />
+      </div>
+    </div>
+
+    <!-- Filtros Secundarios (Plataforma y Tienda) -->
+    <div class="flex flex-wrap items-center gap-3 mb-6 pb-4 border-b border-slate-800">
+      <div class="flex items-center gap-1.5 text-xs text-slate-400 font-semibold mr-2">
+        <Filter class="w-3.5 h-3.5" />
+        <span>Filtrar por:</span>
+      </div>
+
+      <select id="filter-platform" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-300 text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
+        <option value="all">Todas las plataformas</option>
+        <option value="PC">PC</option>
+        <option value="PS5">PlayStation 5</option>
+        <option value="PS4">PlayStation 4</option>
+        <option value="Xbox Series X/S">Xbox Series X/S</option>
+        <option value="Xbox One">Xbox One</option>
+        <option value="Nintendo Switch">Nintendo Switch</option>
+        <option value="Android">Android</option>
+        <option value="iOS">iOS</option>
+      </select>
+
+      <select id="filter-store" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-300 text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
+        <option value="all">Todas las tiendas</option>
+        <option value="Steam">Steam</option>
+        <option value="Epic Games">Epic Games</option>
+        <option value="Microsoft Store">Microsoft Store</option>
+        <option value="GOG">GOG</option>
+        <option value="PlayStation Store">PlayStation Store</option>
+        <option value="Nintendo eShop">Nintendo eShop</option>
+        <option value="Xbox Store">Xbox Store</option>
+        <option value="Google Play">Google Play</option>
+        <option value="App Store">App Store</option>
+        <option value="Otro">Otro / Físico</option>
+      </select>
     </div>
 
     <!-- Galería / Contenedor -->
@@ -139,7 +187,10 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X } from 'lucide-astro';
   import { supabase } from '../lib/supabase';
 
   let allGames: any[] = [];
-  let activeFilter = 'all';
+  let activeStatusFilter = 'all';
+  let activePlatformFilter = 'all';
+  let activeStoreFilter = 'all';
+  let searchQuery = '';
 
   const modal = document.getElementById('edit-modal') as HTMLDivElement;
   const closeModalBtn = document.getElementById('close-modal-btn') as HTMLButtonElement;
@@ -150,12 +201,24 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X } from 'lucide-astro';
   const editHours = document.getElementById('edit-hours') as HTMLInputElement;
   const modalGameTitle = document.getElementById('modal-game-title') as HTMLHeadingElement;
 
+  const platformSelect = document.getElementById('filter-platform') as HTMLSelectElement;
+  const storeSelect = document.getElementById('filter-store') as HTMLSelectElement;
+  const searchInput = document.getElementById('search-internal') as HTMLInputElement;
+
   const statusMap: Record<string, string> = {
     playing: 'Jugando',
     completed: 'Completado',
     backlog: 'Pendiente',
     on_hold: 'En Pausa',
     dropped: 'Abandonado'
+  };
+
+  const statusBadgeStyles: Record<string, string> = {
+    playing: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    completed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    backlog: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    on_hold: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    dropped: 'bg-rose-500/10 text-rose-400 border-rose-500/20'
   };
 
   async function loadLibrary() {
@@ -179,7 +242,6 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X } from 'lucide-astro';
 
     allGames = games || [];
 
-    // Estadísticas globales siempre basadas en el total de juegos
     const totalHours = allGames.reduce((acc, curr) => acc + (Number(curr.hours_played) || 0), 0);
     const completedCount = allGames.filter(g => g.status === 'completed').length;
 
@@ -190,20 +252,18 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X } from 'lucide-astro';
     renderGrid();
   }
 
-  // Mapeo de estilos CSS para los Badges
-  const statusBadgeStyles: Record<string, string> = {
-    playing: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-    completed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    backlog: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    on_hold: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-    dropped: 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-  };
-
   function renderGrid() {
     const container = document.getElementById('library-container')!;
-    const filteredGames = activeFilter === 'all' 
-      ? allGames 
-      : allGames.filter(g => g.status === activeFilter);
+    
+    // Aplicar Filtros Combinados + Búsqueda por Texto
+    const filteredGames = allGames.filter(game => {
+      const matchStatus = activeStatusFilter === 'all' || game.status === activeStatusFilter;
+      const matchPlatform = activePlatformFilter === 'all' || game.platform === activePlatformFilter;
+      const matchStore = activeStoreFilter === 'all' || game.store === activeStoreFilter;
+      const matchSearch = searchQuery === '' || game.title.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return matchStatus && matchPlatform && matchStore && matchSearch;
+    });
 
     if (filteredGames.length === 0) {
       container.className = "bg-slate-900/50 border border-slate-800/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px]";
@@ -211,19 +271,19 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X } from 'lucide-astro';
         <div class="p-4 bg-slate-800/50 rounded-2xl mb-4 text-slate-500">
           <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
         </div>
-        <h3 class="text-lg font-semibold text-white">No hay juegos en esta categoría</h3>
-        <p class="text-sm text-slate-400 max-w-sm mt-1 mb-6">Prueba seleccionando otra pestaña o agrega nuevos títulos.</p>
+        <h3 class="text-lg font-semibold text-white">No se encontraron juegos</h3>
+        <p class="text-sm text-slate-400 max-w-sm mt-1 mb-6">Prueba ajustando el texto o borrando los filtros aplicados.</p>
       `;
       return;
     }
 
-container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6";
+    container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6";
     container.innerHTML = filteredGames.map(game => {
       const badgeClass = statusBadgeStyles[game.status] || 'bg-slate-800 text-slate-300 border-slate-700';
       const statusText = statusMap[game.status] || game.status;
 
       return `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all">
+        <div class="theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all shadow-lg">
           <img src="${game.cover_url || '/placeholder.jpg'}" alt="${game.title}" class="w-full h-44 object-cover" />
           <div class="p-4 flex-1 flex flex-col justify-between">
             <div>
@@ -235,14 +295,17 @@ container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-co
                   ${statusText}
                 </span>
               </div>
-              <h3 class="font-bold text-white text-base line-clamp-1">${game.title}</h3>
-              <p class="text-xs text-slate-400 mt-1">Horas: <span class="font-semibold text-slate-200">${game.hours_played}h</span></p>
+              <h3 class="font-bold text-base line-clamp-1">${game.title}</h3>
+              <div class="flex items-center justify-between text-xs theme-text-muted mt-1">
+                <span>Horas: <strong class="text-indigo-400">${game.hours_played}h</strong></span>
+                <span class="text-[11px] font-medium">${game.store || 'Sin tienda'}</span>
+              </div>
             </div>
 
             <div class="flex gap-2 mt-4 pt-3 border-t border-slate-800/80">
               <button
                 onclick="openEditModal('${game.id}', '${game.title.replace(/'/g, "\\'")}', ${game.hours_played}, '${game.status}')"
-                class="flex-1 py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                class="flex-1 py-1.5 px-2 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
               >
                 <span>Editar</span>
               </button>
@@ -258,8 +321,14 @@ container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-co
       `;
     }).join('');
   }
-  
-  // Event Listeners para Filtros
+
+  // Listener para Buscador Interno
+  searchInput?.addEventListener('input', (e) => {
+    searchQuery = (e.target as HTMLInputElement).value.trim();
+    renderGrid();
+  });
+
+  // Event Listeners para Filtros por Pestaña
   const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -271,12 +340,23 @@ container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-co
       btn.classList.remove('bg-slate-900', 'text-slate-400', 'border', 'border-slate-800');
       btn.classList.add('bg-indigo-600', 'text-white');
 
-      activeFilter = btn.getAttribute('data-filter') || 'all';
+      activeStatusFilter = btn.getAttribute('data-filter') || 'all';
       renderGrid();
     });
   });
 
-  // Lógica del Modal
+  // Listeners para Filtros Desplegables
+  platformSelect?.addEventListener('change', (e) => {
+    activePlatformFilter = (e.target as HTMLSelectElement).value;
+    renderGrid();
+  });
+
+  storeSelect?.addEventListener('change', (e) => {
+    activeStoreFilter = (e.target as HTMLSelectElement).value;
+    renderGrid();
+  });
+
+  // Modal de Edición
   (window as any).openEditModal = (id: string, title: string, hours: number, status: string) => {
     editGameId.value = id;
     modalGameTitle.textContent = `Editar: ${title}`;
@@ -304,9 +384,16 @@ container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-co
       .eq('id', id);
 
     if (error) {
-      alert('Error al actualizar: ' + error.message);
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Error al actualizar: ' + error.message, 'error');
+      } else {
+        alert('Error al actualizar: ' + error.message);
+      }
     } else {
       closeModal();
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Juego actualizado correctamente', 'success');
+      }
       loadLibrary();
     }
   });
@@ -320,8 +407,15 @@ container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-co
       .eq('id', id);
 
     if (error) {
-      alert('Error al eliminar: ' + error.message);
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Error al eliminar: ' + error.message, 'error');
+      } else {
+        alert('Error al eliminar: ' + error.message);
+      }
     } else {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast(`${title} se eliminó de tu biblioteca`, 'success');
+      }
       loadLibrary();
     }
   };

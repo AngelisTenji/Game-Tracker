@@ -161,7 +161,7 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
   (window as any).openAddModal = async (rawgId: number, title: string, coverUrl: string) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      alert('Debes iniciar sesión para guardar juegos.');
+      (window as any).showToast('Debes iniciar sesión para guardar juegos.', 'error');
       window.location.href = '/login';
       return;
     }
@@ -181,7 +181,7 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
   closeModalBtn?.addEventListener('click', closeModal);
   cancelModalBtn?.addEventListener('click', closeModal);
 
-  addForm?.addEventListener('submit', async (e) => {
+addForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
@@ -206,10 +206,18 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
     });
 
     if (error) {
-      alert('Error al agregar el juego: ' + error.message);
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Error al agregar: ' + error.message, 'error');
+      } else {
+        alert('Error al agregar: ' + error.message);
+      }
     } else {
       closeModal();
-      alert(`¡${title} se agregó a tu biblioteca!`);
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast(`¡${title} se agregó a tu biblioteca!`, 'success');
+      } else {
+        alert(`¡${title} se agregó a tu biblioteca!`);
+      }
     }
   });
 </script>

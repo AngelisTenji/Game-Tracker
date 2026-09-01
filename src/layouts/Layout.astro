@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Toast from '../components/common/Toast.astro';
 
 interface Props {
   title: string;
@@ -25,32 +26,48 @@ const { title } = Astro.props;
   </head>
   <body class="min-h-screen bg-theme-bg text-theme-text transition-colors duration-200 flex flex-col font-sans antialiased">
     <slot />
+    <Toast />
   </body>
 </html>
 
 <style is:global>
-  /* Definición de Variables de Color según el Tema */
+  /* Variables de Color por Tema */
   :root[data-theme="legacy"] {
     --bg-main: #0a0f1d;
+    --bg-card: rgba(15, 23, 42, 0.8);
+    --border-card: #1e293b;
     --text-main: #f8fafc;
+    --text-muted: #94a3b8;
   }
 
   :root[data-theme="dark"] {
-    --bg-main: #000000;
-    --text-main: #f3f4f6;
+    --bg-main: #030712;
+    --bg-card: #111827;
+    --border-card: #1f2937;
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
   }
 
   :root[data-theme="light"] {
     --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --border-card: #e2e8f0;
     --text-main: #0f172a;
+    --text-muted: #64748b;
   }
 
-  /* Estilos para soportar los colores de las variables */
-  .bg-theme-bg {
+  /* Aplicación de Variables */
+  body {
     background-color: var(--bg-main);
-  }
-  
-  .text-theme-text {
     color: var(--text-main);
+  }
+
+  .theme-card {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-card) !important;
+  }
+
+  .theme-text-muted {
+    color: var(--text-muted) !important;
   }
 </style>
