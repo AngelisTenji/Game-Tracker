@@ -3,20 +3,19 @@ import '../styles/global.css';
 import Toast from '../components/common/Toast.astro';
 
 interface Props {
-  title: string;
+  title?: string;
 }
 
-const { title } = Astro.props;
+const { title = "KazeChronik" } = Astro.props;
 ---
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es" data-theme="legacy">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="GameTracker - Gestiona tu biblioteca personal de videojuegos" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title} | GameTracker</title>
+    <title>{title} | KazeChronik</title>
 
     <!-- Script Inline Inmediato (Previene Flash de Tema) -->
     <script is:inline>

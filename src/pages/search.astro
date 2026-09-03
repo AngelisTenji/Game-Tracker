@@ -316,4 +316,50 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
       }
     }
   });
+  
+  // ... (referencias de DOM y mapa de tiendas se mantienen) ...
+
+  (window as any).openAddModal = async (rawgId: number, title: string, coverUrl: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Debes iniciar sesión para guardar juegos.', 'error');
+      }
+      window.location.href = '/login';
+      return;
+    }
+
+    // Comprobar si el juego ya existe en la biblioteca del usuario
+    const { data: existingGame } = await supabase
+      .from('user_library')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('rawg_id', rawgId)
+      .maybeSingle();
+
+    const submitBtn = addForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const modalTitle = document.getElementById('modal-title') as HTMLHeadingElement;
+
+    (document.getElementById('modal-rawg-id') as HTMLInputElement).value = rawgId.toString();
+    (document.getElementById('modal-game-name') as HTMLInputElement).value = title;
+    (document.getElementById('modal-cover-url') as HTMLInputElement).value = coverUrl;
+
+    if (existingGame) {
+      modalTitle.textContent = `⚠️ ${title} (Ya en biblioteca)`;
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Este juego ya forma parte de tu colección.', 'error');
+      }
+    } else {
+      modalTitle.textContent = `Agregar: ${title}`;
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+
+    const currentPlatform = platformSelect.value || 'PC';
+    updateStoreOptions(currentPlatform);
+
+    modal.classList.remove('hidden');
+  };
 </script>
