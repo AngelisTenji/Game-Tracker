@@ -117,10 +117,80 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
   const cancelModalBtn = document.getElementById('cancel-modal-btn') as HTMLButtonElement;
   const addForm = document.getElementById('add-form') as HTMLFormElement;
 
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const query = input.value.trim();
-    if (!query) return;
+  const platformSelect = document.getElementById('modal-platform') as HTMLSelectElement;
+  const storeSelect = document.getElementById('modal-store') as HTMLSelectElement;
+
+  // Variables para controlar el Debounce y evitar peticiones duplicadas
+  let debounceTimer: ReturnType<typeof setTimeout>;
+  let lastSearchQuery = '';
+
+  // Mapa Inteligente: Plataforma -> Tiendas Válidas
+  const platformStoresMap: Record<string, { label: string; value: string }[]> = {
+    'PC': [
+      { label: 'Steam', value: 'Steam' },
+      { label: 'Epic Games', value: 'Epic Games' },
+      { label: 'Microsoft Store', value: 'Microsoft Store' },
+      { label: 'GOG', value: 'GOG' },
+      { label: 'Otro / Físico', value: 'Otro' }
+    ],
+    'PS5': [
+      { label: 'PlayStation Store', value: 'PlayStation Store' },
+      { label: 'Físico / Disco', value: 'Otro' }
+    ],
+    'PS4': [
+      { label: 'PlayStation Store', value: 'PlayStation Store' },
+      { label: 'Físico / Disco', value: 'Otro' }
+    ],
+    'Xbox Series X/S': [
+      { label: 'Xbox Store', value: 'Xbox Store' },
+      { label: 'Microsoft Store', value: 'Microsoft Store' },
+      { label: 'Físico / Disco', value: 'Otro' }
+    ],
+    'Xbox One': [
+      { label: 'Xbox Store', value: 'Xbox Store' },
+      { label: 'Microsoft Store', value: 'Microsoft Store' },
+      { label: 'Físico / Disco', value: 'Otro' }
+    ],
+    'Nintendo Switch': [
+      { label: 'Nintendo eShop', value: 'Nintendo eShop' },
+      { label: 'Cartucho / Físico', value: 'Otro' }
+    ],
+    'Android': [
+      { label: 'Google Play', value: 'Google Play' },
+      { label: 'APK / Otro', value: 'Otro' }
+    ],
+    'iOS': [
+      { label: 'App Store', value: 'App Store' }
+    ]
+  };
+
+  function updateStoreOptions(selectedPlatform: string) {
+    if (!storeSelect) return;
+
+    const availableStores = platformStoresMap[selectedPlatform] || [
+      { label: 'Otro / Físico', value: 'Otro' }
+    ];
+
+    storeSelect.innerHTML = availableStores
+      .map(store => `<option value="${store.value}">${store.label}</option>`)
+      .join('');
+  }
+
+  platformSelect?.addEventListener('change', (e) => {
+    const selectedPlatform = (e.target as HTMLSelectElement).value;
+    updateStoreOptions(selectedPlatform);
+  });
+
+  // Función principal para realizar la búsqueda en la API
+  async function executeSearch(query: string) {
+    if (!query) {
+      resultsGrid.innerHTML = '';
+      loading.classList.add('hidden');
+      return;
+    }
+
+    if (query === lastSearchQuery) return;
+    lastSearchQuery = query;
 
     loading.classList.remove('hidden');
     resultsGrid.innerHTML = '';
@@ -131,20 +201,20 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
       loading.classList.add('hidden');
 
       if (!games || games.length === 0) {
-        resultsGrid.innerHTML = `<p class="col-span-full text-center text-slate-400 py-8">No se encontraron videojuegos.</p>`;
+        resultsGrid.innerHTML = `<p class="col-span-full text-center theme-text-secondary py-8">No se encontraron videojuegos.</p>`;
         return;
       }
 
       games.forEach((game: any) => {
         const card = document.createElement('div');
-        card.className = 'bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all';
+        card.className = 'theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all shadow-md';
         card.innerHTML = `
           <img src="${game.background_image || '/placeholder.jpg'}" alt="${game.name}" class="w-full h-40 object-cover" />
           <div class="p-4 flex-1 flex flex-col justify-between">
-            <h3 class="font-bold text-white text-sm line-clamp-1 mb-2">${game.name}</h3>
+            <h3 class="font-bold theme-text-primary text-sm line-clamp-1 mb-2">${game.name}</h3>
             <button 
               onclick="openAddModal(${game.id}, '${game.name.replace(/'/g, "\\'")}', '${game.background_image || ''}')"
-              class="w-full mt-3 py-2 px-3 bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/30 text-indigo-300 hover:text-white text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              class="w-full mt-3 py-2 px-3 bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/30 text-indigo-400 hover:text-white text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               + Agregar a Mi Biblioteca
             </button>
@@ -156,12 +226,35 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
       loading.classList.add('hidden');
       console.error(err);
     }
+  }
+
+  // Listener en tiempo real con DEBOUNCE (800ms)
+  input?.addEventListener('input', (e) => {
+    const query = (e.target as HTMLInputElement).value.trim();
+    
+    // Cancelar el temporizador anterior si el usuario sigue escribiendo
+    clearTimeout(debounceTimer);
+
+    // Iniciar nuevo temporizador
+    debounceTimer = setTimeout(() => {
+      executeSearch(query);
+    }, 800);
   });
 
+  // Listener para el evento Submit (por si presiona Enter explícitamente)
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    clearTimeout(debounceTimer);
+    executeSearch(input.value.trim());
+  });
+
+  // Modal logic
   (window as any).openAddModal = async (rawgId: number, title: string, coverUrl: string) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      (window as any).showToast('Debes iniciar sesión para guardar juegos.', 'error');
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Debes iniciar sesión para guardar juegos.', 'error');
+      }
       window.location.href = '/login';
       return;
     }
@@ -170,6 +263,9 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
     (document.getElementById('modal-game-name') as HTMLInputElement).value = title;
     (document.getElementById('modal-cover-url') as HTMLInputElement).value = coverUrl;
     (document.getElementById('modal-title') as HTMLHeadingElement).textContent = `Agregar: ${title}`;
+
+    const currentPlatform = platformSelect.value || 'PC';
+    updateStoreOptions(currentPlatform);
 
     modal.classList.remove('hidden');
   };
@@ -181,7 +277,7 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
   closeModalBtn?.addEventListener('click', closeModal);
   cancelModalBtn?.addEventListener('click', closeModal);
 
-addForm?.addEventListener('submit', async (e) => {
+  addForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
@@ -189,8 +285,8 @@ addForm?.addEventListener('submit', async (e) => {
     const rawgId = parseInt((document.getElementById('modal-rawg-id') as HTMLInputElement).value);
     const title = (document.getElementById('modal-game-name') as HTMLInputElement).value;
     const coverUrl = (document.getElementById('modal-cover-url') as HTMLInputElement).value;
-    const platform = (document.getElementById('modal-platform') as HTMLSelectElement).value;
-    const store = (document.getElementById('modal-store') as HTMLSelectElement).value;
+    const platform = platformSelect.value;
+    const store = storeSelect.value;
     const status = (document.getElementById('modal-status') as HTMLSelectElement).value;
 
     const { error } = await supabase.from('user_library').insert({

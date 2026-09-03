@@ -34,32 +34,44 @@ const { title } = Astro.props;
   /* Variables de Color por Tema */
   :root[data-theme="legacy"] {
     --bg-main: #0a0f1d;
-    --bg-card: rgba(15, 23, 42, 0.8);
+    --bg-card: #0f172a;
     --border-card: #1e293b;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --bg-input: #020617;
+    --border-input: #1e293b;
+    --bg-button: #1e293b;
+    --text-button: #cbd5e1;
   }
 
   :root[data-theme="dark"] {
     --bg-main: #030712;
     --bg-card: #111827;
     --border-card: #1f2937;
-    --text-main: #f9fafb;
-    --text-muted: #9ca3af;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --bg-input: #000000;
+    --border-input: #1f2937;
+    --bg-button: #1f2937;
+    --text-button: #e5e7eb;
   }
 
   :root[data-theme="light"] {
     --bg-main: #f8fafc;
     --bg-card: #ffffff;
     --border-card: #e2e8f0;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --bg-input: #ffffff;
+    --border-input: #cbd5e1;
+    --bg-button: #e2e8f0;
+    --text-button: #334155;
   }
 
-  /* Aplicación de Variables */
+  /* Aplicación de clases utilitarias de tema */
   body {
     background-color: var(--bg-main);
-    color: var(--text-main);
+    color: var(--text-primary);
   }
 
   .theme-card {
@@ -67,7 +79,22 @@ const { title } = Astro.props;
     border-color: var(--border-card) !important;
   }
 
-  .theme-text-muted {
-    color: var(--text-muted) !important;
+  .theme-text-primary {
+    color: var(--text-primary) !important;
+  }
+
+  .theme-text-secondary {
+    color: var(--text-secondary) !important;
+  }
+
+  .theme-input {
+    background-color: var(--bg-input) !important;
+    border-color: var(--border-input) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .theme-button {
+    background-color: var(--bg-button) !important;
+    color: var(--text-button) !important;
   }
 </style>

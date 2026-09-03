@@ -11,8 +11,8 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     <!-- Encabezado -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
       <div>
-        <h1 class="text-3xl font-bold text-white tracking-tight">Mi Biblioteca</h1>
-        <p class="text-sm text-slate-400 mt-1">Gestiona tus títulos, progreso y estadísticas</p>
+        <h1 class="text-3xl font-bold theme-text-primary tracking-tight">Mi Biblioteca</h1>
+        <p class="text-sm theme-text-secondary mt-1">Gestiona tus títulos, progreso y estadísticas</p>
       </div>
 
       <a
@@ -26,33 +26,33 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
 
     <!-- Tarjetas de Métricas -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4">
-        <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
+      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+        <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-500">
           <Library class="w-6 h-6" />
         </div>
         <div>
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Juegos</p>
-          <p id="stat-total" class="text-2xl font-bold text-white mt-0.5">0</p>
+          <p class="text-xs font-semibold theme-text-secondary uppercase tracking-wider">Total Juegos</p>
+          <p id="stat-total" class="text-2xl font-bold theme-text-primary mt-0.5">0</p>
         </div>
       </div>
 
-      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4">
-        <div class="p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-400">
+      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+        <div class="p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-500">
           <Clock class="w-6 h-6" />
         </div>
         <div>
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Horas Totales</p>
-          <p id="stat-hours" class="text-2xl font-bold text-white mt-0.5">0.0h</p>
+          <p class="text-xs font-semibold theme-text-secondary uppercase tracking-wider">Horas Totales</p>
+          <p id="stat-hours" class="text-2xl font-bold theme-text-primary mt-0.5">0.0h</p>
         </div>
       </div>
 
-      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4">
-        <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
+      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+        <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-500">
           <Trophy class="w-6 h-6" />
         </div>
         <div>
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Completados</p>
-          <p id="stat-completed" class="text-2xl font-bold text-white mt-0.5">0</p>
+          <p class="text-xs font-semibold theme-text-secondary uppercase tracking-wider">Completados</p>
+          <p id="stat-completed" class="text-2xl font-bold theme-text-primary mt-0.5">0</p>
         </div>
       </div>
     </div>
@@ -61,43 +61,46 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4">
       <!-- Pestañas de Estado -->
       <div class="flex items-center gap-2 overflow-x-auto pb-1">
-        <button data-filter="all" class="filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition-all cursor-pointer whitespace-nowrap">
+        <button data-filter="all" class="filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition-all cursor-pointer whitespace-nowrap shadow-sm">
           Todos
         </button>
-        <button data-filter="playing" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer whitespace-nowrap">
+        <button data-filter="playing" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold theme-button border border-transparent transition-all cursor-pointer whitespace-nowrap">
           Jugando
         </button>
-        <button data-filter="completed" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer whitespace-nowrap">
+        <button data-filter="completed" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold theme-button border border-transparent transition-all cursor-pointer whitespace-nowrap">
           Completados
         </button>
-        <button data-filter="backlog" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer whitespace-nowrap">
+        <button data-filter="backlog" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold theme-button border border-transparent transition-all cursor-pointer whitespace-nowrap">
           Pendientes
         </button>
-        <button data-filter="on_hold" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition-all cursor-pointer whitespace-nowrap">
+        <button data-filter="on_hold" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold theme-button border border-transparent transition-all cursor-pointer whitespace-nowrap">
           En Pausa
+        </button>
+        <button data-filter="dropped" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold theme-button border border-transparent transition-all cursor-pointer whitespace-nowrap">
+          Abandonados
         </button>
       </div>
 
       <!-- Buscador Interno -->
       <div class="relative w-full sm:w-64">
-        <Search class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+        <Search class="w-4 h-4 theme-text-secondary absolute left-3 top-1/2 -translate-y-1/2" />
         <input
           type="text"
           id="search-internal"
           placeholder="Buscar en mi colección..."
-          class="w-full pl-9 pr-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+          class="w-full pl-9 pr-3 py-1.5 theme-input border rounded-xl text-xs placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 transition-colors shadow-sm"
         />
       </div>
     </div>
 
     <!-- Filtros Secundarios (Plataforma y Tienda) -->
-    <div class="flex flex-wrap items-center gap-3 mb-6 pb-4 border-b border-slate-800">
-      <div class="flex items-center gap-1.5 text-xs text-slate-400 font-semibold mr-2">
+    <div class="flex flex-wrap items-center gap-3 mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div class="flex items-center gap-1.5 text-xs theme-text-secondary font-semibold mr-2">
         <Filter class="w-3.5 h-3.5" />
         <span>Filtrar por:</span>
       </div>
 
-      <select id="filter-platform" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-300 text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
+      <select id="filter-platform" class="px-3 py-1.5 theme-input border rounded-lg text-xs focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
         <option value="all">Todas las plataformas</option>
         <option value="PC">PC</option>
         <option value="PS5">PlayStation 5</option>
@@ -109,7 +112,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
         <option value="iOS">iOS</option>
       </select>
 
-      <select id="filter-store" class="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-300 text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
+      <select id="filter-store" class="px-3 py-1.5 theme-input border rounded-lg text-xs focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
         <option value="all">Todas las tiendas</option>
         <option value="Steam">Steam</option>
         <option value="Epic Games">Epic Games</option>
@@ -125,13 +128,13 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     </div>
 
     <!-- Galería / Contenedor -->
-    <div id="library-container" class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
-      <div class="p-4 bg-slate-800/50 rounded-2xl mb-4 text-slate-500">
+    <div id="library-container" class="theme-card border rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+      <div class="p-4 theme-button rounded-2xl mb-4 theme-text-secondary">
         <Gamepad2 class="w-10 h-10" />
       </div>
-      <h3 class="text-lg font-semibold text-white">Tu biblioteca está vacía</h3>
-      <p class="text-sm text-slate-400 max-w-sm mt-1 mb-6">Aún no has agregado ningún juego a tu colección.</p>
-      <a href="/search" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl transition-colors">
+      <h3 class="text-lg font-semibold theme-text-primary">Tu biblioteca está vacía</h3>
+      <p class="text-sm theme-text-secondary max-w-sm mt-1 mb-6">Aún no has agregado ningún juego a tu colección.</p>
+      <a href="/search" class="px-4 py-2 theme-button hover:opacity-90 text-sm font-semibold rounded-xl transition-colors">
         Ir al buscador
       </a>
     </div>
@@ -139,10 +142,10 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
 
   <!-- MODAL DE EDICIÓN ESTILIZADO -->
   <div id="edit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-        <h3 id="modal-game-title" class="text-lg font-bold text-white truncate">Editar Juego</h3>
-        <button id="close-modal-btn" class="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+    <div class="theme-card border w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+        <h3 id="modal-game-title" class="text-lg font-bold theme-text-primary truncate">Editar Juego</h3>
+        <button id="close-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg hover:bg-slate-500/10 transition-colors">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -151,10 +154,10 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
         <input type="hidden" id="edit-game-id" />
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+          <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
             Estado de Juego
           </label>
-          <select id="edit-status" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500">
+          <select id="edit-status" class="w-full px-3 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500">
             <option value="playing">Jugando</option>
             <option value="completed">Completado</option>
             <option value="backlog">Pendiente (Backlog)</option>
@@ -164,14 +167,14 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+          <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
             Horas Jugadas
           </label>
-          <input type="number" step="0.5" min="0" id="edit-hours" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500" />
+          <input type="number" step="0.5" min="0" id="edit-hours" class="w-full px-3 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500" />
         </div>
 
         <div class="flex gap-3 pt-2">
-          <button type="button" id="cancel-modal-btn" class="flex-1 py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-xl transition-colors">
+          <button type="button" id="cancel-modal-btn" class="flex-1 py-2.5 px-4 theme-button text-sm font-semibold rounded-xl transition-colors">
             Cancelar
           </button>
           <button type="submit" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20">
@@ -214,11 +217,11 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
   };
 
   const statusBadgeStyles: Record<string, string> = {
-    playing: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-    completed: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    backlog: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    on_hold: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-    dropped: 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+    playing: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
+    completed: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+    backlog: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    on_hold: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+    dropped: 'bg-rose-500/10 text-rose-500 border-rose-500/20'
   };
 
   async function loadLibrary() {
@@ -266,52 +269,52 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     });
 
     if (filteredGames.length === 0) {
-      container.className = "bg-slate-900/50 border border-slate-800/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px]";
+      container.className = "theme-card border rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px]";
       container.innerHTML = `
-        <div class="p-4 bg-slate-800/50 rounded-2xl mb-4 text-slate-500">
+        <div class="p-4 theme-button rounded-2xl mb-4 theme-text-secondary">
           <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
         </div>
-        <h3 class="text-lg font-semibold text-white">No se encontraron juegos</h3>
-        <p class="text-sm text-slate-400 max-w-sm mt-1 mb-6">Prueba ajustando el texto o borrando los filtros aplicados.</p>
+        <h3 class="text-lg font-semibold theme-text-primary">No se encontraron juegos</h3>
+        <p class="text-sm theme-text-secondary max-w-sm mt-1 mb-6">Prueba ajustando el texto o borrando los filtros aplicados.</p>
       `;
       return;
     }
 
     container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6";
     container.innerHTML = filteredGames.map(game => {
-      const badgeClass = statusBadgeStyles[game.status] || 'bg-slate-800 text-slate-300 border-slate-700';
+      const badgeClass = statusBadgeStyles[game.status] || 'theme-button border-slate-500/20';
       const statusText = statusMap[game.status] || game.status;
 
       return `
-        <div class="theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all shadow-lg">
+        <div class="theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all shadow-md">
           <img src="${game.cover_url || '/placeholder.jpg'}" alt="${game.title}" class="w-full h-44 object-cover" />
           <div class="p-4 flex-1 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between mb-2">
-                <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-md">
+                <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 rounded-md">
                   ${game.platform}
                 </span>
                 <span class="text-[10px] uppercase font-bold px-2 py-0.5 border rounded-md ${badgeClass}">
                   ${statusText}
                 </span>
               </div>
-              <h3 class="font-bold text-base line-clamp-1">${game.title}</h3>
-              <div class="flex items-center justify-between text-xs theme-text-muted mt-1">
-                <span>Horas: <strong class="text-indigo-400">${game.hours_played}h</strong></span>
+              <h3 class="font-bold theme-text-primary text-base line-clamp-1">${game.title}</h3>
+              <div class="flex items-center justify-between text-xs theme-text-secondary mt-1">
+                <span>Horas: <strong class="text-indigo-500 font-bold">${game.hours_played}h</strong></span>
                 <span class="text-[11px] font-medium">${game.store || 'Sin tienda'}</span>
               </div>
             </div>
 
-            <div class="flex gap-2 mt-4 pt-3 border-t border-slate-800/80">
+            <div class="flex gap-2 mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
               <button
                 onclick="openEditModal('${game.id}', '${game.title.replace(/'/g, "\\'")}', ${game.hours_played}, '${game.status}')"
-                class="flex-1 py-1.5 px-2 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                class="flex-1 py-1.5 px-2 theme-button hover:opacity-80 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
               >
                 <span>Editar</span>
               </button>
               <button
                 onclick="deleteGame('${game.id}', '${game.title.replace(/'/g, "\\'")}')"
-                class="py-1.5 px-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                class="py-1.5 px-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
               >
                 Eliminar
               </button>
@@ -334,10 +337,10 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => {
         b.classList.remove('bg-indigo-600', 'text-white');
-        b.classList.add('bg-slate-900', 'text-slate-400', 'border', 'border-slate-800');
+        b.classList.add('theme-button');
       });
 
-      btn.classList.remove('bg-slate-900', 'text-slate-400', 'border', 'border-slate-800');
+      btn.classList.remove('theme-button');
       btn.classList.add('bg-indigo-600', 'text-white');
 
       activeStatusFilter = btn.getAttribute('data-filter') || 'all';
