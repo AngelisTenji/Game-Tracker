@@ -1,5 +1,5 @@
 ---
-import { Library, Search, Settings, LogOut, User } from 'lucide-astro';
+import { Library, Search, Settings, BarChart2, LogOut } from 'lucide-astro';
 ---
 
 <header class="theme-card border-b sticky top-0 z-40 backdrop-blur-md bg-opacity-80">
@@ -48,6 +48,13 @@ import { Library, Search, Settings, LogOut, User } from 'lucide-astro';
       >
         <Settings class="w-4 h-4 text-emerald-400" />
         <span class="hidden sm:inline">Ajustes</span>
+      </a>
+      <a 
+        href="/analytics" 
+        class="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold theme-text-secondary hover:text-indigo-400 transition-colors group"
+      >
+        <BarChart2 class="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
+        <span>Estadísticas</span>
       </a>
 
       <!-- Botón Cierre de Sesión -->

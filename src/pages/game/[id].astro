@@ -1,0 +1,387 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/common/Navbar.astro';
+---
+
+<Layout title="Cargando Juego... | KazeChronik">
+  <Navbar />
+
+  <main class="min-h-screen pt-24 pb-16 px-4 max-w-6xl mx-auto theme-text-primary">
+    <!-- Estado de Carga (Skeleton) -->
+    <div id="loading-skeleton" class="animate-pulse space-y-6">
+      <div class="h-64 bg-slate-800/50 rounded-2xl w-full"></div>
+      <div class="h-10 bg-slate-800/50 rounded-xl w-1/3"></div>
+      <div class="h-32 bg-slate-800/50 rounded-xl w-full"></div>
+    </div>
+
+    <!-- Mensaje de Error / No Encontrado -->
+    <div id="error-container" class="hidden text-center py-20 space-y-4">
+      <h2 class="text-2xl font-bold text-rose-500">No se pudo cargar el juego</h2>
+      <p class="text-sm theme-text-secondary">Es posible que el juego no exista o no tengas permisos para verlo.</p>
+      <a href="/dashboard" class="inline-block px-5 py-2.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl">
+        Volver a la Biblioteca
+      </a>
+    </div>
+
+    <!-- Contenido del Juego (Oculto al inicio) -->
+    <article id="game-content" class="hidden space-y-8">
+      <!-- Banner / Header Principal -->
+      <header class="relative h-72 sm:h-96 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl">
+        <img 
+          id="game-cover" 
+          src="" 
+          alt="" 
+          class="w-full h-full object-cover filter brightness-75"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+        
+        <div class="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span id="game-store" class="px-2.5 py-1 bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-semibold rounded-lg backdrop-blur-md"></span>
+              <span id="game-platform" class="px-2.5 py-1 bg-slate-800/80 text-slate-300 text-xs font-semibold rounded-lg backdrop-blur-md"></span>
+            </div>
+            <h1 id="game-title" class="text-3xl sm:text-5xl font-black tracking-tight text-white drop-shadow-md"></h1>
+          </div>
+
+          <a 
+            href="/dashboard" 
+            class="px-4 py-2 bg-slate-900/80 hover:bg-slate-800 text-slate-300 text-sm font-medium rounded-xl border border-slate-700/50 transition-all flex items-center gap-2 backdrop-blur-md"
+          >
+            ← Volver al Dashboard
+          </a>
+        </div>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Columna Izquierda: Ajustes de Estado y Progreso -->
+        <section class="lg:col-span-1 space-y-6">
+          <div class="theme-card border p-6 rounded-2xl space-y-5 shadow-sm">
+            <h2 class="font-bold text-lg border-b border-slate-800/80 pb-3 flex items-center gap-2">
+              🎮 Estado & Progreso
+            </h2>
+
+            <!-- Selector de Estado -->
+            <div>
+              <label class="block text-xs font-semibold theme-text-secondary mb-2">Estado en la biblioteca</label>
+              <select 
+                id="status-select" 
+                class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500 cursor-pointer"
+              >
+                <option value="playing">🔥 Jugando</option>
+                <option value="completed">🏆 Completado</option>
+                <option value="paused">⏸️ En Pausa</option>
+                <option value="backlog">📋 Backlog (Pendiente)</option>
+              </select>
+            </div>
+
+            <!-- Horas Jugadas -->
+            <div>
+              <label class="block text-xs font-semibold theme-text-secondary mb-2">Horas Jugadas</label>
+              <div class="flex items-center gap-2">
+                <input 
+                  type="number" 
+                  id="hours-input" 
+                  step="0.1" 
+                  min="0"
+                  class="flex-1 px-4 py-2.5 theme-input border rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500"
+                />
+                <span class="text-sm theme-text-secondary font-medium">hrs</span>
+              </div>
+            </div>
+
+            <!-- Progreso de Logros -->
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <label class="text-xs font-semibold theme-text-secondary">Logros desbloqueados</label>
+                <span id="achievements-val" class="text-xs font-bold text-indigo-400">0%</span>
+              </div>
+              <input 
+                type="range" 
+                id="achievements-input" 
+                min="0" 
+                max="100" 
+                class="w-full accent-indigo-500 cursor-pointer"
+              />
+            </div>
+
+            <button 
+              id="save-progress-btn" 
+              class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer"
+            >
+              Guardar Cambios
+            </button>
+          </div>
+          <!-- Componente de Etiquetas -->
+<div>
+  <label class="block text-xs font-semibold theme-text-secondary mb-2">Etiquetas / Categorías</label>
+  <div id="tags-container" class="flex flex-wrap gap-1.5 mb-2">
+    <!-- Badges de etiquetas inyectados dinámicamente -->
+  </div>
+  <div class="flex gap-2">
+    <input 
+      type="text" 
+      id="new-tag-input" 
+      placeholder="Añadir etiqueta (ej: Sigilo, Coop)"
+      class="flex-1 px-3 py-1.5 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+    />
+    <button 
+      type="button" 
+      id="add-tag-btn" 
+      class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 text-xs font-semibold rounded-xl transition-all cursor-pointer"
+    >
+      +
+    </button>
+  </div>
+</div>
+        </section>
+
+        <!-- Columna Derecha: Reseña y Bitácora Personal -->
+        <section class="lg:col-span-2 space-y-6">
+          <div class="theme-card border p-6 rounded-2xl space-y-5 shadow-sm">
+            <h2 class="font-bold text-lg border-b border-slate-800/80 pb-3 flex items-center gap-2">
+              📝 Tu Bitácora y Reseña
+            </h2>
+
+            <!-- Calificación Personal -->
+            <div>
+              <label class="block text-xs font-semibold theme-text-secondary mb-2">Puntuación Personal (1 al 10)</label>
+              <input 
+                type="number" 
+                id="rating-input" 
+                min="1" 
+                max="10" 
+                step="0.5" 
+                placeholder="Ej: 9.5"
+                class="w-32 px-4 py-2.5 theme-input border rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <!-- Reseña del juego -->
+            <div>
+              <label class="block text-xs font-semibold theme-text-secondary mb-2">Reseña del Juego</label>
+              <textarea 
+                id="review-input" 
+                rows="4" 
+                placeholder="¿Qué te pareció la jugabilidad, historia, banda sonora...?"
+                class="w-full px-4 py-3 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500 resize-none"
+              ></textarea>
+            </div>
+
+            <!-- Notas Privadas -->
+            <div>
+              <label class="block text-xs font-semibold theme-text-secondary mb-2">Notas Rápidas / Recordatorios</label>
+              <textarea 
+                id="notes-input" 
+                rows="3" 
+                placeholder="Ej: Quedé en la misión secundaria X, conseguir el coleccionable Y..."
+                class="w-full px-4 py-3 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500 resize-none"
+              ></textarea>
+            </div>
+
+            <button 
+              id="save-review-btn" 
+              class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-xl transition-all border border-slate-700 cursor-pointer"
+            >
+              Guardar Bitácora
+            </button>
+          </div>
+        </section>
+      </div>
+    </article>
+  </main>
+</Layout>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+
+  async function initGameDetail() {
+    // Extraer el ID directamente de la URL /game/[id]
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const gameId = pathParts[pathParts.length - 1];
+
+    const skeleton = document.getElementById('loading-skeleton');
+    const content = document.getElementById('game-content');
+    const errorBox = document.getElementById('error-container');
+
+    const coverEl = document.getElementById('game-cover') as HTMLImageElement;
+    const titleEl = document.getElementById('game-title');
+    const storeEl = document.getElementById('game-store');
+    const platformEl = document.getElementById('game-platform');
+
+    const statusSelect = document.getElementById('status-select') as HTMLSelectElement;
+    const hoursInput = document.getElementById('hours-input') as HTMLInputElement;
+    const achievementsInput = document.getElementById('achievements-input') as HTMLInputElement;
+    const achievementsVal = document.getElementById('achievements-val');
+
+    const ratingInput = document.getElementById('rating-input') as HTMLInputElement;
+    const reviewInput = document.getElementById('review-input') as HTMLTextAreaElement;
+    const notesInput = document.getElementById('notes-input') as HTMLTextAreaElement;
+
+    const saveProgressBtn = document.getElementById('save-progress-btn') as HTMLButtonElement;
+    const saveReviewBtn = document.getElementById('save-review-btn') as HTMLButtonElement;
+
+    if (!gameId) {
+      if (skeleton) skeleton.classList.add('hidden');
+      if (errorBox) errorBox.classList.remove('hidden');
+      return;
+    }
+
+    achievementsInput?.addEventListener('input', (e: any) => {
+      if (achievementsVal) achievementsVal.textContent = `${e.target.value}%`;
+    });
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = '/login';
+      return;
+    }
+
+    console.log('🔍 Consultando en Supabase ID:', gameId);
+    let currentTags: string[] = [];
+    const { data, error } = await supabase
+  .from('user_library')
+  .update({
+    rating: parseFloat(ratingInput.value) || null,
+    review: reviewInput.value.trim() || null,
+    notes: notesInput.value.trim() || null,
+    tags: currentTags,
+    updated_at: new Date().toISOString()
+  })
+  .eq('id', gameId)
+  .eq('user_id', session.user.id)
+  .select('*')
+  .maybeSingle();
+
+    if (error || !data) {
+      console.error('❌ Error o registro no encontrado en Supabase:', error);
+      if (skeleton) skeleton.classList.add('hidden');
+      if (errorBox) errorBox.classList.remove('hidden');
+      return;
+    }
+
+    // Llenar datos en la interfaz
+    if (coverEl) coverEl.src = data.cover_url || '/placeholder.jpg';
+    if (titleEl) titleEl.textContent = data.title;
+    if (storeEl) storeEl.textContent = data.store || 'Biblioteca';
+    if (platformEl) platformEl.textContent = data.platform || 'PC';
+
+    if (statusSelect) statusSelect.value = data.status || 'backlog';
+    if (hoursInput) hoursInput.value = data.hours_played || 0;
+    if (achievementsInput) achievementsInput.value = data.achievements_progress || 0;
+    if (achievementsVal) achievementsVal.textContent = `${data.achievements_progress || 0}%`;
+
+    if (ratingInput) ratingInput.value = data.rating || '';
+    if (reviewInput) reviewInput.value = data.review || '';
+    if (notesInput) notesInput.value = data.notes || '';
+
+    document.title = `${data.title} | KazeChronik`;
+
+    // Mostrar el contenido
+    if (skeleton) skeleton.classList.add('hidden');
+    if (content) content.classList.remove('hidden');
+
+    // Listener: Guardar Progreso
+    saveProgressBtn?.addEventListener('click', async () => {
+      saveProgressBtn.disabled = true;
+      saveProgressBtn.textContent = 'Guardando...';
+
+      const { error } = await supabase
+        .from('user_library')
+        .update({
+          status: statusSelect.value,
+          hours_played: parseFloat(hoursInput.value) || 0,
+          achievements_progress: parseInt(achievementsInput.value) || 0,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', gameId);
+
+      saveProgressBtn.disabled = false;
+      saveProgressBtn.textContent = 'Guardar Cambios';
+
+      if (!error) {
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('¡Progreso actualizado!', 'success');
+        } else {
+          alert('¡Progreso actualizado!');
+        }
+      } else {
+        alert('Error al guardar: ' + error.message);
+      }
+    });
+
+    // Listener: Guardar Bitácora y Notas
+    saveReviewBtn?.addEventListener('click', async () => {
+      saveReviewBtn.disabled = true;
+      saveReviewBtn.textContent = 'Guardando...';
+
+      const { error } = await supabase
+        .from('user_library')
+        .update({
+          rating: parseFloat(ratingInput.value) || null,
+          review: reviewInput.value.trim() || null,
+          notes: notesInput.value.trim() || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', gameId);
+
+      saveReviewBtn.disabled = false;
+      saveReviewBtn.textContent = 'Guardar Bitácora';
+
+      if (!error) {
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('¡Bitácora guardada con éxito!', 'success');
+        } else {
+          alert('¡Bitácora guardada con éxito!');
+        }
+      } else {
+        alert('Error al guardar bitácora: ' + error.message);
+      }
+    });
+    
+
+const tagsContainer = document.getElementById('tags-container');
+const newTagInput = document.getElementById('new-tag-input') as HTMLInputElement;
+const addTagBtn = document.getElementById('add-tag-btn');
+
+function renderTags() {
+  if (!tagsContainer) return;
+  
+  if (currentTags.length === 0) {
+    tagsContainer.innerHTML = `<span class="text-[11px] theme-text-secondary italic">Sin etiquetas asignadas.</span>`;
+    return;
+  }
+
+  tagsContainer.innerHTML = currentTags.map((tag, idx) => `
+    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold rounded-lg">
+      #${tag}
+      <button type="button" onclick="removeTag(${idx})" class="hover:text-rose-400 cursor-pointer ml-1">×</button>
+    </span>
+  `).join('');
+}
+
+(window as any).removeTag = (index: number) => {
+  currentTags.splice(index, 1);
+  renderTags();
+};
+
+addTagBtn?.addEventListener('click', () => {
+  const val = newTagInput?.value.trim().replace(/^#/, '');
+  if (val && !currentTags.includes(val)) {
+    currentTags.push(val);
+    newTagInput.value = '';
+    renderTags();
+  }
+});
+
+// Al cargar los datos del juego desde Supabase
+currentTags = data.tags || [];
+renderTags();
+  }
+
+  // Inicializar la vista
+  initGameDetail();
+  document.addEventListener('astro:page-load', initGameDetail);
+</script>

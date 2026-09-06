@@ -1,0 +1,182 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/common/Navbar.astro';
+---
+
+<Layout title="Estadísticas & Analytics | KazeChronik">
+  <Navbar />
+
+  <main class="min-h-screen pt-24 pb-16 px-4 max-w-7xl mx-auto theme-text-primary">
+    <!-- Encabezado -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight">Panel de Estadísticas</h1>
+      <p class="text-sm theme-text-secondary mt-1">Análisis detallado de tu tiempo de juego y distribución de biblioteca.</p>
+    </div>
+
+    <!-- Estado de Carga (Skeleton) -->
+    <div id="analytics-skeleton" class="animate-pulse space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div class="h-28 bg-slate-800/50 rounded-2xl"></div>
+        <div class="h-28 bg-slate-800/50 rounded-2xl"></div>
+        <div class="h-28 bg-slate-800/50 rounded-2xl"></div>
+        <div class="h-28 bg-slate-800/50 rounded-2xl"></div>
+      </div>
+      <div class="h-64 bg-slate-800/50 rounded-2xl"></div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div id="analytics-content" class="hidden space-y-8">
+      <!-- Tarjetas de Métricas Clave -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="theme-card border p-5 rounded-2xl shadow-sm">
+          <p class="text-xs font-semibold theme-text-secondary uppercase tracking-wider">Horas Totales</p>
+          <p id="total-hours" class="text-3xl font-black text-indigo-400 mt-2">0.0h</p>
+        </div>
+        <div class="theme-card border p-5 rounded-2xl shadow-sm">
+          <p class="text-xs font-semibold theme-text-secondary uppercase tracking-wider">Promedio por Juego</p>
+          <p id="avg-hours" class="text-3xl font-black text-cyan-400 mt-2">0.0h</p>
+        </div>
+        <div class="theme-card border p-5 rounded-2xl shadow-sm">
+          <p class="text-xs font-semibold theme-text-secondary uppercase tracking-wider">Tasa de Completitud</p>
+          <p id="completion-rate" class="text-3xl font-black text-emerald-400 mt-2">0%</p>
+        </div>
+        <div class="theme-card border p-5 rounded-2xl shadow-sm">
+          <p class="text-xs font-semibold theme-text-secondary uppercase tracking-wider">Total Títulos</p>
+          <p id="total-titles" class="text-3xl font-black text-amber-400 mt-2">0</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Top 5 Juegos Más Jugados -->
+        <section class="lg:col-span-2 theme-card border p-6 rounded-2xl shadow-sm space-y-4">
+          <h2 class="font-bold text-lg border-b border-slate-800/80 pb-3 flex items-center gap-2">
+            🔥 Top 5 Juegos Más Jugados
+          </h2>
+          <div id="top-games-list" class="space-y-4 pt-2">
+            <!-- Inyectado dinámicamente -->
+          </div>
+        </section>
+
+        <!-- Distribución por Estado -->
+        <section class="lg:col-span-1 theme-card border p-6 rounded-2xl shadow-sm space-y-4">
+          <h2 class="font-bold text-lg border-b border-slate-800/80 pb-3 flex items-center gap-2">
+            📊 Desglose por Estado
+          </h2>
+          <div id="status-breakdown" class="space-y-3 pt-2">
+            <!-- Inyectado dinámicamente -->
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  async function loadAnalytics() {
+    const skeleton = document.getElementById('analytics-skeleton');
+    const content = document.getElementById('analytics-content');
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = '/login';
+      return;
+    }
+
+    const { data: games, error } = await supabase
+      .from('user_library')
+      .select('*')
+      .eq('user_id', session.user.id);
+
+    if (error || !games) {
+      console.error('Error al cargar datos:', error);
+      return;
+    }
+
+    // Cálculos de Métricas
+    const totalTitles = games.length;
+    const totalHours = games.reduce((acc, g) => acc + (Number(g.hours_played) || 0), 0);
+    const completedCount = games.filter(g => g.status === 'completed').length;
+    const avgHours = totalTitles > 0 ? (totalHours / totalTitles) : 0;
+    const completionRate = totalTitles > 0 ? Math.round((completedCount / totalTitles) * 100) : 0;
+
+    // Actualizar tarjetas principales
+    document.getElementById('total-hours')!.textContent = `${totalHours.toFixed(1)}h`;
+    document.getElementById('avg-hours')!.textContent = `${avgHours.toFixed(1)}h`;
+    document.getElementById('completion-rate')!.textContent = `${completionRate}%`;
+    document.getElementById('total-titles')!.textContent = totalTitles.toString();
+
+    // Renderizar Top 5 Juegos
+    const topGames = [...games]
+      .sort((a, b) => (Number(b.hours_played) || 0) - (Number(a.hours_played) || 0))
+      .slice(0, 5);
+
+    const topListEl = document.getElementById('top-games-list')!;
+    if (topGames.length === 0) {
+      topListEl.innerHTML = `<p class="text-xs theme-text-secondary">No hay suficientes datos registrados.</p>`;
+    } else {
+      const maxHours = Number(topGames[0].hours_played) || 1;
+      topListEl.innerHTML = topGames.map((game, index) => {
+        const hrs = Number(game.hours_played) || 0;
+        const percentage = Math.min(Math.round((hrs / maxHours) * 100), 100);
+
+        return `
+          <div class="space-y-1.5">
+            <div class="flex justify-between items-center text-sm">
+              <span class="font-bold theme-text-primary flex items-center gap-2">
+                <span class="text-xs text-indigo-400 font-mono">#${index + 1}</span>
+                ${game.title}
+              </span>
+              <span class="text-xs font-semibold text-indigo-400">${hrs} hrs</span>
+            </div>
+            <div class="w-full bg-slate-800/80 rounded-full h-2.5 overflow-hidden">
+              <div class="bg-indigo-500 h-full rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Renderizar Desglose por Estado
+    const statusCounts: Record<string, number> = {
+      playing: games.filter(g => g.status === 'playing').length,
+      completed: games.filter(g => g.status === 'completed').length,
+      backlog: games.filter(g => g.status === 'backlog').length,
+      paused: games.filter(g => g.status === 'paused' || g.status === 'on_hold').length,
+    };
+
+    const statusLabels: Record<string, { label: string; color: string }> = {
+      playing: { label: '🔥 Jugando', color: 'bg-cyan-500' },
+      completed: { label: '🏆 Completados', color: 'bg-emerald-500' },
+      backlog: { label: '📋 Backlog', color: 'bg-amber-500' },
+      paused: { label: '⏸️ En Pausa', color: 'bg-purple-500' },
+    };
+
+    const statusEl = document.getElementById('status-breakdown')!;
+    statusEl.innerHTML = Object.entries(statusCounts).map(([key, count]) => {
+      const pct = totalTitles > 0 ? Math.round((count / totalTitles) * 100) : 0;
+      const info = statusLabels[key] || { label: key, color: 'bg-indigo-500' };
+
+      return `
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs font-semibold">
+            <span class="theme-text-primary">${info.label}</span>
+            <span class="theme-text-secondary">${count} (${pct}%)</span>
+          </div>
+          <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden">
+            <div class="${info.color} h-full rounded-full" style="width: ${pct}%"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    skeleton?.classList.add('hidden');
+    content?.classList.remove('hidden');
+  }
+
+  loadAnalytics();
+  document.addEventListener('astro:page-load', loadAnalytics);
+</script>
