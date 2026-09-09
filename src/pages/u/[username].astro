@@ -1,0 +1,189 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/common/Navbar.astro';
+
+const { username } = Astro.params;
+---
+
+<Layout title={`Perfil de @${username} | KazeChronik`}>
+  <Navbar />
+
+  <main class="min-h-screen pt-24 pb-16 px-4 max-w-6xl mx-auto theme-text-primary">
+    <!-- Estado de Carga -->
+    <div id="loading-skeleton" class="animate-pulse space-y-6">
+      <div class="h-44 bg-slate-800/50 rounded-3xl w-full"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="h-24 bg-slate-800/50 rounded-2xl"></div>
+        <div class="h-24 bg-slate-800/50 rounded-2xl"></div>
+        <div class="h-24 bg-slate-800/50 rounded-2xl"></div>
+      </div>
+    </div>
+
+    <!-- Error / Perfil no encontrado -->
+    <div id="error-container" class="hidden text-center py-20 space-y-4">
+      <h2 class="text-2xl font-bold text-rose-500">Perfil no encontrado</h2>
+      <p class="text-sm theme-text-secondary">El usuario @{username} no existe o no tiene una cuenta pública.</p>
+      <a href="/dashboard" class="inline-block px-5 py-2.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl">
+        Volver al Dashboard
+      </a>
+    </div>
+
+    <!-- Contenido del Perfil -->
+    <article id="profile-content" class="hidden space-y-8">
+      <!-- Tarjeta de Presentación / Header -->
+      <header class="theme-card border p-6 sm:p-8 rounded-3xl relative overflow-hidden shadow-xl flex flex-col sm:flex-row items-center sm:items-start gap-6">
+        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-indigo-600/20 border-2 border-indigo-500/40 flex items-center justify-center text-4xl font-black text-indigo-400 shrink-0 shadow-lg">
+          <span id="user-avatar">?</span>
+        </div>
+
+        <div class="flex-1 text-center sm:text-left space-y-2">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+            <h1 id="user-display-name" class="text-2xl sm:text-4xl font-black text-white"></h1>
+            <span id="user-handle" class="text-xs font-mono px-2.5 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-lg w-fit mx-auto sm:mx-0"></span>
+          </div>
+          <p id="user-bio" class="text-sm theme-text-secondary max-w-xl"></p>
+        </div>
+      </header>
+
+      <!-- Métricas del Jugador -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="theme-card border p-5 rounded-2xl shadow-sm text-center sm:text-left">
+          <p class="text-xs font-semibold theme-text-secondary uppercase tracking-wider">Horas de Juego</p>
+          <p id="profile-hours" class="text-3xl font-black text-indigo-400 mt-1">0.0h</p>
+        </div>
+        <div class="theme-card border p-5 rounded-2xl shadow-sm text-center sm:text-left">
+          <p class="text-xs font-semibold theme-text-secondary uppercase tracking-wider">Juegos Registrados</p>
+          <p id="profile-total" class="text-3xl font-black text-cyan-400 mt-1">0</p>
+        </div>
+        <div class="theme-card border p-5 rounded-2xl shadow-sm text-center sm:text-left">
+          <p class="text-xs font-semibold theme-text-secondary uppercase tracking-wider">Completados</p>
+          <p id="profile-completed" class="text-3xl font-black text-emerald-400 mt-1">0</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Top 5 Juegos Destacados -->
+        <section class="lg:col-span-2 theme-card border p-6 rounded-2xl shadow-sm space-y-4">
+          <h2 class="font-bold text-lg border-b border-slate-800/80 pb-3 flex items-center gap-2">
+            🏆 Top 5 Títulos Más Jugados
+          </h2>
+          <div id="profile-top-games" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Inyectado dinámicamente -->
+          </div>
+        </section>
+
+        <!-- Reseñas / Bitácoras Recientes -->
+        <section class="lg:col-span-1 theme-card border p-6 rounded-2xl shadow-sm space-y-4">
+          <h2 class="font-bold text-lg border-b border-slate-800/80 pb-3 flex items-center gap-2">
+            📝 Reseñas Publicadas
+          </h2>
+          <div id="profile-reviews-list" class="space-y-4">
+            <!-- Inyectado dinámicamente -->
+          </div>
+        </section>
+      </div>
+    </article>
+  </main>
+</Layout>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+
+  async function loadUserProfile() {
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const username = pathParts[pathParts.length - 1];
+
+    const skeleton = document.getElementById('loading-skeleton');
+    const content = document.getElementById('profile-content');
+    const errorBox = document.getElementById('error-container');
+
+    if (!username) {
+      if (skeleton) skeleton.classList.add('hidden');
+      if (errorBox) errorBox.classList.remove('hidden');
+      return;
+    }
+
+    // 1. Obtener perfil
+    const { data: profile, error: profileErr } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('username', username.toLowerCase())
+      .maybeSingle();
+
+    if (profileErr || !profile) {
+      if (skeleton) skeleton.classList.add('hidden');
+      if (errorBox) errorBox.classList.remove('hidden');
+      return;
+    }
+
+    // Llenar datos de usuario
+    const displayName = profile.display_name || profile.username;
+    document.getElementById('user-display-name')!.textContent = displayName;
+    document.getElementById('user-handle')!.textContent = `@${profile.username}`;
+    document.getElementById('user-avatar')!.textContent = displayName.charAt(0).toUpperCase();
+    document.getElementById('user-bio')!.textContent = profile.bio || 'Este jugador aún no ha escrito su biografía.';
+    document.title = `Perfil de ${displayName} | KazeChronik`;
+
+    // 2. Obtener la biblioteca pública de este usuario
+    const { data: games, error: gamesErr } = await supabase
+      .from('user_library')
+      .select('*')
+      .eq('user_id', profile.id)
+      .order('hours_played', { ascending: false });
+
+    const userGames = games || [];
+
+    // Cálculos
+    const totalHours = userGames.reduce((acc, g) => acc + (Number(g.hours_played) || 0), 0);
+    const completedCount = userGames.filter(g => g.status === 'completed').length;
+
+    document.getElementById('profile-hours')!.textContent = `${totalHours.toFixed(1)}h`;
+    document.getElementById('profile-total')!.textContent = userGames.length.toString();
+    document.getElementById('profile-completed')!.textContent = completedCount.toString();
+
+    // Renderizar Top 5
+    const topGames = userGames.slice(0, 5);
+    const topContainer = document.getElementById('profile-top-games')!;
+
+    if (topGames.length === 0) {
+      topContainer.innerHTML = `<p class="text-xs theme-text-secondary col-span-full">No hay juegos en esta biblioteca.</p>`;
+    } else {
+      topContainer.innerHTML = topGames.map(game => `
+        <div class="theme-card border rounded-xl overflow-hidden flex items-center gap-3 p-3 bg-slate-900/40">
+          <img src="${game.cover_url || '/placeholder.jpg'}" alt="${game.title}" class="w-16 h-20 object-cover rounded-lg shrink-0" />
+          <div class="overflow-hidden">
+            <h4 class="font-bold text-sm theme-text-primary truncate">${game.title}</h4>
+            <p class="text-xs theme-text-secondary">${game.platform || 'PC'}</p>
+            <p class="text-xs font-semibold text-indigo-400 mt-1">${game.hours_played || 0} hrs jugadas</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Renderizar Reseñas
+    const reviews = userGames.filter(g => g.review && g.review.trim() !== '');
+    const reviewsContainer = document.getElementById('profile-reviews-list')!;
+
+    if (reviews.length === 0) {
+      reviewsContainer.innerHTML = `<p class="text-xs theme-text-secondary">Este usuario aún no ha escrito ninguna reseña.</p>`;
+    } else {
+      reviewsContainer.innerHTML = reviews.slice(0, 4).map(game => `
+        <div class="p-3 bg-slate-900/40 border border-slate-800 rounded-xl space-y-1.5">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-xs theme-text-primary truncate">${game.title}</span>
+            <span class="text-xs font-black text-amber-400">⭐ ${game.rating || 'N/A'}</span>
+          </div>
+          <p class="text-xs theme-text-secondary line-clamp-3 italic">"${game.review}"</p>
+        </div>
+      `).join('');
+    }
+
+    skeleton?.classList.add('hidden');
+    content?.classList.remove('hidden');
+  }
+
+  loadUserProfile();
+  document.addEventListener('astro:page-load', loadUserProfile);
+</script>

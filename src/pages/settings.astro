@@ -76,10 +76,88 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
         </button>
       </div>
     </div>
+    <!-- Formulario de Perfil Público -->
+<section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm">
+  <h2 class="font-bold text-lg border-b border-slate-800 pb-3">👤 Perfil Público</h2>
+  
+  <form id="profile-form" class="space-y-4">
+    <div>
+      <label class="block text-xs font-semibold theme-text-secondary mb-1">Nombre de Usuario (@username)</label>
+      <input 
+        type="text" 
+        id="profile-username" 
+        required 
+        placeholder="ej: angel"
+        class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+      />
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold theme-text-secondary mb-1">Nombre Visible</label>
+      <input 
+        type="text" 
+        id="profile-display-name" 
+        placeholder="ej: Ángel González"
+        class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+      />
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold theme-text-secondary mb-1">Biografía</label>
+      <textarea 
+        id="profile-bio" 
+        rows="3" 
+        placeholder="Escribe algo sobre tus gustos en videojuegos..."
+        class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500 resize-none"
+      ></textarea>
+    </div>
+
+    <button 
+      type="submit" 
+      class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer"
+    >
+      Guardar Perfil
+    </button>
+  </form>
+</section>
+<!-- Copia de Seguridad & Datos -->
+<section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mt-6">
+  <h2 class="font-bold text-lg border-b border-slate-800 pb-3 flex items-center gap-2">
+    📦 Copia de Seguridad & Datos
+  </h2>
+  <p class="text-xs theme-text-secondary">
+    Exporta una copia de respaldo en formato JSON de toda tu biblioteca de juegos, horas y reseñas, o restaura tus datos desde un archivo previo.
+  </p>
+
+  <div class="flex flex-col sm:flex-row gap-4 pt-2">
+    <!-- Exportar -->
+    <button 
+      id="export-backup-btn"
+      type="button"
+      class="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer flex items-center justify-center gap-2"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+      </svg>
+      <span>Exportar Biblioteca (JSON)</span>
+    </button>
+
+    <!-- Importar -->
+    <label class="flex-1 px-4 py-2.5 theme-button hover:border-indigo-500/50 theme-text-primary font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border text-center">
+      <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+      </svg>
+      <span>Restaurar Copia (JSON)</span>
+      <input type="file" id="import-backup-input" accept=".json" class="hidden" />
+    </label>
+  </div>
+</section>
   </main>
 </Layout>
 
 <script>
+  import { supabase } from '../lib/supabase';
+
   const buttons = document.querySelectorAll<HTMLButtonElement>('.theme-opt');
   const currentTheme = localStorage.getItem('theme') || 'legacy';
 
@@ -112,4 +190,163 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
       document.documentElement.setAttribute('data-theme', selectedTheme);
     });
   });
+
+  async function initProfileSettings() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = '/login';
+      return;
+    }
+
+    const usernameInput = document.getElementById('profile-username') as HTMLInputElement;
+    const nameInput = document.getElementById('profile-display-name') as HTMLInputElement;
+    const bioInput = document.getElementById('profile-bio') as HTMLTextAreaElement;
+    const profileForm = document.getElementById('profile-form') as HTMLFormElement;
+
+    // 1. Cargar los datos actuales si ya existen en la tabla profiles
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .maybeSingle();
+
+    if (profile) {
+      if (usernameInput) usernameInput.value = profile.username || '';
+      if (nameInput) nameInput.value = profile.display_name || '';
+      if (bioInput) bioInput.value = profile.bio || '';
+    }
+
+    // 2. Escuchar el submit para INSERTAR o ACTUALIZAR (upsert)
+    profileForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const usernameVal = usernameInput.value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+      const displayNameVal = nameInput.value.trim();
+      const bioVal = bioInput.value.trim();
+
+      if (!usernameVal) {
+        alert('Por favor ingresa un nombre de usuario válido.');
+        return;
+      }
+
+      console.log('💾 Guardando perfil en Supabase para:', session.user.id);
+
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: session.user.id,
+          username: usernameVal,
+          display_name: displayNameVal || usernameVal,
+          bio: bioVal,
+          created_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+
+      if (error) {
+        console.error('❌ Error al guardar perfil:', error);
+        alert('Error al guardar el perfil: ' + error.message);
+      } else {
+        alert('¡Perfil actualizado con éxito!');
+        // Redirige directamente a la página del perfil recién creado
+        window.location.href = `/u/${usernameVal}`;
+      }
+    });
+  }
+
+  initProfileSettings();
+  document.addEventListener('astro:page-load', initProfileSettings);
+
+  // --- EXPORTAR BACKUP (JSON) ---
+const exportBtn = document.getElementById('export-backup-btn');
+exportBtn?.addEventListener('click', async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const { data: games, error } = await supabase
+    .from('user_library')
+    .select('*')
+    .eq('user_id', session.user.id);
+
+  if (error || !games) {
+    alert('Error al obtener datos para la copia de seguridad.');
+    return;
+  }
+
+  const backupData = {
+    app: 'KazeChronik',
+    version: '1.0',
+    exported_at: new Date().toISOString(),
+    total_games: games.length,
+    library: games
+  };
+
+  const jsonStr = JSON.stringify(backupData, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `kazechronik-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// --- IMPORTAR BACKUP (JSON) ---
+const importInput = document.getElementById('import-backup-input') as HTMLInputElement;
+importInput?.addEventListener('change', async (e: any) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const reader = new FileReader();
+  reader.onload = async (event) => {
+    try {
+      const content = JSON.parse(event.target?.result as string);
+      const gamesToImport = content.library || content;
+
+      if (!Array.isArray(gamesToImport)) {
+        alert('El archivo JSON no tiene un formato válido de biblioteca.');
+        return;
+      }
+
+      if (!confirm(`Se van a importar ${gamesToImport.length} juegos a tu cuenta. ¿Deseas continuar?`)) {
+        return;
+      }
+
+      // Mapear registros asignando el user_id del usuario actual
+      const preparedGames = gamesToImport.map(g => ({
+        user_id: session.user.id,
+        title: g.title,
+        cover_url: g.cover_url || null,
+        platform: g.platform || 'PC',
+        store: g.store || 'Otra',
+        status: g.status || 'backlog',
+        hours_played: Number(g.hours_played) || 0,
+        rating: g.rating ? Number(g.rating) : null,
+        review: g.review || null,
+        notes: g.notes || null,
+        tags: Array.isArray(g.tags) ? g.tags : [],
+        updated_at: new Date().toISOString()
+      }));
+
+      const { error } = await supabase
+        .from('user_library')
+        .insert(preparedGames);
+
+      if (!error) {
+        alert('¡Copia de seguridad restaurada con éxito!');
+        window.location.href = '/dashboard';
+      } else {
+        alert('Error al importar algunos datos: ' + error.message);
+      }
+    } catch (err) {
+      alert('Error al leer el archivo JSON. Asegúrate de que no esté corrupto.');
+    }
+  };
+
+  reader.readAsText(file);
+});
 </script>

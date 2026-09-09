@@ -59,7 +59,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
 
     <!-- Buscador Interno y Pestañas de Estado -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4">
-      <!-- Pestañas de Estado -->
+      <!-- Pestañas de Estado + Favoritos -->
       <div class="flex items-center gap-2 overflow-x-auto pb-1">
         <button data-filter="all" class="filter-btn active px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition-all cursor-pointer whitespace-nowrap shadow-sm">
           Todos
@@ -79,6 +79,9 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
         <button data-filter="dropped" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold theme-button border border-transparent transition-all cursor-pointer whitespace-nowrap">
           Abandonados
         </button>
+        <button data-filter="favorites" class="filter-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold theme-button border border-transparent transition-all cursor-pointer whitespace-nowrap flex items-center gap-1 text-amber-400">
+          ⭐ Favoritos
+        </button>
       </div>
 
       <!-- Buscador Interno -->
@@ -94,7 +97,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     </div>
 
     <!-- Filtros Secundarios (Plataforma y Tienda) -->
-    <div class="flex flex-wrap items-center gap-3 mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+    <div class="flex flex-wrap items-center gap-3 mb-4 pb-4 border-b border-slate-200 dark:border-slate-800">
       <div class="flex items-center gap-1.5 text-xs theme-text-secondary font-semibold mr-2">
         <Filter class="w-3.5 h-3.5" />
         <span>Filtrar por:</span>
@@ -127,30 +130,36 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
       </select>
     </div>
 
+    <!-- Filtro de Etiquetas Personalizadas (Separado) -->
+    <div id="tags-filter-wrapper" class="hidden mb-6">
+      <div class="flex items-center gap-2 overflow-x-auto pb-1" id="tags-filter-container">
+        <!-- Inyectado dinámicamente -->
+      </div>
+    </div>
 
-<!-- Galería / Contenedor (Inicia con Skeleton Loader) -->
-<div id="library-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-  <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
-    <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
-    <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
-    <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
-  </div>
-  <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
-    <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
-    <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
-    <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
-  </div>
-  <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
-    <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
-    <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
-    <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
-  </div>
-  <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
-    <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
-    <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
-    <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
-  </div>
-</div>
+    <!-- Galería / Contenedor -->
+    <div id="library-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
+        <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
+        <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+      </div>
+      <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
+        <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
+        <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+      </div>
+      <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
+        <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
+        <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+      </div>
+      <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
+        <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
+        <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+      </div>
+    </div>
   </main>
 
   <!-- MODAL DE EDICIÓN ESTILIZADO -->
@@ -197,7 +206,6 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
       </form>
     </div>
   </div>
-
 </Layout>
 
 <script>
@@ -207,6 +215,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
   let activeStatusFilter = 'all';
   let activePlatformFilter = 'all';
   let activeStoreFilter = 'all';
+  let activeTagFilter = 'all';
   let searchQuery = '';
 
   const modal = document.getElementById('edit-modal') as HTMLDivElement;
@@ -270,21 +279,70 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     if (hoursEl) hoursEl.textContent = `${totalHours.toFixed(1)}h`;
     if (completedEl) completedEl.textContent = completedCount.toString();
 
+    renderTagFilters();
     renderGrid();
+  }
+
+  function renderTagFilters() {
+    const wrapper = document.getElementById('tags-filter-wrapper');
+    const container = document.getElementById('tags-filter-container');
+    if (!wrapper || !container) return;
+
+    const allTags = Array.from(
+      new Set(allGames.flatMap(g => g.tags || []))
+    ).filter(Boolean);
+
+    if (allTags.length === 0) {
+      wrapper.classList.add('hidden');
+      return;
+    }
+
+    wrapper.classList.remove('hidden');
+
+    container.innerHTML = `
+      <span class="text-xs font-semibold theme-text-secondary mr-1">Etiquetas:</span>
+      <button 
+        data-tag="all" 
+        class="tag-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold ${activeTagFilter === 'all' ? 'bg-indigo-600 text-white' : 'theme-button'} transition-all cursor-pointer whitespace-nowrap"
+      >
+        Todas
+      </button>
+      ${allTags.map(tag => `
+        <button 
+          data-tag="${tag}" 
+          class="tag-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold ${activeTagFilter === tag ? 'bg-indigo-600 text-white' : 'theme-button'} transition-all cursor-pointer whitespace-nowrap"
+        >
+          #${tag}
+        </button>
+      `).join('')}
+    `;
+
+    container.querySelectorAll('.tag-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeTagFilter = btn.getAttribute('data-tag') || 'all';
+        renderTagFilters();
+        renderGrid();
+      });
+    });
   }
 
   function renderGrid() {
     const container = document.getElementById('library-container');
     if (!container) return;
 
-    // Aplicar Filtros Combinados + Búsqueda por Texto
     const filteredGames = allGames.filter(game => {
-      const matchStatus = activeStatusFilter === 'all' || game.status === activeStatusFilter;
+      const matchStatus = activeStatusFilter === 'all' 
+        ? true 
+        : activeStatusFilter === 'favorites' 
+          ? game.is_favorite === true 
+          : game.status === activeStatusFilter;
+
       const matchPlatform = activePlatformFilter === 'all' || game.platform === activePlatformFilter;
       const matchStore = activeStoreFilter === 'all' || game.store === activeStoreFilter;
       const matchSearch = searchQuery === '' || game.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchTag = activeTagFilter === 'all' || (game.tags && game.tags.includes(activeTagFilter));
 
-      return matchStatus && matchPlatform && matchStore && matchSearch;
+      return matchStatus && matchPlatform && matchStore && matchSearch && matchTag;
     });
 
     if (filteredGames.length === 0) {
@@ -304,23 +362,36 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
       const badgeClass = statusBadgeStyles[game.status] || 'theme-button border-slate-500/20';
       const statusText = statusMap[game.status] || game.status;
       const safeTitle = game.title.replace(/'/g, "\\'");
+      const isFav = game.is_favorite === true;
 
       return `
-        <div class="theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all shadow-md group">
+        <div class="theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all shadow-md group relative">
           
-          <!-- Enlace de Portada hacia /game/[id] -->
-          <a href="/game/${game.id}" class="block relative overflow-hidden h-44 bg-slate-800">
-            <img 
-              src="${game.cover_url || '/placeholder.jpg'}" 
-              alt="${game.title}" 
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-              <span class="text-xs font-semibold text-white bg-indigo-600/90 px-2.5 py-1 rounded-lg backdrop-blur-sm">
-                Ver Bitácora →
-              </span>
-            </div>
-          </a>
+          <!-- Enlace de Portada con Botón de Favorito Superpuesto -->
+          <div class="relative overflow-hidden h-44 bg-slate-800">
+            <a href="/game/${game.id}" class="block w-full h-full">
+              <img 
+                src="${game.cover_url || '/placeholder.jpg'}" 
+                alt="${game.title}" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                <span class="text-xs font-semibold text-white bg-indigo-600/90 px-2.5 py-1 rounded-lg backdrop-blur-sm">
+                  Ver Bitácora →
+                </span>
+              </div>
+            </a>
+
+            <!-- Botón Favorito Flotante Arriba a la Derecha -->
+            <button 
+              type="button"
+              onclick="toggleFavorite('${game.id}', ${isFav})"
+              class="absolute top-2 right-2 p-1.5 rounded-xl bg-slate-950/80 backdrop-blur-md text-amber-400 hover:scale-110 transition-all z-20 cursor-pointer shadow-lg border border-white/10"
+              title="${isFav ? 'Quitar de favoritos' : 'Marcar como favorito'}"
+            >
+              ${isFav ? '★' : '☆'}
+            </button>
+          </div>
 
           <!-- Contenido e Información -->
           <div class="p-4 flex-1 flex flex-col justify-between">
@@ -334,7 +405,6 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
                 </span>
               </div>
 
-              <!-- Enlace en Título hacia /game/[id] -->
               <a href="/game/${game.id}" class="hover:text-indigo-400 transition-colors">
                 <h3 class="font-bold theme-text-primary text-base line-clamp-1">${game.title}</h3>
               </a>
@@ -345,7 +415,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
               </div>
             </div>
 
-            <!-- Acciones Secundarias (Modal de Edición / Eliminar) -->
+            <!-- Acciones Secundarias (Editar / Eliminar) -->
             <div class="flex gap-2 mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
               <button
                 onclick="openEditModal('${game.id}', '${safeTitle}', ${game.hours_played || 0}, '${game.status}')"
@@ -353,6 +423,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
               >
                 <span>Editar</span>
               </button>
+              
               <button
                 onclick="deleteGame('${game.id}', '${safeTitle}')"
                 class="py-1.5 px-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
@@ -366,13 +437,33 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     }).join('');
   }
 
-  // Listener para Buscador Interno
+  // Alternar Favorito
+  (window as any).toggleFavorite = async (gameId: string, currentFav: boolean) => {
+    const newFavStatus = !currentFav;
+    
+    // Actualización local rápida
+    const game = allGames.find(g => g.id === gameId);
+    if (game) game.is_favorite = newFavStatus;
+    renderGrid();
+
+    const { error } = await supabase
+      .from('user_library')
+      .update({ is_favorite: newFavStatus })
+      .eq('id', gameId);
+
+    if (error) {
+      console.error('Error al actualizar favorito:', error);
+      if (game) game.is_favorite = currentFav;
+      renderGrid();
+    }
+  };
+
+  // Listeners para filtros generales
   searchInput?.addEventListener('input', (e) => {
     searchQuery = (e.target as HTMLInputElement).value.trim();
     renderGrid();
   });
 
-  // Event Listeners para Filtros por Pestaña
   const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -389,7 +480,6 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     });
   });
 
-  // Listeners para Filtros Desplegables
   platformSelect?.addEventListener('change', (e) => {
     activePlatformFilter = (e.target as HTMLSelectElement).value;
     renderGrid();
@@ -400,7 +490,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     renderGrid();
   });
 
-  // Modal de Edición
+  // Modal
   (window as any).openEditModal = (id: string, title: string, hours: number, status: string) => {
     editGameId.value = id;
     modalGameTitle.textContent = `Editar: ${title}`;
