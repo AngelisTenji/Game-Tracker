@@ -1,0 +1,151 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Bienvenido a KazeChronik | Configura tu Perfil">
+  <main class="min-h-screen flex items-center justify-center p-4 bg-slate-950 theme-text-primary">
+    <div class="theme-card border w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6">
+      
+      <!-- Encabezado de Bienvenida -->
+      <div class="text-center space-y-2">
+        <div class="w-16 h-16 bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto text-2xl font-black shadow-inner">
+          🎮
+        </div>
+        <h1 class="text-2xl font-black text-white tracking-tight">¡Bienvenido a KazeChronik!</h1>
+        <p class="text-xs theme-text-secondary leading-relaxed">
+          Antes de empezar a organizar tu biblioteca, reserva tu nombre de usuario único para tu perfil público.
+        </p>
+      </div>
+
+      <!-- Formulario de Registro de Username -->
+      <form id="onboarding-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-1.5">
+            Nombre de Usuario <span class="text-indigo-400">(@handle)</span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-indigo-400">@</span>
+            <input 
+              type="text" 
+              id="onboarding-username" 
+              required 
+              placeholder="angelistenji"
+              pattern="[a-zA-Z0-9_]+"
+              title="Solo letras, números y guiones bajos"
+              class="w-full pl-8 pr-4 py-2.5 theme-input border rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 transition-colors"
+            />
+          </div>
+          <p class="text-[11px] theme-text-secondary mt-1">Este nombre será tu enlace público (<span class="text-indigo-400">kazechronik.com/u/tu_user</span>) y no podrá cambiarse después.</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-1.5">
+            Nombre Visible
+          </label>
+          <input 
+            type="text" 
+            id="onboarding-display-name" 
+            placeholder="Ej: Ángel González"
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-1.5">
+            Biografía <span class="text-slate-500 font-normal">(Opcional)</span>
+          </label>
+          <textarea 
+            id="onboarding-bio" 
+            rows="2" 
+            placeholder="¿Cuáles son tus géneros o plataformas favoritas?"
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500 resize-none"
+          ></textarea>
+        </div>
+
+        <button 
+          type="submit" 
+          id="submit-btn"
+          class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer flex items-center justify-center gap-2"
+        >
+          <span>Comenzar a usar KazeChronik →</span>
+        </button>
+      </form>
+
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  async function initOnboarding() {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      window.location.href = '/login';
+      return;
+    }
+
+    // Verificar si ya tiene perfil creado
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', session.user.id)
+      .maybeSingle();
+
+    if (existingProfile?.username) {
+      window.location.href = '/dashboard';
+      return;
+    }
+
+    const form = document.getElementById('onboarding-form');
+    const usernameInput = document.getElementById('onboarding-username') as HTMLInputElement;
+    const nameInput = document.getElementById('onboarding-display-name') as HTMLInputElement;
+    const bioInput = document.getElementById('onboarding-bio') as HTMLTextAreaElement;
+    const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const rawUsername = usernameInput.value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+      const displayName = nameInput.value.trim() || rawUsername;
+      const bio = bioInput.value.trim();
+
+      if (!rawUsername) {
+        alert('Por favor, ingresa un nombre de usuario válido.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Reservando tu @username...';
+
+      // Intentar guardar en Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .insert({
+          id: session.user.id,
+          username: rawUsername,
+          display_name: displayName,
+          bio: bio,
+          created_at: new Date().toISOString()
+        });
+
+      if (error) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Comenzar a usar KazeChronik →';
+
+        if (error.code === '23505') { // Violación de unicidad en Postgres
+          alert(`El usuario @${rawUsername} ya está ocupado. Prueba con otro.`);
+        } else {
+          alert('Error al guardar el perfil: ' + error.message);
+        }
+      } else {
+        window.location.href = '/dashboard';
+      }
+    });
+  }
+
+  initOnboarding();
+</script>

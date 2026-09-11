@@ -209,7 +209,8 @@ import Navbar from '../../components/common/Navbar.astro';
   import { supabase } from '../../lib/supabase';
 
   async function initGameDetail() {
-    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const cleanPath = window.location.pathname.replace(/\/$/, '');
+    const pathParts = cleanPath.split('/');
     const gameId = pathParts[pathParts.length - 1];
 
     const skeleton = document.getElementById('loading-skeleton');
@@ -240,7 +241,7 @@ import Navbar from '../../components/common/Navbar.astro';
     let currentTags: string[] = [];
     let isFavorite = false;
 
-    if (!gameId) {
+    if (!gameId || gameId === 'game') {
       if (skeleton) skeleton.classList.add('hidden');
       if (errorBox) errorBox.classList.remove('hidden');
       return;
@@ -256,7 +257,7 @@ import Navbar from '../../components/common/Navbar.astro';
       return;
     }
 
-    // 1. CARGA INICIAL
+    // 1. Cargar Registro desde Supabase
     const { data, error } = await supabase
       .from('user_library')
       .select('*')
@@ -265,16 +266,14 @@ import Navbar from '../../components/common/Navbar.astro';
       .maybeSingle();
 
     if (error || !data) {
-      console.error('❌ Error o registro no encontrado:', error);
       if (skeleton) skeleton.classList.add('hidden');
       if (errorBox) errorBox.classList.remove('hidden');
       return;
     }
 
-    // 2. LLENAR DATOS
-    isFavorite = data.is_favorite || false;
-    updateFavoriteUI();
-
+    // 2. Poblar Datos y UI
+    isFavorite = Boolean(data.is_favorite);
+    
     function updateFavoriteUI() {
       const btn = document.getElementById('favorite-btn');
       const icon = document.getElementById('favorite-icon');
@@ -293,6 +292,8 @@ import Navbar from '../../components/common/Navbar.astro';
       }
     }
 
+    updateFavoriteUI();
+
     document.getElementById('favorite-btn')?.addEventListener('click', () => {
       isFavorite = !isFavorite;
       updateFavoriteUI();
@@ -308,18 +309,12 @@ import Navbar from '../../components/common/Navbar.astro';
     if (achievementsInput) achievementsInput.value = data.achievements_progress || 0;
     if (achievementsVal) achievementsVal.textContent = `${data.achievements_progress || 0}%`;
 
-    if (ratingInput) ratingInput.value = data.rating || '';
+    if (ratingInput) ratingInput.value = data.rating !== null && data.rating !== undefined ? data.rating : '';
     if (reviewInput) reviewInput.value = data.review || '';
     if (notesInput) notesInput.value = data.notes || '';
 
     currentTags = Array.isArray(data.tags) ? data.tags : [];
-    renderTags();
-
-    document.title = `${data.title} | KazeChronik`;
-
-    if (skeleton) skeleton.classList.add('hidden');
-    if (content) content.classList.remove('hidden');
-
+    
     function renderTags() {
       if (!tagsContainer) return;
       
@@ -336,6 +331,8 @@ import Navbar from '../../components/common/Navbar.astro';
       `).join('');
     }
 
+    renderTags();
+
     (window as any).removeTag = (index: number) => {
       currentTags.splice(index, 1);
       renderTags();
@@ -350,7 +347,12 @@ import Navbar from '../../components/common/Navbar.astro';
       }
     });
 
-    // 3. LISTENERS DE GUARDADO
+    document.title = `${data.title} | KazeChronik`;
+
+    if (skeleton) skeleton.classList.add('hidden');
+    if (content) content.classList.remove('hidden');
+
+    // 3. Listeners para guardar cambios
     saveProgressBtn?.addEventListener('click', async () => {
       saveProgressBtn.disabled = true;
       saveProgressBtn.textContent = 'Guardando...';
@@ -371,11 +373,7 @@ import Navbar from '../../components/common/Navbar.astro';
       saveProgressBtn.textContent = 'Guardar Cambios';
 
       if (!error) {
-        if (typeof (window as any).showToast === 'function') {
-          (window as any).showToast('¡Progreso guardado!', 'success');
-        } else {
-          alert('¡Progreso guardado!');
-        }
+        alert('¡Progreso guardado!');
       } else {
         alert('Error al guardar: ' + error.message);
       }
@@ -388,7 +386,7 @@ import Navbar from '../../components/common/Navbar.astro';
       const { error } = await supabase
         .from('user_library')
         .update({
-          rating: parseFloat(ratingInput.value) || null,
+          rating: ratingInput.value ? parseFloat(ratingInput.value) : null,
           review: reviewInput.value.trim() || null,
           notes: notesInput.value.trim() || null,
           tags: currentTags,
@@ -401,11 +399,7 @@ import Navbar from '../../components/common/Navbar.astro';
       saveReviewBtn.textContent = 'Guardar Bitácora';
 
       if (!error) {
-        if (typeof (window as any).showToast === 'function') {
-          (window as any).showToast('¡Bitácora guardada con éxito!', 'success');
-        } else {
-          alert('¡Bitácora guardada con éxito!');
-        }
+        alert('¡Bitácora guardada con éxito!');
       } else {
         alert('Error al guardar bitácora: ' + error.message);
       }
