@@ -7,7 +7,10 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
   output: 'server',
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    build: {
+      sourcemap: false
+    }
   },
   adapter: vercel()
 });
