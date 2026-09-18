@@ -1,0 +1,10 @@
+# KazeChronik
+
+> KazeChronik es una aplicación web moderna de seguimiento y organización de videojuegos personales.
+
+## Características Principales
+- Gestión de biblioteca de juegos (Jugando, Completados, Pendientes, En Pausa, Abandonados).
+- Búsqueda e integración con la API de RAWG.
+- Estadísticas detalladas de tiempo jugado y progreso.
+- Reseñas e impresiones personales.
+- Autenticación segura y sincronización con Supabase.

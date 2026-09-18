@@ -5,7 +5,7 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Bienvenido a KazeChronik | Configura tu Perfil">
-  <main class="min-h-screen flex items-center justify-center p-4 bg-slate-950 theme-text-primary">
+  <main class="min-h-screen flex items-center justify-center p-4 theme-text-primary">
     <div class="theme-card border w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6">
       
       <!-- Encabezado de Bienvenida -->
@@ -13,7 +13,7 @@ import Layout from '../layouts/Layout.astro';
         <div class="w-16 h-16 bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto text-2xl font-black shadow-inner">
           🎮
         </div>
-        <h1 class="text-2xl font-black text-white tracking-tight">¡Bienvenido a KazeChronik!</h1>
+        <h1 class="text-2xl font-black theme-text-primary tracking-tight">¡Bienvenido a KazeChronik!</h1>
         <p class="text-xs theme-text-secondary leading-relaxed">
           Antes de empezar a organizar tu biblioteca, reserva tu nombre de usuario único para tu perfil público.
         </p>
@@ -54,7 +54,7 @@ import Layout from '../layouts/Layout.astro';
 
         <div>
           <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-1.5">
-            Biografía <span class="text-slate-500 font-normal">(Opcional)</span>
+            Biografía <span class="theme-text-secondary font-normal">(Opcional)</span>
           </label>
           <textarea 
             id="onboarding-bio" 

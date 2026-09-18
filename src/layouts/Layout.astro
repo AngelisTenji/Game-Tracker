@@ -2,12 +2,19 @@
 import '../styles/global.css';
 import Toast from '../components/common/Toast.astro';
 import CookieBanner from '../components/CookieBanner.astro';
+import SEO from '../components/common/SEO.astro';
 
 interface Props {
   title?: string;
+  description?: string;
+  image?: string;
 }
 
-const { title = "KazeChronik" } = Astro.props;
+const { 
+  title = "KazeChronik", 
+  description = "Organiza tu colección de videojuegos, lleva el control de tu progreso, estadísticas y bitácora en tiempo real con KazeChronik.",
+  image = "/og-image.jpg" 
+} = Astro.props;
 ---
 
 <!DOCTYPE html>
@@ -16,7 +23,9 @@ const { title = "KazeChronik" } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title} | KazeChronik</title>
+
+    <!-- SEO Técnico, Open Graph y Twitter Meta Tags -->
+    <SEO title={title} description={description} image={image} />
 
     <!-- Script Inline Inmediato (Previene Flash de Tema) -->
     <script is:inline>

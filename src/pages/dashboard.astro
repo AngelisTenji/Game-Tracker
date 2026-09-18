@@ -4,7 +4,7 @@ import Navbar from '../components/common/Navbar.astro';
 import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucide-astro';
 ---
 
-<Layout title="Mi Biblioteca">
+<Layout title="Mi Biblioteca | KazeChronik">
   <Navbar />
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
@@ -160,6 +160,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
         <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
       </div>
     </div>
+
     <!-- Controles de Paginación -->
     <div id="pagination-controls" class="flex items-center justify-between mt-8 pt-4 border-t border-slate-800 hidden">
       <p id="pagination-info" class="text-xs theme-text-secondary font-medium">
@@ -186,9 +187,9 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     </div>
   </main>
 
-  <!-- MODAL DE EDICIÓN ESTILIZADO -->
+  <!-- MODAL DE EDICIÓN ESTILIZADO (Con fix responsivo de overflow en móvil) -->
   <div id="edit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="theme-card border w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+    <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl relative overflow-hidden">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
         <h3 id="modal-game-title" class="text-lg font-bold theme-text-primary truncate">Editar Juego</h3>
         <button id="close-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg hover:bg-slate-500/10 transition-colors">
@@ -203,13 +204,15 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
           <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
             Estado de Juego
           </label>
-          <select id="edit-status" class="w-full px-3 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500">
-            <option value="playing">Jugando</option>
-            <option value="completed">Completado</option>
-            <option value="backlog">Pendiente (Backlog)</option>
-            <option value="on_hold">En Pausa</option>
-            <option value="dropped">Abandonado</option>
-          </select>
+          <div class="w-full overflow-x-hidden">
+            <select id="edit-status" class="w-full max-w-full px-3 py-2.5 theme-input border rounded-xl theme-text-primary text-sm focus:outline-none focus:border-indigo-500 truncate cursor-pointer">
+              <option value="playing">Jugando</option>
+              <option value="completed">Completado</option>
+              <option value="backlog">Pendiente (Backlog)</option>
+              <option value="on_hold">En Pausa</option>
+              <option value="dropped">Abandonado</option>
+            </select>
+          </div>
         </div>
 
         <div>
@@ -223,7 +226,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
           <button type="button" id="cancel-modal-btn" class="flex-1 py-2.5 px-4 theme-button text-sm font-semibold rounded-xl transition-colors">
             Cancelar
           </button>
-          <button type="submit" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20">
+          <button type="submit" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20 cursor-pointer">
             Guardar Cambios
           </button>
         </div>
@@ -273,7 +276,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     dropped: 'bg-rose-500/10 text-rose-500 border-rose-500/20'
   };
 
- async function loadLibrary() {
+  async function loadLibrary() {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session) {
@@ -281,7 +284,6 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
       return;
     }
 
-    // Verificar si el usuario ya completó el onboarding
     const { data: profile } = await supabase
       .from('profiles')
       .select('username')
@@ -293,7 +295,6 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
       return;
     }
 
-    // Carga de la biblioteca
     const { data: games, error } = await supabase
       .from('user_library')
       .select('*')
@@ -359,7 +360,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     container.querySelectorAll('.tag-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         activeTagFilter = btn.getAttribute('data-tag') || 'all';
-        currentPage = 1; // 👈 Reset a página 1
+        currentPage = 1;
         renderTagFilters();
         renderGrid();
       });
@@ -367,158 +368,147 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
   }
 
   function renderGrid() {
-  const container = document.getElementById('library-container');
-  const paginationControls = document.getElementById('pagination-controls');
-  if (!container) return;
+    const container = document.getElementById('library-container');
+    const paginationControls = document.getElementById('pagination-controls');
+    if (!container) return;
 
-  // 1. Filtrar lista completa
-  const filteredGames = allGames.filter(game => {
-    const matchStatus = activeStatusFilter === 'all' 
-      ? true 
-      : activeStatusFilter === 'favorites' 
-        ? game.is_favorite === true 
-        : game.status === activeStatusFilter;
+    const filteredGames = allGames.filter(game => {
+      const matchStatus = activeStatusFilter === 'all' 
+        ? true 
+        : activeStatusFilter === 'favorites' 
+          ? game.is_favorite === true 
+          : game.status === activeStatusFilter;
 
-    const matchPlatform = activePlatformFilter === 'all' || game.platform === activePlatformFilter;
-    const matchStore = activeStoreFilter === 'all' || game.store === activeStoreFilter;
-    const matchSearch = searchQuery === '' || game.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchTag = activeTagFilter === 'all' || (game.tags && game.tags.includes(activeTagFilter));
+      const matchPlatform = activePlatformFilter === 'all' || game.platform === activePlatformFilter;
+      const matchStore = activeStoreFilter === 'all' || game.store === activeStoreFilter;
+      const matchSearch = searchQuery === '' || game.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchTag = activeTagFilter === 'all' || (game.tags && game.tags.includes(activeTagFilter));
 
-    return matchStatus && matchPlatform && matchStore && matchSearch && matchTag;
-  });
+      return matchStatus && matchPlatform && matchStore && matchSearch && matchTag;
+    });
 
-  // Empty State
-  if (filteredGames.length === 0) {
-    if (paginationControls) paginationControls.classList.add('hidden');
-    container.className = "theme-card border rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px]";
-    container.innerHTML = `
-      <div class="p-4 theme-button rounded-2xl mb-4 theme-text-secondary">
-        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
-      </div>
-      <h3 class="text-lg font-semibold theme-text-primary">No se encontraron juegos</h3>
-      <p class="text-sm theme-text-secondary max-w-sm mt-1 mb-6">Prueba ajustando el texto o borrando los filtros aplicados.</p>
-    `;
-    return;
-  }
-
-  // 2. Cálculo de Paginación
-  const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE);
-  if (currentPage > totalPages) currentPage = 1;
-
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredGames.length);
-  const paginatedGames = filteredGames.slice(startIndex, endIndex);
-
-  // 3. Renderizar Controles de Paginación
-  if (paginationControls) {
-    if (filteredGames.length > ITEMS_PER_PAGE) {
-      paginationControls.classList.remove('hidden');
-      
-      const startEl = document.getElementById('page-start');
-      const endEl = document.getElementById('page-end');
-      const totalEl = document.getElementById('page-total');
-      const badgeEl = document.getElementById('current-page-badge');
-      const prevBtn = document.getElementById('prev-page-btn') as HTMLButtonElement;
-      const nextBtn = document.getElementById('next-page-btn') as HTMLButtonElement;
-
-      if (startEl) startEl.textContent = (startIndex + 1).toString();
-      if (endEl) endEl.textContent = endIndex.toString();
-      if (totalEl) totalEl.textContent = filteredGames.length.toString();
-      if (badgeEl) badgeEl.textContent = `${currentPage} / ${totalPages}`;
-
-      if (prevBtn) prevBtn.disabled = currentPage === 1;
-      if (nextBtn) nextBtn.disabled = currentPage === totalPages;
-    } else {
-      paginationControls.classList.add('hidden');
-    }
-  }
-
-  // 4. Renderizar Tarjetas de la Página Actual
-  container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6";
-  container.innerHTML = paginatedGames.map(game => {
-    const badgeClass = statusBadgeStyles[game.status] || 'theme-button border-slate-500/20';
-    const statusText = statusMap[game.status] || game.status;
-    const safeTitle = game.title.replace(/'/g, "\\'");
-    const isFav = game.is_favorite === true;
-
-    return `
-      <div class="theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all shadow-md group relative">
-        
-        <!-- Enlace de Portada con Botón de Favorito Superpuesto -->
-        <div class="relative overflow-hidden h-44 bg-slate-800">
-          <a href="/game/${game.id}" class="block w-full h-full">
-            <img 
-              src="${game.cover_url || '/placeholder.jpg'}" 
-              alt="${game.title}" 
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-              <span class="text-xs font-semibold text-white bg-indigo-600/90 px-2.5 py-1 rounded-lg backdrop-blur-sm">
-                Ver Bitácora →
-              </span>
-            </div>
-          </a>
-
-          <!-- Botón Favorito Flotante -->
-          <button 
-            type="button"
-            onclick="toggleFavorite('${game.id}', ${isFav})"
-            class="absolute top-2 right-2 p-1.5 rounded-xl bg-slate-950/80 backdrop-blur-md text-amber-400 hover:scale-110 transition-all z-20 cursor-pointer shadow-lg border border-white/10"
-            title="${isFav ? 'Quitar de favoritos' : 'Marcar como favorito'}"
-          >
-            ${isFav ? '★' : '☆'}
-          </button>
+    if (filteredGames.length === 0) {
+      if (paginationControls) paginationControls.classList.add('hidden');
+      container.className = "theme-card border rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px]";
+      container.innerHTML = `
+        <div class="p-4 theme-button rounded-2xl mb-4 theme-text-secondary">
+          <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
         </div>
+        <h3 class="text-lg font-semibold theme-text-primary">No se encontraron juegos</h3>
+        <p class="text-sm theme-text-secondary max-w-sm mt-1 mb-6">Prueba ajustando el texto o borrando los filtros aplicados.</p>
+      `;
+      return;
+    }
 
-        <!-- Contenido e Información -->
-        <div class="p-4 flex-1 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 rounded-md">
-                ${game.platform || 'PC'}
-              </span>
-              <span class="text-[10px] uppercase font-bold px-2 py-0.5 border rounded-md ${badgeClass}">
-                ${statusText}
-              </span>
-            </div>
+    const totalPages = Math.ceil(filteredGames.length / ITEMS_PER_PAGE);
+    if (currentPage > totalPages) currentPage = 1;
 
-            <a href="/game/${game.id}" class="hover:text-indigo-400 transition-colors">
-              <h3 class="font-bold theme-text-primary text-base line-clamp-1">${game.title}</h3>
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredGames.length);
+    const paginatedGames = filteredGames.slice(startIndex, endIndex);
+
+    if (paginationControls) {
+      if (filteredGames.length > ITEMS_PER_PAGE) {
+        paginationControls.classList.remove('hidden');
+        
+        const startEl = document.getElementById('page-start');
+        const endEl = document.getElementById('page-end');
+        const totalEl = document.getElementById('page-total');
+        const badgeEl = document.getElementById('current-page-badge');
+        const prevBtn = document.getElementById('prev-page-btn') as HTMLButtonElement;
+        const nextBtn = document.getElementById('next-page-btn') as HTMLButtonElement;
+
+        if (startEl) startEl.textContent = (startIndex + 1).toString();
+        if (endEl) endEl.textContent = endIndex.toString();
+        if (totalEl) totalEl.textContent = filteredGames.length.toString();
+        if (badgeEl) badgeEl.textContent = `${currentPage} / ${totalPages}`;
+
+        if (prevBtn) prevBtn.disabled = currentPage === 1;
+        if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+      } else {
+        paginationControls.classList.add('hidden');
+      }
+    }
+
+    container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6";
+    container.innerHTML = paginatedGames.map(game => {
+      const badgeClass = statusBadgeStyles[game.status] || 'theme-button border-slate-500/20';
+      const statusText = statusMap[game.status] || game.status;
+      const safeTitle = game.title.replace(/'/g, "\\'");
+      const isFav = game.is_favorite === true;
+
+      return `
+        <div class="theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all shadow-md group relative">
+          
+          <div class="relative overflow-hidden h-44 bg-slate-800">
+            <a href="/game/${game.id}" class="block w-full h-full">
+              <img 
+                src="${game.cover_url || '/placeholder.jpg'}" 
+                alt="Portada de ${game.title}" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                <span class="text-xs font-semibold text-white bg-indigo-600/90 px-2.5 py-1 rounded-lg backdrop-blur-sm">
+                  Ver Bitácora →
+                </span>
+              </div>
             </a>
 
-            <div class="flex items-center justify-between text-xs theme-text-secondary mt-1">
-              <span>Horas: <strong class="text-indigo-500 font-bold">${game.hours_played || 0}h</strong></span>
-              <span class="text-[11px] font-medium">${game.store || 'Sin tienda'}</span>
+            <button 
+              type="button"
+              onclick="toggleFavorite('${game.id}', ${isFav})"
+              class="absolute top-2 right-2 p-1.5 rounded-xl bg-slate-950/80 backdrop-blur-md text-amber-400 hover:scale-110 transition-all z-20 cursor-pointer shadow-lg border border-white/10"
+              title="${isFav ? 'Quitar de favoritos' : 'Marcar como favorito'}"
+            >
+              ${isFav ? '★' : '☆'}
+            </button>
+          </div>
+
+          <div class="p-4 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 rounded-md">
+                  ${game.platform || 'PC'}
+                </span>
+                <span class="text-[10px] uppercase font-bold px-2 py-0.5 border rounded-md ${badgeClass}">
+                  ${statusText}
+                </span>
+              </div>
+
+              <a href="/game/${game.id}" class="hover:text-indigo-400 transition-colors">
+                <h3 class="font-bold theme-text-primary text-base line-clamp-1">${game.title}</h3>
+              </a>
+
+              <div class="flex items-center justify-between text-xs theme-text-secondary mt-1">
+                <span>Horas: <strong class="text-indigo-500 font-bold">${game.hours_played || 0}h</strong></span>
+                <span class="text-[11px] font-medium">${game.store || 'Sin tienda'}</span>
+              </div>
+            </div>
+
+            <div class="flex gap-2 mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <button
+                onclick="openEditModal('${game.id}', '${safeTitle}', ${game.hours_played || 0}, '${game.status}')"
+                class="flex-1 py-1.5 px-2 theme-button hover:opacity-80 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <span>Editar</span>
+              </button>
+              
+              <button
+                onclick="deleteGame('${game.id}', '${safeTitle}')"
+                class="py-1.5 px-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+              >
+                Eliminar
+              </button>
             </div>
           </div>
-
-          <!-- Acciones Secundarias (Editar / Eliminar) -->
-          <div class="flex gap-2 mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
-            <button
-              onclick="openEditModal('${game.id}', '${safeTitle}', ${game.hours_played || 0}, '${game.status}')"
-              class="flex-1 py-1.5 px-2 theme-button hover:opacity-80 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
-            >
-              <span>Editar</span>
-            </button>
-            
-            <button
-              onclick="deleteGame('${game.id}', '${safeTitle}')"
-              class="py-1.5 px-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
-            >
-              Eliminar
-            </button>
-          </div>
         </div>
-      </div>
-    `;
-  }).join('');
-}
+      `;
+    }).join('');
+  }
 
-  // Alternar Favorito
   (window as any).toggleFavorite = async (gameId: string, currentFav: boolean) => {
     const newFavStatus = !currentFav;
     
-    // Actualización local rápida
     const game = allGames.find(g => g.id === gameId);
     if (game) game.is_favorite = newFavStatus;
     renderGrid();
@@ -535,10 +525,9 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     }
   };
 
-  // Listeners para filtros generales
   searchInput?.addEventListener('input', (e) => {
     searchQuery = (e.target as HTMLInputElement).value.trim();
-    currentPage = 1; // 👈 Reset a página 1
+    currentPage = 1;
     renderGrid();
   });
 
@@ -554,24 +543,23 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
       btn.classList.add('bg-indigo-600', 'text-white');
 
       activeStatusFilter = btn.getAttribute('data-filter') || 'all';
-      currentPage = 1; // 👈 Reset a página 1
+      currentPage = 1;
       renderGrid();
     });
   });
 
   platformSelect?.addEventListener('change', (e) => {
     activePlatformFilter = (e.target as HTMLSelectElement).value;
-    currentPage = 1; // 👈 Reset a página 1
+    currentPage = 1;
     renderGrid();
   });
 
   storeSelect?.addEventListener('change', (e) => {
     activeStoreFilter = (e.target as HTMLSelectElement).value;
-    currentPage = 1; // 👈 Reset a página 1
+    currentPage = 1;
     renderGrid();
   });
 
-  // Modal
   (window as any).openEditModal = (id: string, title: string, hours: number, status: string) => {
     editGameId.value = id;
     modalGameTitle.textContent = `Editar: ${title}`;

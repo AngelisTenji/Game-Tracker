@@ -9,19 +9,19 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
 
   <main class="flex-1 max-w-xl w-full mx-auto px-4 py-8">
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-white tracking-tight">Ajustes</h1>
-      <p class="text-xs text-slate-400 mt-0.5">Personaliza la apariencia y preferencias de tu cuenta</p>
+      <h1 class="text-2xl font-bold theme-text-primary tracking-tight">Ajustes</h1>
+      <p class="text-xs theme-text-secondary mt-0.5">Personaliza la apariencia y preferencias de tu cuenta</p>
     </div>
 
     <!-- Sección de Apariencia -->
-    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl mb-6">
+    <div class="theme-card border rounded-2xl p-5 shadow-xl mb-6">
       <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-800">
         <div class="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
           <Palette class="w-4 h-4" />
         </div>
         <div>
-          <h2 class="text-sm font-bold text-white">Tema Visual</h2>
-          <p class="text-[11px] text-slate-400">Selecciona el esquema de colores de la interfaz</p>
+          <h2 class="text-sm font-bold theme-text-primary">Tema Visual</h2>
+          <p class="text-[11px] theme-text-secondary">Selecciona el esquema de colores de la interfaz</p>
         </div>
       </div>
 
@@ -38,8 +38,8 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
             <span class="check-icon text-indigo-400"><Check class="w-3.5 h-3.5" /></span>
           </div>
           <div>
-            <span class="block text-xs font-bold text-white">Legacy Dark</span>
-            <span class="block text-[10px] text-slate-400">Azul oscuro</span>
+            <span class="block text-xs font-bold theme-text-primary">Legacy Dark</span>
+            <span class="block text-[10px] theme-text-secondary">Azul oscuro</span>
           </div>
         </button>
 
@@ -54,8 +54,8 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
             <span class="check-icon hidden text-indigo-400"><Check class="w-3.5 h-3.5" /></span>
           </div>
           <div>
-            <span class="block text-xs font-bold text-slate-300">Midnight</span>
-            <span class="block text-[10px] text-slate-500">Oscuro puro</span>
+            <span class="block text-xs font-bold theme-text-primary">Midnight</span>
+            <span class="block text-[10px] theme-text-secondary">Oscuro puro</span>
           </div>
         </button>
 
@@ -70,8 +70,8 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
             <span class="check-icon hidden text-indigo-400"><Check class="w-3.5 h-3.5" /></span>
           </div>
           <div>
-            <span class="block text-xs font-bold text-slate-300">Modo Claro</span>
-            <span class="block text-[10px] text-slate-500">Luminoso</span>
+            <span class="block text-xs font-bold theme-text-primary">Modo Claro</span>
+            <span class="block text-[10px] theme-text-secondary">Luminoso</span>
           </div>
         </button>
       </div>
@@ -79,7 +79,7 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
 
     <!-- Formulario de Perfil Público -->
     <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mb-6">
-      <h2 class="font-bold text-lg border-b border-slate-800 pb-3">👤 Perfil Público</h2>
+      <h2 class="font-bold text-lg border-b border-slate-800 pb-3 theme-text-primary">👤 Perfil Público</h2>
       
       <form id="profile-form" class="space-y-4">
         <div>
@@ -89,7 +89,7 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
             id="profile-username" 
             readonly 
             disabled
-            class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm font-bold text-slate-400 bg-slate-900/50 cursor-not-allowed border-slate-800"
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm font-bold theme-text-secondary bg-slate-900/50 cursor-not-allowed border-slate-800"
           />
           <p class="text-[10px] theme-text-secondary mt-1">El nombre de usuario es tu identificador único e inmodificable.</p>
         </div>
@@ -124,8 +124,8 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
     </section>
 
     <!-- Copia de Seguridad & Datos -->
-    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm">
-      <h2 class="font-bold text-lg border-b border-slate-800 pb-3 flex items-center gap-2">
+    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mb-6">
+      <h2 class="font-bold text-lg border-b border-slate-800 pb-3 flex items-center gap-2 theme-text-primary">
         📦 Copia de Seguridad & Datos
       </h2>
       <p class="text-xs theme-text-secondary">
@@ -155,46 +155,47 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
         </label>
       </div>
     </section>
+
     <!-- Sección de Seguridad & Contraseña -->
-<section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mb-6">
-  <h2 class="font-bold text-lg border-b border-slate-800 pb-3 flex items-center gap-2">
-    🔒 Seguridad & Contraseña
-  </h2>
-  
-  <form id="password-form" class="space-y-4">
-    <div>
-      <label class="block text-xs font-semibold theme-text-secondary mb-1">Nueva Contraseña</label>
-      <input 
-        type="password" 
-        id="new-password" 
-        required
-        minlength="6"
-        placeholder="••••••••"
-        class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500"
-      />
-    </div>
+    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mb-6">
+      <h2 class="font-bold text-lg border-b border-slate-800 pb-3 flex items-center gap-2 theme-text-primary">
+        🔒 Seguridad & Contraseña
+      </h2>
+      
+      <form id="password-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary mb-1">Nueva Contraseña</label>
+          <input 
+            type="password" 
+            id="new-password" 
+            required
+            minlength="6"
+            placeholder="••••••••"
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+          />
+        </div>
 
-    <div>
-      <label class="block text-xs font-semibold theme-text-secondary mb-1">Confirmar Nueva Contraseña</label>
-      <input 
-        type="password" 
-        id="confirm-password" 
-        required
-        minlength="6"
-        placeholder="••••••••"
-        class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500"
-      />
-    </div>
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary mb-1">Confirmar Nueva Contraseña</label>
+          <input 
+            type="password" 
+            id="confirm-password" 
+            required
+            minlength="6"
+            placeholder="••••••••"
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+          />
+        </div>
 
-    <button 
-      type="submit" 
-      id="change-password-btn"
-      class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer"
-    >
-      Actualizar Contraseña
-    </button>
-  </form>
-</section>
+        <button 
+          type="submit" 
+          id="change-password-btn"
+          class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer"
+        >
+          Actualizar Contraseña
+        </button>
+      </form>
+    </section>
   </main>
 </Layout>
 
@@ -287,6 +288,7 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
         alert('¡Perfil actualizado con éxito!');
       }
     });
+
     passwordForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
 

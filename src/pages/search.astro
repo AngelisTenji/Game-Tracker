@@ -4,25 +4,25 @@ import Navbar from '../components/common/Navbar.astro';
 import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
 ---
 
-<Layout title="Buscar Juegos">
+<Layout title="Buscar Juegos | KazeChronik">
   <Navbar />
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
     <div class="max-w-xl mx-auto text-center mb-8">
-      <h1 class="text-3xl font-bold text-white tracking-tight">Buscar Videojuegos</h1>
-      <p class="text-sm text-slate-400 mt-1">Encuentra tus títulos favoritos para agregarlos a tu colección</p>
+      <h1 class="text-3xl font-bold theme-text-primary tracking-tight">Buscar Videojuegos</h1>
+      <p class="text-sm theme-text-secondary mt-1">Encuentra tus títulos favoritos para agregarlos a tu colección</p>
       
       <form id="search-form" class="mt-6 relative">
-        <SearchIcon class="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2" />
+        <SearchIcon class="w-5 h-5 theme-text-secondary absolute left-4 top-1/2 -translate-y-1/2" />
         <input
           type="text"
           id="search-input"
           placeholder="Ej: Genshin Impact, Assassin's Creed, Minecraft..."
-          class="w-full pl-11 pr-24 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors text-sm"
+          class="w-full pl-11 pr-24 py-3 theme-card border theme-text-primary placeholder:theme-text-secondary rounded-2xl text-sm focus:outline-none focus:border-indigo-500 transition-colors shadow-sm"
         />
         <button
           type="submit"
-          class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+          class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer shadow-md"
         >
           Buscar
         </button>
@@ -36,12 +36,12 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
     <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
   </main>
 
-  <!-- MODAL PARA AGREGAR JUEGO -->
+  <!-- MODAL PARA AGREGAR JUEGO (Con fix responsivo de overflow) -->
   <div id="add-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+    <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl relative overflow-hidden">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-        <h3 id="modal-title" class="text-lg font-bold text-white truncate">Agregar a la Biblioteca</h3>
-        <button id="close-modal-btn" class="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+        <h3 id="modal-title" class="text-lg font-bold theme-text-primary truncate">Agregar a la Biblioteca</h3>
+        <button id="close-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg hover:bg-slate-500/10 transition-colors">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -52,57 +52,62 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
         <input type="hidden" id="modal-cover-url" />
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Plataforma</label>
-          <select id="modal-platform" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500">
-            <option value="PC">PC</option>
-            <option value="PS5">PlayStation 5</option>
-            <option value="PS4">PlayStation 4</option>
-            <option value="Xbox Series X/S">Xbox Series X/S</option>
-            <option value="Xbox One">Xbox One</option>
-            <option value="Nintendo Switch">Nintendo Switch</option>
-            <option value="Android">Android</option>
-            <option value="iOS">iOS</option>
-          </select>
+          <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">Plataforma</label>
+          <div class="w-full overflow-x-hidden">
+            <select id="modal-platform" class="w-full max-w-full px-3 py-2.5 theme-input border rounded-xl theme-text-primary text-sm focus:outline-none focus:border-indigo-500 truncate cursor-pointer">
+              <option value="PC">PC</option>
+              <option value="PS5">PlayStation 5</option>
+              <option value="PS4">PlayStation 4</option>
+              <option value="Xbox Series X/S">Xbox Series X/S</option>
+              <option value="Xbox One">Xbox One</option>
+              <option value="Nintendo Switch">Nintendo Switch</option>
+              <option value="Android">Android</option>
+              <option value="iOS">iOS</option>
+            </select>
+          </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Tienda / Distribución</label>
-          <select id="modal-store" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500">
-            <option value="Steam">Steam</option>
-            <option value="Epic Games">Epic Games</option>
-            <option value="Microsoft Store">Microsoft Store</option>
-            <option value="GOG">GOG</option>
-            <option value="PlayStation Store">PlayStation Store</option>
-            <option value="Nintendo eShop">Nintendo eShop</option>
-            <option value="Xbox Store">Xbox Store</option>
-            <option value="Google Play">Google Play</option>
-            <option value="App Store">App Store</option>
-            <option value="Otro">Otro / Físico</option>
-          </select>
+          <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">Tienda / Distribución</label>
+          <div class="w-full overflow-x-hidden">
+            <select id="modal-store" class="w-full max-w-full px-3 py-2.5 theme-input border rounded-xl theme-text-primary text-sm focus:outline-none focus:border-indigo-500 truncate cursor-pointer">
+              <option value="Steam">Steam</option>
+              <option value="Epic Games">Epic Games</option>
+              <option value="Microsoft Store">Microsoft Store</option>
+              <option value="GOG">GOG</option>
+              <option value="PlayStation Store">PlayStation Store</option>
+              <option value="Nintendo eShop">Nintendo eShop</option>
+              <option value="Xbox Store">Xbox Store</option>
+              <option value="Google Play">Google Play</option>
+              <option value="App Store">App Store</option>
+              <option value="Otro">Otro / Físico</option>
+            </select>
+          </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Estado Inicial</label>
-          <select id="modal-status" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500">
-            <option value="backlog">Pendiente (Backlog)</option>
-            <option value="playing">Jugando</option>
-            <option value="completed">Completado</option>
-            <option value="on_hold">En Pausa</option>
-          </select>
+          <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">Estado Inicial</label>
+          <div class="w-full overflow-x-hidden">
+            <select id="modal-status" class="w-full max-w-full px-3 py-2.5 theme-input border rounded-xl theme-text-primary text-sm focus:outline-none focus:border-indigo-500 truncate cursor-pointer">
+              <option value="backlog">Pendiente (Backlog)</option>
+              <option value="playing">Jugando</option>
+              <option value="completed">Completado</option>
+              <option value="on_hold">En Pausa</option>
+            </select>
+          </div>
         </div>
 
         <div class="flex gap-3 pt-2">
-          <button type="button" id="cancel-modal-btn" class="flex-1 py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-xl transition-colors">
+          <button type="button" id="cancel-modal-btn" class="flex-1 py-2.5 px-4 theme-button border hover:bg-slate-500/10 theme-text-secondary text-sm font-semibold rounded-xl transition-colors">
             Cancelar
           </button>
-          <button type="submit" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20">
+          <button type="submit" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20 cursor-pointer">
             Guardar
           </button>
         </div>
       </form>
     </div>
   </div>
-  
 </Layout>
 
 <script>
@@ -121,11 +126,9 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
   const platformSelect = document.getElementById('modal-platform') as HTMLSelectElement;
   const storeSelect = document.getElementById('modal-store') as HTMLSelectElement;
 
-  // Variables para controlar el Debounce y evitar peticiones duplicadas
   let debounceTimer: ReturnType<typeof setTimeout>;
   let lastSearchQuery = '';
 
-  // Mapa Inteligente: Plataforma -> Tiendas Válidas
   const platformStoresMap: Record<string, { label: string; value: string }[]> = {
     'PC': [
       { label: 'Steam', value: 'Steam' },
@@ -182,7 +185,6 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
     updateStoreOptions(selectedPlatform);
   });
 
-  // Función principal para realizar la búsqueda en la API
   async function executeSearch(query: string) {
     if (!query) {
       resultsGrid.innerHTML = '';
@@ -210,7 +212,7 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
         const card = document.createElement('div');
         card.className = 'theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all shadow-md';
         card.innerHTML = `
-          <img src="${game.background_image || '/placeholder.jpg'}" alt="${game.name}" class="w-full h-40 object-cover" />
+          <img src="${game.background_image || '/placeholder.jpg'}" alt="Portada de ${game.name}" class="w-full h-40 object-cover" />
           <div class="p-4 flex-1 flex flex-col justify-between">
             <h3 class="font-bold theme-text-primary text-sm line-clamp-1 mb-2">${game.name}</h3>
             <button 
@@ -229,27 +231,20 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
     }
   }
 
-  // Listener en tiempo real con DEBOUNCE (800ms)
   input?.addEventListener('input', (e) => {
     const query = (e.target as HTMLInputElement).value.trim();
-    
-    // Cancelar el temporizador anterior si el usuario sigue escribiendo
     clearTimeout(debounceTimer);
-
-    // Iniciar nuevo temporizador
     debounceTimer = setTimeout(() => {
       executeSearch(query);
     }, 800);
   });
 
-  // Listener para el evento Submit (por si presiona Enter explícitamente)
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
     clearTimeout(debounceTimer);
     executeSearch(input.value.trim());
   });
 
-  // Modal logic
   (window as any).openAddModal = async (rawgId: number, title: string, coverUrl: string) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
@@ -260,10 +255,32 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
       return;
     }
 
+    const { data: existingGame } = await supabase
+      .from('user_library')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('rawg_id', rawgId)
+      .maybeSingle();
+
+    const submitBtn = addForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const modalTitle = document.getElementById('modal-title') as HTMLHeadingElement;
+
     (document.getElementById('modal-rawg-id') as HTMLInputElement).value = rawgId.toString();
     (document.getElementById('modal-game-name') as HTMLInputElement).value = title;
     (document.getElementById('modal-cover-url') as HTMLInputElement).value = coverUrl;
-    (document.getElementById('modal-title') as HTMLHeadingElement).textContent = `Agregar: ${title}`;
+
+    if (existingGame) {
+      modalTitle.textContent = `⚠️ ${title} (Ya en biblioteca)`;
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Este juego ya forma parte de tu colección.', 'error');
+      }
+    } else {
+      modalTitle.textContent = `Agregar: ${title}`;
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
 
     const currentPlatform = platformSelect.value || 'PC';
     updateStoreOptions(currentPlatform);
@@ -317,50 +334,4 @@ import { Search as SearchIcon, Loader2, X } from 'lucide-astro';
       }
     }
   });
-  
-  // ... (referencias de DOM y mapa de tiendas se mantienen) ...
-
-  (window as any).openAddModal = async (rawgId: number, title: string, coverUrl: string) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      if (typeof (window as any).showToast === 'function') {
-        (window as any).showToast('Debes iniciar sesión para guardar juegos.', 'error');
-      }
-      window.location.href = '/login';
-      return;
-    }
-
-    // Comprobar si el juego ya existe en la biblioteca del usuario
-    const { data: existingGame } = await supabase
-      .from('user_library')
-      .select('id')
-      .eq('user_id', session.user.id)
-      .eq('rawg_id', rawgId)
-      .maybeSingle();
-
-    const submitBtn = addForm.querySelector('button[type="submit"]') as HTMLButtonElement;
-    const modalTitle = document.getElementById('modal-title') as HTMLHeadingElement;
-
-    (document.getElementById('modal-rawg-id') as HTMLInputElement).value = rawgId.toString();
-    (document.getElementById('modal-game-name') as HTMLInputElement).value = title;
-    (document.getElementById('modal-cover-url') as HTMLInputElement).value = coverUrl;
-
-    if (existingGame) {
-      modalTitle.textContent = `⚠️ ${title} (Ya en biblioteca)`;
-      submitBtn.disabled = true;
-      submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-      if (typeof (window as any).showToast === 'function') {
-        (window as any).showToast('Este juego ya forma parte de tu colección.', 'error');
-      }
-    } else {
-      modalTitle.textContent = `Agregar: ${title}`;
-      submitBtn.disabled = false;
-      submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-    }
-
-    const currentPlatform = platformSelect.value || 'PC';
-    updateStoreOptions(currentPlatform);
-
-    modal.classList.remove('hidden');
-  };
 </script>

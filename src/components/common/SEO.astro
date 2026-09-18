@@ -1,0 +1,34 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonicalURL?: URL | string;
+}
+
+const {
+  title = "KazeChronik | Tu Seguimiento y Biblioteca de Videojuegos",
+  description = "Organiza tu colección de videojuegos, lleva el control de tu progreso, estadísticas y bitácora en tiempo real con KazeChronik.",
+  image = "/og-image.jpg",
+  canonicalURL = new URL(Astro.url.pathname, Astro.site || "https://kazechronik.vercel.app")
+} = Astro.props;
+---
+
+<!-- Metadatos Básicos -->
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Open Graph / Facebook / Discord / WhatsApp -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content={Astro.url} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={new URL(image, Astro.url)} />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={new URL(image, Astro.url)} />
