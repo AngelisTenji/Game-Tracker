@@ -15,8 +15,8 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
 
     <!-- Sección de Apariencia -->
     <div class="theme-card border rounded-2xl p-5 shadow-xl mb-6">
-      <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-800">
-        <div class="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
+      <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-500/20">
+        <div class="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-500">
           <Palette class="w-4 h-4" />
         </div>
         <div>
@@ -31,11 +31,11 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
         <button
           type="button"
           data-theme="legacy"
-          class="theme-opt active p-3 rounded-xl border-2 border-indigo-500 bg-indigo-950/40 text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer"
+          class="theme-opt p-3 rounded-xl border theme-card text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-indigo-500/50"
         >
           <div class="flex items-center justify-between">
-            <Moon class="w-4 h-4 text-indigo-400" />
-            <span class="check-icon text-indigo-400"><Check class="w-3.5 h-3.5" /></span>
+            <Moon class="w-4 h-4 theme-text-secondary" />
+            <span class="check-icon hidden text-indigo-500"><Check class="w-3.5 h-3.5" /></span>
           </div>
           <div>
             <span class="block text-xs font-bold theme-text-primary">Legacy Dark</span>
@@ -47,11 +47,11 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
         <button
           type="button"
           data-theme="dark"
-          class="theme-opt p-3 rounded-xl border border-slate-800 bg-slate-950/50 text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-slate-700"
+          class="theme-opt p-3 rounded-xl border theme-card text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-indigo-500/50"
         >
           <div class="flex items-center justify-between">
-            <Monitor class="w-4 h-4 text-slate-400" />
-            <span class="check-icon hidden text-indigo-400"><Check class="w-3.5 h-3.5" /></span>
+            <Monitor class="w-4 h-4 theme-text-secondary" />
+            <span class="check-icon hidden text-indigo-500"><Check class="w-3.5 h-3.5" /></span>
           </div>
           <div>
             <span class="block text-xs font-bold theme-text-primary">Midnight</span>
@@ -63,11 +63,11 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
         <button
           type="button"
           data-theme="light"
-          class="theme-opt p-3 rounded-xl border border-slate-800 bg-slate-950/50 text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-slate-700"
+          class="theme-opt p-3 rounded-xl border theme-card text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-indigo-500/50"
         >
           <div class="flex items-center justify-between">
-            <Sun class="w-4 h-4 text-slate-400" />
-            <span class="check-icon hidden text-indigo-400"><Check class="w-3.5 h-3.5" /></span>
+            <Sun class="w-4 h-4 theme-text-secondary" />
+            <span class="check-icon hidden text-indigo-500"><Check class="w-3.5 h-3.5" /></span>
           </div>
           <div>
             <span class="block text-xs font-bold theme-text-primary">Modo Claro</span>
@@ -79,7 +79,7 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
 
     <!-- Formulario de Perfil Público -->
     <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mb-6">
-      <h2 class="font-bold text-lg border-b border-slate-800 pb-3 theme-text-primary">👤 Perfil Público</h2>
+      <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 theme-text-primary">👤 Perfil Público</h2>
       
       <form id="profile-form" class="space-y-4">
         <div>
@@ -89,7 +89,7 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
             id="profile-username" 
             readonly 
             disabled
-            class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm font-bold theme-text-secondary bg-slate-900/50 cursor-not-allowed border-slate-800"
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm font-bold theme-text-secondary opacity-60 cursor-not-allowed"
           />
           <p class="text-[10px] theme-text-secondary mt-1">El nombre de usuario es tu identificador único e inmodificable.</p>
         </div>
@@ -125,7 +125,7 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
 
     <!-- Copia de Seguridad & Datos -->
     <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mb-6">
-      <h2 class="font-bold text-lg border-b border-slate-800 pb-3 flex items-center gap-2 theme-text-primary">
+      <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
         📦 Copia de Seguridad & Datos
       </h2>
       <p class="text-xs theme-text-secondary">
@@ -147,7 +147,7 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
 
         <!-- Importar -->
         <label class="flex-1 px-4 py-2.5 theme-button hover:border-indigo-500/50 theme-text-primary font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border text-center">
-          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
           </svg>
           <span>Restaurar Copia (JSON)</span>
@@ -158,7 +158,7 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
 
     <!-- Sección de Seguridad & Contraseña -->
     <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mb-6">
-      <h2 class="font-bold text-lg border-b border-slate-800 pb-3 flex items-center gap-2 theme-text-primary">
+      <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
         🔒 Seguridad & Contraseña
       </h2>
       
@@ -209,13 +209,13 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
 
     function applyActiveStyles(selectedBtn: HTMLButtonElement) {
       buttons.forEach(b => {
-        b.classList.remove('border-2', 'border-indigo-500', 'bg-indigo-950/40');
-        b.classList.add('border', 'border-slate-800', 'bg-slate-950/50');
+        b.classList.remove('border-2', 'border-indigo-500', 'ring-2', 'ring-indigo-500/20');
+        b.classList.add('border');
         b.querySelector('.check-icon')?.classList.add('hidden');
       });
 
-      selectedBtn.classList.remove('border', 'border-slate-800', 'bg-slate-950/50');
-      selectedBtn.classList.add('border-2', 'border-indigo-500', 'bg-indigo-950/40');
+      selectedBtn.classList.remove('border');
+      selectedBtn.classList.add('border-2', 'border-indigo-500', 'ring-2', 'ring-indigo-500/20');
       selectedBtn.querySelector('.check-icon')?.classList.remove('hidden');
     }
 
@@ -234,7 +234,6 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
     });
   }
 
-  // Lógica Asíncrona Principal (Perfil y Respaldo)
   async function initSettingsPage() {
     initThemeSelector();
 

@@ -13,11 +13,11 @@ const { username } = Astro.params;
   <main class="min-h-screen pt-24 pb-16 px-4 max-w-6xl mx-auto theme-text-primary">
     <!-- Estado de Carga -->
     <div id="loading-skeleton" class="animate-pulse space-y-6">
-      <div class="h-44 bg-slate-800/50 rounded-3xl w-full"></div>
+      <div class="h-44 theme-card rounded-3xl w-full border"></div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="h-24 bg-slate-800/50 rounded-2xl"></div>
-        <div class="h-24 bg-slate-800/50 rounded-2xl"></div>
-        <div class="h-24 bg-slate-800/50 rounded-2xl"></div>
+        <div class="h-24 theme-card rounded-2xl border"></div>
+        <div class="h-24 theme-card rounded-2xl border"></div>
+        <div class="h-24 theme-card rounded-2xl border"></div>
       </div>
     </div>
 
@@ -25,7 +25,7 @@ const { username } = Astro.params;
     <div id="error-container" class="hidden text-center py-20 space-y-4">
       <h2 class="text-2xl font-bold text-rose-500">Perfil no encontrado</h2>
       <p class="text-sm theme-text-secondary">El usuario @{username} no existe o no tiene una cuenta pública.</p>
-      <a href="/dashboard" class="inline-block px-5 py-2.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl">
+      <a href="/dashboard" class="inline-block px-5 py-2.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-500 transition-colors">
         Volver al Dashboard
       </a>
     </div>
@@ -40,7 +40,7 @@ const { username } = Astro.params;
 
         <div class="flex-1 text-center sm:text-left space-y-2">
           <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-            <h1 id="user-display-name" class="text-2xl sm:text-4xl font-black text-white"></h1>
+            <h1 id="user-display-name" class="text-2xl sm:text-4xl font-black theme-text-primary"></h1>
             <span id="user-handle" class="text-xs font-mono px-2.5 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-lg w-fit mx-auto sm:mx-0"></span>
           </div>
           <p id="user-bio" class="text-sm theme-text-secondary max-w-xl"></p>
@@ -66,7 +66,7 @@ const { username } = Astro.params;
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Top 5 Juegos Destacados -->
         <section class="lg:col-span-2 theme-card border p-6 rounded-2xl shadow-sm space-y-4">
-          <h2 class="font-bold text-lg border-b border-slate-800/80 pb-3 flex items-center gap-2">
+          <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
             🏆 Top 5 Títulos Más Jugados
           </h2>
           <div id="profile-top-games" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -76,7 +76,7 @@ const { username } = Astro.params;
 
         <!-- Reseñas / Bitácoras Recientes -->
         <section class="lg:col-span-1 theme-card border p-6 rounded-2xl shadow-sm space-y-4">
-          <h2 class="font-bold text-lg border-b border-slate-800/80 pb-3 flex items-center gap-2">
+          <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
             📝 Reseñas Publicadas
           </h2>
           <div id="profile-reviews-list" class="space-y-4">
@@ -151,8 +151,8 @@ const { username } = Astro.params;
       topContainer.innerHTML = `<p class="text-xs theme-text-secondary col-span-full">No hay juegos en esta biblioteca.</p>`;
     } else {
       topContainer.innerHTML = topGames.map(game => `
-        <div class="theme-card border rounded-xl overflow-hidden flex items-center gap-3 p-3 bg-slate-900/40">
-          <img src="${game.cover_url || '/placeholder.jpg'}" alt="${game.title}" class="w-16 h-20 object-cover rounded-lg shrink-0" />
+        <div class="theme-card border rounded-xl overflow-hidden flex items-center gap-3 p-3">
+          <img src="${game.cover_url || '/placeholder.jpg'}" alt="Portada de ${game.title}" class="w-16 h-20 object-cover rounded-lg shrink-0" />
           <div class="overflow-hidden">
             <h4 class="font-bold text-sm theme-text-primary truncate">${game.title}</h4>
             <p class="text-xs theme-text-secondary">${game.platform || 'PC'}</p>
@@ -170,7 +170,7 @@ const { username } = Astro.params;
       reviewsContainer.innerHTML = `<p class="text-xs theme-text-secondary">Este usuario aún no ha escrito ninguna reseña.</p>`;
     } else {
       reviewsContainer.innerHTML = reviews.slice(0, 4).map(game => `
-        <div class="p-3 bg-slate-900/40 border border-slate-800 rounded-xl space-y-1.5">
+        <div class="p-3 theme-card border rounded-xl space-y-1.5">
           <div class="flex justify-between items-center">
             <span class="font-bold text-xs theme-text-primary truncate">${game.title}</span>
             <span class="text-xs font-black text-amber-400">⭐ ${game.rating || 'N/A'}</span>

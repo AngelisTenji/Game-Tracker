@@ -1,53 +1,89 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Gamepad2, Mail, Lock, LogIn } from 'lucide-astro';
+import { Gamepad2, Mail, Lock, LogIn, Eye, EyeOff, Sun, Moon, Monitor } from 'lucide-astro';
 ---
 
-<Layout title="Iniciar Sesión">
+<Layout title="Iniciar Sesión | KazeChronik">
   <Navbar />
 
   <main class="flex-1 flex items-center justify-center px-4 py-12">
-    <div class="w-full max-w-md bg-slate-900/90 border border-slate-800 p-8 rounded-2xl shadow-xl backdrop-blur-sm">
+    <div class="w-full max-w-md theme-card border rounded-2xl p-8 shadow-xl relative overflow-hidden">
+      
+      <!-- Selector Rápido de Temas Visuales -->
+      <div class="absolute top-4 right-4 flex items-center gap-1 bg-slate-500/10 p-1 rounded-xl border border-slate-500/20">
+        <button type="button" data-quick-theme="legacy" class="p-1.5 rounded-lg theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer" title="Legacy Dark">
+          <Moon class="w-3.5 h-3.5" />
+        </button>
+        <button type="button" data-quick-theme="dark" class="p-1.5 rounded-lg theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer" title="Midnight Black">
+          <Monitor class="w-3.5 h-3.5" />
+        </button>
+        <button type="button" data-quick-theme="light" class="p-1.5 rounded-lg theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer" title="Modo Claro">
+          <Sun class="w-3.5 h-3.5" />
+        </button>
+      </div>
+
       <div class="flex flex-col items-center mb-6">
         <div class="p-3 bg-indigo-600/10 border border-indigo-500/20 rounded-xl mb-3">
           <Gamepad2 class="w-8 h-8 text-indigo-400" />
         </div>
-        <h2 class="text-2xl font-bold text-white tracking-tight">Bienvenido de nuevo</h2>
-        <p class="text-sm text-slate-400 mt-1">Ingresa tus credenciales para acceder a tu biblioteca</p>
+        <h2 class="text-2xl font-bold theme-text-primary tracking-tight">Bienvenido de nuevo</h2>
+        <p class="text-sm theme-text-secondary mt-1">Ingresa tus credenciales para acceder a tu biblioteca</p>
       </div>
 
       <form id="auth-form" class="space-y-4">
         <div>
-          <label for="email" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+          <label for="email" class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
             Correo Electrónico
           </label>
           <div class="relative">
-            <Mail class="w-5 h-5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Mail class="w-5 h-5 theme-text-secondary absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="email"
               id="email"
               required
               placeholder="tu@email.com"
-              class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors text-sm"
+              class="w-full pl-10 pr-4 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-colors"
             />
           </div>
         </div>
 
         <div>
-          <label for="password" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+          <label for="password" class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
             Contraseña
           </label>
           <div class="relative">
-            <Lock class="w-5 h-5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Lock class="w-5 h-5 theme-text-secondary absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="password"
               id="password"
               required
+              minlength="6"
               placeholder="••••••••"
-              class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors text-sm"
+              class="w-full pl-10 pr-10 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-colors"
             />
+            <button
+              type="button"
+              id="toggle-password-btn"
+              class="absolute right-3 top-1/2 -translate-y-1/2 theme-text-secondary hover:theme-text-primary transition-colors cursor-pointer"
+              title="Mostrar u ocultar contraseña"
+            >
+              <Eye id="eye-open" class="w-4 h-4" />
+              <EyeOff id="eye-closed" class="w-4 h-4 hidden" />
+            </button>
           </div>
+        </div>
+
+        <!-- Casilla Aceptación Términos y Privacidad (Para registro) -->
+        <div class="flex items-start gap-2 pt-1">
+          <input
+            type="checkbox"
+            id="terms-checkbox"
+            class="mt-0.5 rounded accent-indigo-600 cursor-pointer"
+          />
+          <label for="terms-checkbox" class="text-xs theme-text-secondary leading-tight cursor-pointer">
+            Acepto los <a href="/terminos" target="_blank" class="text-indigo-400 hover:underline font-semibold">Términos de Servicio</a> y la <a href="/privacidad" target="_blank" class="text-indigo-400 hover:underline font-semibold">Política de Privacidad</a> (Requerido para registrarse).
+          </label>
         </div>
 
         <div id="error-message" class="hidden p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl"></div>
@@ -65,7 +101,7 @@ import { Gamepad2, Mail, Lock, LogIn } from 'lucide-astro';
           <button
             type="button"
             id="btn-register"
-            class="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm rounded-xl transition-colors cursor-pointer"
+            class="py-2.5 px-4 theme-button border hover:border-indigo-500/50 theme-text-primary font-semibold text-sm rounded-xl transition-colors cursor-pointer"
           >
             Registrarse
           </button>
@@ -83,6 +119,29 @@ import { Gamepad2, Mail, Lock, LogIn } from 'lucide-astro';
   const passwordInput = document.getElementById('password') as HTMLInputElement;
   const btnRegister = document.getElementById('btn-register') as HTMLButtonElement;
   const errorMessage = document.getElementById('error-message') as HTMLDivElement;
+  const termsCheckbox = document.getElementById('terms-checkbox') as HTMLInputElement;
+
+  // Toggle Ocultar/Mostrar Contraseña
+  const togglePassBtn = document.getElementById('toggle-password-btn');
+  const eyeOpen = document.getElementById('eye-open');
+  const eyeClosed = document.getElementById('eye-closed');
+
+  togglePassBtn?.addEventListener('click', () => {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    eyeOpen?.classList.toggle('hidden', isPassword);
+    eyeClosed?.classList.toggle('hidden', !isPassword);
+  });
+
+  // Toggle Rápido de Temas en Login
+  const quickThemeBtns = document.querySelectorAll<HTMLButtonElement>('[data-quick-theme]');
+  quickThemeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const selectedTheme = btn.getAttribute('data-quick-theme') || 'legacy';
+      localStorage.setItem('theme', selectedTheme);
+      document.documentElement.setAttribute('data-theme', selectedTheme);
+    });
+  });
 
   function showError(msg: string) {
     errorMessage.textContent = msg;
@@ -112,6 +171,11 @@ import { Gamepad2, Mail, Lock, LogIn } from 'lucide-astro';
 
     if (!emailInput.value || !passwordInput.value) {
       showError('Por favor, ingresa correo y contraseña.');
+      return;
+    }
+
+    if (!termsCheckbox.checked) {
+      showError('Debes aceptar los Términos de Servicio y la Política de Privacidad para registrarte.');
       return;
     }
 
