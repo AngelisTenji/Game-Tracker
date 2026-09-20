@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucide-astro';
+import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangle } from 'lucide-astro';
 ---
 
 <Layout title="Mi Biblioteca | KazeChronik">
@@ -97,7 +97,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     </div>
 
     <!-- Filtros Secundarios (Plataforma y Tienda) -->
-    <div class="flex flex-wrap items-center gap-3 mb-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+    <div class="flex flex-wrap items-center gap-3 mb-4 pb-4 border-b border-slate-500/20">
       <div class="flex items-center gap-1.5 text-xs theme-text-secondary font-semibold mr-2">
         <Filter class="w-3.5 h-3.5" />
         <span>Filtrar por:</span>
@@ -130,7 +130,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
       </select>
     </div>
 
-    <!-- Filtro de Etiquetas Personalizadas (Separado) -->
+    <!-- Filtro de Etiquetas Personalizadas -->
     <div id="tags-filter-wrapper" class="hidden mb-6">
       <div class="flex items-center gap-2 overflow-x-auto pb-1" id="tags-filter-container">
         <!-- Inyectado dinámicamente -->
@@ -162,7 +162,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     </div>
 
     <!-- Controles de Paginación -->
-    <div id="pagination-controls" class="flex items-center justify-between mt-8 pt-4 border-t border-slate-800 hidden">
+    <div id="pagination-controls" class="flex items-center justify-between mt-8 pt-4 border-t border-slate-500/20 hidden">
       <p id="pagination-info" class="text-xs theme-text-secondary font-medium">
         Mostrando <span id="page-start">0</span> - <span id="page-end">0</span> de <span id="page-total">0</span> juegos
       </p>
@@ -170,7 +170,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
       <div class="flex items-center gap-2">
         <button 
           id="prev-page-btn" 
-          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold theme-button border border-slate-800 hover:border-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold theme-button border border-slate-500/20 hover:border-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
         >
           ← Anterior
         </button>
@@ -179,7 +179,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
         </span>
         <button 
           id="next-page-btn" 
-          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold theme-button border border-slate-800 hover:border-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+          class="px-3.5 py-1.5 rounded-xl text-xs font-semibold theme-button border border-slate-500/20 hover:border-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
         >
           Siguiente →
         </button>
@@ -187,10 +187,10 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     </div>
   </main>
 
-  <!-- MODAL DE EDICIÓN ESTILIZADO (Con fix responsivo de overflow en móvil) -->
+  <!-- MODAL DE EDICIÓN ESTILIZADO -->
   <div id="edit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-500/20">
         <h3 id="modal-game-title" class="text-lg font-bold theme-text-primary truncate">Editar Juego</h3>
         <button id="close-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg hover:bg-slate-500/10 transition-colors">
           <X class="w-5 h-5" />
@@ -233,6 +233,28 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
       </form>
     </div>
   </div>
+
+  <!-- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN -->
+  <div id="delete-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="theme-card border w-[92vw] max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden text-center">
+      <div class="mx-auto w-12 h-12 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-2xl flex items-center justify-center mb-4">
+        <AlertTriangle class="w-6 h-6" />
+      </div>
+      <h3 class="text-lg font-bold theme-text-primary mb-1">¿Eliminar Videojuego?</h3>
+      <p id="delete-modal-msg" class="text-xs theme-text-secondary mb-6 line-clamp-2">
+        Esta acción eliminará el juego y sus registros de tu biblioteca de forma permanente.
+      </p>
+
+      <div class="flex gap-3">
+        <button id="cancel-delete-btn" type="button" class="flex-1 py-2.5 px-4 theme-button text-xs font-semibold rounded-xl transition-colors">
+          Cancelar
+        </button>
+        <button id="confirm-delete-btn" type="button" class="flex-1 py-2.5 px-4 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-all shadow-lg shadow-rose-600/20 cursor-pointer">
+          Sí, Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
 </Layout>
 
 <script>
@@ -245,6 +267,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
   let activeTagFilter = 'all';
   let searchQuery = '';
   let currentPage = 1;
+  let gameToDeleteId: string | null = null;
 
   const ITEMS_PER_PAGE = 12;
   const modal = document.getElementById('edit-modal') as HTMLDivElement;
@@ -255,6 +278,11 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
   const editStatus = document.getElementById('edit-status') as HTMLSelectElement;
   const editHours = document.getElementById('edit-hours') as HTMLInputElement;
   const modalGameTitle = document.getElementById('modal-game-title') as HTMLHeadingElement;
+
+  const deleteModal = document.getElementById('delete-modal') as HTMLDivElement;
+  const deleteModalMsg = document.getElementById('delete-modal-msg') as HTMLParagraphElement;
+  const cancelDeleteBtn = document.getElementById('cancel-delete-btn') as HTMLButtonElement;
+  const confirmDeleteBtn = document.getElementById('confirm-delete-btn') as HTMLButtonElement;
 
   const platformSelect = document.getElementById('filter-platform') as HTMLSelectElement;
   const storeSelect = document.getElementById('filter-store') as HTMLSelectElement;
@@ -485,7 +513,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
               </div>
             </div>
 
-            <div class="flex gap-2 mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
+            <div class="flex gap-2 mt-4 pt-3 border-t border-slate-500/20">
               <button
                 onclick="openEditModal('${game.id}', '${safeTitle}', ${game.hours_played || 0}, '${game.status}')"
                 class="flex-1 py-1.5 px-2 theme-button hover:opacity-80 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
@@ -494,7 +522,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
               </button>
               
               <button
-                onclick="deleteGame('${game.id}', '${safeTitle}')"
+                onclick="promptDeleteGame('${game.id}', '${safeTitle}')"
                 class="py-1.5 px-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
               >
                 Eliminar
@@ -601,13 +629,29 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
     }
   });
 
-  (window as any).deleteGame = async (id: string, title: string) => {
-    if (!confirm(`¿Seguro que deseas eliminar ${title} de tu biblioteca?`)) return;
+  // Modal Personalizado de Confirmación de Eliminación
+  (window as any).promptDeleteGame = (id: string, title: string) => {
+    gameToDeleteId = id;
+    if (deleteModalMsg) {
+      deleteModalMsg.textContent = `¿Estás seguro de que deseas eliminar "${title}" de tu colección? Esta acción no se puede deshacer.`;
+    }
+    deleteModal.classList.remove('hidden');
+  };
+
+  function closeDeleteModal() {
+    gameToDeleteId = null;
+    deleteModal.classList.add('hidden');
+  }
+
+  cancelDeleteBtn?.addEventListener('click', closeDeleteModal);
+
+  confirmDeleteBtn?.addEventListener('click', async () => {
+    if (!gameToDeleteId) return;
 
     const { error } = await supabase
       .from('user_library')
       .delete()
-      .eq('id', id);
+      .eq('id', gameToDeleteId);
 
     if (error) {
       if (typeof (window as any).showToast === 'function') {
@@ -617,11 +661,12 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search } from 'lucid
       }
     } else {
       if (typeof (window as any).showToast === 'function') {
-        (window as any).showToast(`${title} se eliminó de tu biblioteca`, 'success');
+        (window as any).showToast('Videojuego eliminado correctamente', 'success');
       }
+      closeDeleteModal();
       loadLibrary();
     }
-  };
+  });
 
   loadLibrary();
   document.getElementById('prev-page-btn')?.addEventListener('click', () => {

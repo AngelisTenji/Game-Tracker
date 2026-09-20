@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
+import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } from 'lucide-astro';
 ---
 
 <Layout title="Ajustes | KazeChronik">
@@ -79,7 +79,18 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
 
     <!-- Formulario de Perfil Público -->
     <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mb-6">
-      <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 theme-text-primary">👤 Perfil Público</h2>
+      <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+        <h2 class="font-bold text-lg theme-text-primary flex items-center gap-2">👤 Perfil Público</h2>
+        <button
+          id="copy-profile-link-btn"
+          type="button"
+          class="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 font-semibold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+          title="Copiar enlace a tu perfil público"
+        >
+          <Share2 class="w-3.5 h-3.5" />
+          <span id="copy-btn-text">Copiar Perfil</span>
+        </button>
+      </div>
       
       <form id="profile-form" class="space-y-4">
         <div>
@@ -129,28 +140,38 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
         📦 Copia de Seguridad & Datos
       </h2>
       <p class="text-xs theme-text-secondary">
-        Exporta una copia de respaldo en formato JSON de toda tu biblioteca de juegos, horas y reseñas, o restaura tus datos desde un archivo previo.
+        Exporta tu biblioteca en JSON para respaldos completos, o en formato CSV para usar en Excel / Google Sheets.
       </p>
 
-      <div class="flex flex-col sm:flex-row gap-4 pt-2">
-        <!-- Exportar -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+        <!-- Exportar JSON -->
         <button 
           id="export-backup-btn"
           type="button"
-          class="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer flex items-center justify-center gap-2"
+          class="px-3 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer flex items-center justify-center gap-1.5"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
           </svg>
-          <span>Exportar Biblioteca (JSON)</span>
+          <span>JSON</span>
         </button>
 
-        <!-- Importar -->
-        <label class="flex-1 px-4 py-2.5 theme-button hover:border-indigo-500/50 theme-text-primary font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border text-center">
-          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Exportar CSV -->
+        <button 
+          id="export-csv-btn"
+          type="button"
+          class="px-3 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-emerald-600/20 cursor-pointer flex items-center justify-center gap-1.5"
+        >
+          <FileSpreadsheet class="w-4 h-4 shrink-0" />
+          <span>CSV (Excel)</span>
+        </button>
+
+        <!-- Importar JSON -->
+        <label class="px-3 py-2.5 theme-button hover:border-indigo-500/50 theme-text-primary font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border text-center">
+          <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
           </svg>
-          <span>Restaurar Copia (JSON)</span>
+          <span>Restaurar</span>
           <input type="file" id="import-backup-input" accept=".json" class="hidden" />
         </label>
       </div>
@@ -251,6 +272,8 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
     const newPasswordInput = document.getElementById('new-password') as HTMLInputElement;
     const confirmPasswordInput = document.getElementById('confirm-password') as HTMLInputElement;
     const changePasswordBtn = document.getElementById('change-password-btn') as HTMLButtonElement;
+    const copyProfileBtn = document.getElementById('copy-profile-link-btn');
+    const copyBtnText = document.getElementById('copy-btn-text');
 
     // 1. Cargar perfil actual desde Supabase
     const { data: profile } = await supabase
@@ -264,6 +287,23 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
       if (nameInput) nameInput.value = profile.display_name || '';
       if (bioInput) bioInput.value = profile.bio || '';
     }
+
+    // Copiar Enlace de Perfil Público al Portapapeles
+    copyProfileBtn?.addEventListener('click', () => {
+      const username = usernameInput.value;
+      if (!username) return;
+
+      const profileUrl = `${window.location.origin}/u/${username}`;
+      navigator.clipboard.writeText(profileUrl).then(() => {
+        if (copyBtnText) copyBtnText.textContent = '¡Copiado!';
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Enlace de perfil copiado al portapapeles', 'success');
+        }
+        setTimeout(() => {
+          if (copyBtnText) copyBtnText.textContent = 'Copiar Perfil';
+        }, 2000);
+      });
+    });
 
     // 2. Listener para Guardar Perfil Público
     profileForm?.addEventListener('submit', async (e) => {
@@ -344,6 +384,44 @@ import { Palette, Check, Sun, Moon, Monitor } from 'lucide-astro';
       const a = document.createElement('a');
       a.href = url;
       a.download = `kazechronik-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Exportar Biblioteca a CSV (Excel)
+    const exportCsvBtn = document.getElementById('export-csv-btn');
+    exportCsvBtn?.addEventListener('click', async () => {
+      const { data: games, error } = await supabase
+        .from('user_library')
+        .select('*')
+        .eq('user_id', session.user.id);
+
+      if (error || !games || games.length === 0) {
+        alert('No hay datos disponibles para exportar.');
+        return;
+      }
+
+      const headers = ['Título', 'Plataforma', 'Tienda', 'Estado', 'Horas Jugadas', 'Calificación', 'Favorito', 'Reseña'];
+      const rows = games.map(g => [
+        `"${(g.title || '').replace(/"/g, '""')}"`,
+        `"${(g.platform || 'PC').replace(/"/g, '""')}"`,
+        `"${(g.store || 'Otra').replace(/"/g, '""')}"`,
+        `"${g.status || 'backlog'}"`,
+        g.hours_played || 0,
+        g.rating || 'N/A',
+        g.is_favorite ? 'Sí' : 'No',
+        `"${(g.review || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `kazechronik-biblioteca-${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

@@ -1,5 +1,5 @@
 ---
-import { Library, Search, Settings, BarChart2, BookOpen, LogOut } from 'lucide-astro';
+import { Library, Search, Settings, BarChart2, BookOpen, User, LogOut } from 'lucide-astro';
 ---
 
 <header class="theme-card border-b sticky top-0 z-40 backdrop-blur-md bg-opacity-80">
@@ -41,15 +41,16 @@ import { Library, Search, Settings, BarChart2, BookOpen, LogOut } from 'lucide-a
       </a>
 
       <a
+        id="nav-profile-link"
         href="/settings"
-        class="flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold theme-text-secondary hover:theme-text-primary hover:bg-slate-500/10 transition-colors shrink-0"
-        title="Ajustes"
+        class="flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold theme-text-secondary hover:theme-text-primary hover:bg-slate-500/10 transition-colors group shrink-0"
+        title="Mi Perfil Público"
       >
-        <Settings class="w-4 h-4 text-emerald-400" />
-        <span class="hidden md:inline">Ajustes</span>
+        <User class="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+        <span class="hidden md:inline">Perfil</span>
       </a>
 
-      <a 
+      <a
         href="/analytics" 
         class="flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold theme-text-secondary hover:theme-text-primary hover:bg-slate-500/10 transition-colors group shrink-0"
         title="Estadísticas"
@@ -67,6 +68,15 @@ import { Library, Search, Settings, BarChart2, BookOpen, LogOut } from 'lucide-a
         <span class="hidden md:inline">Reseñas</span>
       </a>
 
+      <a
+        href="/settings"
+        class="flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold theme-text-secondary hover:theme-text-primary hover:bg-slate-500/10 transition-colors shrink-0"
+        title="Ajustes"
+      >
+        <Settings class="w-4 h-4 text-emerald-400" />
+        <span class="hidden md:inline">Ajustes</span>
+      </a>
+
       <!-- Botón Cierre de Sesión -->
       <button
         id="logout-btn"
@@ -82,7 +92,6 @@ import { Library, Search, Settings, BarChart2, BookOpen, LogOut } from 'lucide-a
 </header>
 
 <style>
-  /* Ocultar scrollbar visual pero mantener desplazamiento si la pantalla es muy estrecha */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -95,8 +104,23 @@ import { Library, Search, Settings, BarChart2, BookOpen, LogOut } from 'lucide-a
 <script>
   import { supabase } from '../../lib/supabase';
 
-  function initNavbar() {
+  async function initNavbar() {
     const logoutBtn = document.getElementById('logout-btn');
+    const profileLink = document.getElementById('nav-profile-link') as HTMLAnchorElement;
+
+    // Configurar enlace dinámico al perfil público del usuario en PWA
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session && profileLink) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      if (profile?.username) {
+        profileLink.href = `/u/${profile.username}`;
+      }
+    }
 
     logoutBtn?.addEventListener('click', async () => {
       logoutBtn.setAttribute('disabled', 'true');
