@@ -3,6 +3,7 @@ export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/common/Navbar.astro';
+import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'lucide-astro';
 ---
 
 <Layout title="Cargando Juego... | KazeChronik">
@@ -199,6 +200,101 @@ import Navbar from '../../components/common/Navbar.astro';
               Guardar Bitácora
             </button>
           </div>
+
+          <!-- SECCIÓN: GAMER NOTEBOOK (NOTAS & BUILDS ESPECIALIZADAS) -->
+          <div class="theme-card border p-6 rounded-2xl space-y-5 shadow-sm">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+              <div>
+                <h2 class="font-bold text-lg theme-text-primary flex items-center gap-2">
+                  📓 Gamer Notebook
+                </h2>
+                <p class="text-xs theme-text-secondary mt-0.5">
+                  Guarda builds, infografías, ubicaciones de mapa y puzles para este juego.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                id="toggle-note-form-btn"
+                class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5"
+              >
+                <Plus class="w-4 h-4" />
+                <span>Nueva Nota</span>
+              </button>
+            </div>
+
+            <!-- Formulario de Creación de Nota (Colapsable) -->
+            <form id="create-note-form" class="hidden theme-input border p-4 rounded-xl space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-semibold theme-text-secondary mb-1">Título de la Nota</label>
+                  <input 
+                    type="text" 
+                    id="note-title" 
+                    required 
+                    placeholder="ej: Build Raiden Shogun (Sub-DPS)"
+                    class="w-full px-3 py-2 theme-card border rounded-lg text-xs focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-[11px] font-semibold theme-text-secondary mb-1">Categoría</label>
+                  <select 
+                    id="note-category" 
+                    class="w-full px-3 py-2 theme-card border rounded-lg text-xs focus:outline-none focus:border-indigo-500 cursor-pointer"
+                  >
+                    <option value="builds">🛡️ Build / Equipamiento</option>
+                    <option value="map">🗺️ Mapa / Misión / Coleccionable</option>
+                    <option value="puzzle">🧩 Puzle / Código</option>
+                    <option value="general">📝 General / Pendientes</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-semibold theme-text-secondary mb-1">Contenido / Detalles</label>
+                <textarea 
+                  id="note-content" 
+                  rows="3" 
+                  placeholder="Escribe artefactos, atributos, armas, secuencias de puzle o notas directas..."
+                  class="w-full px-3 py-2 theme-card border rounded-lg text-xs focus:outline-none focus:border-indigo-500 resize-none"
+                ></textarea>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-semibold theme-text-secondary mb-1">URL de Imagen / Infografía (Opcional)</label>
+                <input 
+                  type="url" 
+                  id="note-image-url" 
+                  placeholder="https://i.imgur.com/... o enlace de captura"
+                  class="w-full px-3 py-2 theme-card border rounded-lg text-xs focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div class="flex items-center justify-between pt-1">
+                <label class="flex items-center gap-2 cursor-pointer text-xs theme-text-secondary">
+                  <input type="checkbox" id="note-pinned" class="rounded accent-indigo-600" />
+                  <span>Fijar nota al inicio (Pin)</span>
+                </label>
+
+                <div class="flex gap-2">
+                  <button type="button" id="cancel-note-btn" class="px-3 py-1.5 theme-button text-xs font-semibold rounded-lg">
+                    Cancelar
+                  </button>
+                  <button type="submit" id="save-note-btn" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-lg transition-all shadow-md">
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <!-- Lista de Notas Guardadas -->
+            <div id="notes-list-container" class="grid grid-cols-1 gap-4 pt-2">
+              <div class="p-6 text-center theme-button rounded-xl text-xs theme-text-secondary italic">
+                Cargando notas de la bitácora...
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </article>
@@ -238,8 +334,21 @@ import Navbar from '../../components/common/Navbar.astro';
     const newTagInput = document.getElementById('new-tag-input') as HTMLInputElement;
     const addTagBtn = document.getElementById('add-tag-btn');
 
+    // Elementos del Gamer Notebook
+    const toggleNoteFormBtn = document.getElementById('toggle-note-form-btn');
+    const createNoteForm = document.getElementById('create-note-form') as HTMLFormElement;
+    const cancelNoteBtn = document.getElementById('cancel-note-btn');
+    const noteTitleInput = document.getElementById('note-title') as HTMLInputElement;
+    const noteCategorySelect = document.getElementById('note-category') as HTMLSelectElement;
+    const noteContentInput = document.getElementById('note-content') as HTMLTextAreaElement;
+    const noteImageUrlInput = document.getElementById('note-image-url') as HTMLInputElement;
+    const notePinnedCheckbox = document.getElementById('note-pinned') as HTMLInputElement;
+    const notesListContainer = document.getElementById('notes-list-container');
+
     let currentTags: string[] = [];
     let isFavorite = false;
+    let loadedNotes: any[] = [];
+    let editingNoteId: string | null = null;
 
     if (!gameId || gameId === 'game') {
       if (skeleton) skeleton.classList.add('hidden');
@@ -251,27 +360,60 @@ import Navbar from '../../components/common/Navbar.astro';
       if (achievementsVal) achievementsVal.textContent = `${e.target.value}%`;
     });
 
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      window.location.href = '/login';
-      return;
+    // 1. Cargar Registro (Online con Fallback a Caché Offline)
+    let data: any = null;
+    const cacheKey = `kazechronik_game_${gameId}`;
+    const notesCacheKey = `kazechronik_notes_${gameId}`;
+
+    if (!navigator.onLine) {
+      const cachedGame = localStorage.getItem(cacheKey);
+      if (cachedGame) {
+        try {
+          data = JSON.parse(cachedGame);
+          if (typeof (window as any).showToast === 'function') {
+            (window as any).showToast('Bitácora cargada en Modo Offline (Lectura)', 'info');
+          }
+        } catch (e) {
+          console.error('Error al leer caché del juego:', e);
+        }
+      }
     }
 
-    // 1. Cargar Registro desde Supabase
-    const { data, error } = await supabase
-      .from('user_library')
-      .select('*')
-      .eq('id', gameId)
-      .eq('user_id', session.user.id)
-      .maybeSingle();
+    if (!data) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          window.location.href = '/login';
+          return;
+        }
 
-    if (error || !data) {
-      if (skeleton) skeleton.classList.add('hidden');
-      if (errorBox) errorBox.classList.remove('hidden');
-      return;
+        const res = await supabase
+          .from('user_library')
+          .select('*')
+          .eq('id', gameId)
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        if (res.error || !res.data) {
+          throw new Error('Juego no encontrado');
+        }
+
+        data = res.data;
+        // Guardar respaldo local del juego
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+      } catch (err) {
+        const cachedGame = localStorage.getItem(cacheKey);
+        if (cachedGame) {
+          data = JSON.parse(cachedGame);
+        } else {
+          if (skeleton) skeleton.classList.add('hidden');
+          if (errorBox) errorBox.classList.remove('hidden');
+          return;
+        }
+      }
     }
 
-    // 2. Poblar Datos y UI
+    // 2. Poblar Datos y UI del Juego
     isFavorite = Boolean(data.is_favorite);
     
     function updateFavoriteUI() {
@@ -347,12 +489,215 @@ import Navbar from '../../components/common/Navbar.astro';
       }
     });
 
+    // --- LÓGICA DEL GAMER NOTEBOOK (CON CACHÉ OFFLINE) ---
+    async function loadGameNotes() {
+      if (!notesListContainer) return;
+
+      if (!navigator.onLine) {
+        const cachedNotes = localStorage.getItem(notesCacheKey);
+        if (cachedNotes) {
+          try {
+            loadedNotes = JSON.parse(cachedNotes);
+            renderNotesList();
+            return;
+          } catch (e) {
+            console.error('Error al parsear notas en caché:', e);
+          }
+        }
+      }
+
+      try {
+        const { data: notes, error } = await supabase
+          .from('game_notes')
+          .select('*')
+          .eq('game_id', gameId)
+          .order('is_pinned', { ascending: false })
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        loadedNotes = notes || [];
+        localStorage.setItem(notesCacheKey, JSON.stringify(loadedNotes));
+        renderNotesList();
+      } catch (err: any) {
+        const cachedNotes = localStorage.getItem(notesCacheKey);
+        if (cachedNotes) {
+          loadedNotes = JSON.parse(cachedNotes);
+          renderNotesList();
+        } else {
+          notesListContainer.innerHTML = `<div class="p-4 theme-button rounded-xl text-xs text-rose-400">Sin conexión y sin notas almacenadas en caché.</div>`;
+        }
+      }
+    }
+
+    function renderNotesList() {
+      if (!notesListContainer) return;
+
+      if (loadedNotes.length === 0) {
+        notesListContainer.innerHTML = `
+          <div class="p-6 text-center theme-button border border-dashed border-slate-500/20 rounded-xl">
+            <p class="text-xs font-semibold theme-text-primary">No hay notas creadas aún</p>
+            <p class="text-[11px] theme-text-secondary mt-1">Crea tu primera nota para guardar builds o ubicaciones de mapa.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const catBadges: Record<string, { label: string, color: string }> = {
+        builds: { label: '🛡️ Build / Craft', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+        map: { label: '🗺️ Mapa', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
+        puzzle: { label: '🧩 Puzle', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+        general: { label: '📝 General', color: 'bg-slate-500/10 text-slate-300 border-slate-500/20' }
+      };
+
+      notesListContainer.innerHTML = loadedNotes.map(n => {
+        const cat = catBadges[n.category] || catBadges.general;
+        
+        const formattedContent = (n.content || '').split('\n').map((line: string) => {
+          if (line.startsWith('[x]') || line.startsWith('[X]')) {
+            return `<span class="line-through opacity-60 text-emerald-400 font-medium">✓ ${line.replace(/^\[[xX]\]/, '').trim()}</span>`;
+          }
+          if (line.startsWith('[ ]')) {
+            return `<span class="font-medium">☐ ${line.replace(/^\[ \]/, '').trim()}</span>`;
+          }
+          return line;
+        }).join('<br/>');
+
+        return `
+          <div class="theme-input border rounded-xl p-4 space-y-2 relative transition-all ${n.is_pinned ? 'border-amber-500/40 bg-amber-500/5' : ''}">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 overflow-hidden">
+                <span class="text-[10px] font-bold px-2 py-0.5 border rounded-md shrink-0 ${cat.color}">
+                  ${cat.label}
+                </span>
+                <h4 class="text-sm font-bold theme-text-primary truncate">${n.title}</h4>
+                ${n.is_pinned ? `<span class="text-amber-400 text-xs shrink-0" title="Nota fijada">📌</span>` : ''}
+              </div>
+
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" onclick="editNote('${n.id}')" class="p-1 hover:text-indigo-400 cursor-pointer text-xs theme-text-secondary" title="Editar Nota">
+                  ✏️
+                </button>
+                <button type="button" onclick="togglePinNote('${n.id}', ${n.is_pinned})" class="p-1 hover:text-amber-400 cursor-pointer text-xs theme-text-secondary" title="Fijar/Desfijar">
+                  ${n.is_pinned ? '📌' : '📍'}
+                </button>
+                <button type="button" onclick="deleteNote('${n.id}')" class="p-1 hover:text-rose-400 cursor-pointer text-xs text-rose-500/80" title="Eliminar">
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            ${n.content ? `<div class="text-xs theme-text-secondary leading-relaxed">${formattedContent}</div>` : ''}
+
+            ${n.image_url ? `
+              <div class="mt-2 rounded-lg overflow-hidden border border-slate-500/20 max-h-60 bg-slate-950">
+                <img src="${n.image_url}" alt="Guía / Build" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer" onclick="window.open('${n.image_url}', '_blank')" />
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    toggleNoteFormBtn?.addEventListener('click', () => {
+      editingNoteId = null;
+      createNoteForm.reset();
+      const saveBtn = document.getElementById('save-note-btn');
+      if (saveBtn) saveBtn.textContent = 'Guardar';
+      createNoteForm.classList.toggle('hidden');
+    });
+
+    (window as any).editNote = (noteId: string) => {
+      const note = loadedNotes.find(n => n.id === noteId);
+      if (!note) return;
+
+      editingNoteId = noteId;
+      noteTitleInput.value = note.title || '';
+      noteCategorySelect.value = note.category || 'general';
+      noteContentInput.value = note.content || '';
+      noteImageUrlInput.value = note.image_url || '';
+      notePinnedCheckbox.checked = Boolean(note.is_pinned);
+
+      const saveBtn = document.getElementById('save-note-btn');
+      if (saveBtn) saveBtn.textContent = 'Actualizar Nota';
+
+      createNoteForm.classList.remove('hidden');
+      createNoteForm.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    cancelNoteBtn?.addEventListener('click', () => {
+      editingNoteId = null;
+      createNoteForm.reset();
+      createNoteForm.classList.add('hidden');
+    });
+
+    createNoteForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const title = noteTitleInput.value.trim();
+      if (!title) return;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const noteData = {
+        user_id: session.user.id,
+        game_id: gameId,
+        title: title,
+        category: noteCategorySelect.value,
+        content: noteContentInput.value.trim() || null,
+        image_url: noteImageUrlInput.value.trim() || null,
+        is_pinned: notePinnedCheckbox.checked,
+        updated_at: new Date().toISOString()
+      };
+
+      let error;
+      if (editingNoteId) {
+        const res = await supabase.from('game_notes').update(noteData).eq('id', editingNoteId);
+        error = res.error;
+      } else {
+        const res = await supabase.from('game_notes').insert([noteData]);
+        error = res.error;
+      }
+
+      if (!error) {
+        editingNoteId = null;
+        createNoteForm.reset();
+        createNoteForm.classList.add('hidden');
+        loadGameNotes();
+      } else {
+        alert('Error al guardar la nota: ' + error.message);
+      }
+    });
+
+    (window as any).togglePinNote = async (noteId: string, currentPinned: boolean) => {
+      await supabase
+        .from('game_notes')
+        .update({ is_pinned: !currentPinned })
+        .eq('id', noteId);
+
+      loadGameNotes();
+    };
+
+    (window as any).deleteNote = async (noteId: string) => {
+      if (!confirm('¿Seguro que deseas eliminar esta nota?')) return;
+
+      await supabase
+        .from('game_notes')
+        .delete()
+        .eq('id', noteId);
+
+      loadGameNotes();
+    };
+
     document.title = `${data.title} | KazeChronik`;
 
     if (skeleton) skeleton.classList.add('hidden');
     if (content) content.classList.remove('hidden');
 
-    // 3. Listeners para guardar cambios
+    loadGameNotes();
+
+    // 3. Listeners para guardar cambios de la Bitácora
     saveProgressBtn?.addEventListener('click', async () => {
       saveProgressBtn.disabled = true;
       saveProgressBtn.textContent = 'Guardando...';
@@ -373,6 +718,14 @@ import Navbar from '../../components/common/Navbar.astro';
       saveProgressBtn.textContent = 'Guardar Cambios';
 
       if (!error) {
+        // Actualizar caché local tras guardar
+        data.status = statusSelect.value;
+        data.hours_played = parseFloat(hoursInput.value) || 0;
+        data.achievements_progress = parseInt(achievementsInput.value) || 0;
+        data.tags = currentTags;
+        data.is_favorite = isFavorite;
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+
         alert('¡Progreso guardado!');
       } else {
         alert('Error al guardar: ' + error.message);
@@ -399,6 +752,12 @@ import Navbar from '../../components/common/Navbar.astro';
       saveReviewBtn.textContent = 'Guardar Bitácora';
 
       if (!error) {
+        // Actualizar caché local tras guardar
+        data.rating = ratingInput.value ? parseFloat(ratingInput.value) : null;
+        data.review = reviewInput.value.trim() || null;
+        data.notes = notesInput.value.trim() || null;
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+
         alert('¡Bitácora guardada con éxito!');
       } else {
         alert('Error al guardar bitácora: ' + error.message);

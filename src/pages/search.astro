@@ -1,31 +1,77 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Search as SearchIcon, Loader2, X, Star } from 'lucide-astro';
+import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
 ---
 
 <Layout title="Buscar Juegos | KazeChronik">
   <Navbar />
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
-    <div class="max-w-xl mx-auto text-center mb-8">
+    <div class="max-w-2xl mx-auto text-center mb-8">
       <h1 class="text-3xl font-bold theme-text-primary tracking-tight">Buscar Videojuegos</h1>
       <p class="text-sm theme-text-secondary mt-1">Encuentra tus títulos favoritos para agregarlos a tu colección</p>
       
-      <form id="search-form" class="mt-6 relative">
-        <SearchIcon class="w-5 h-5 theme-text-secondary absolute left-4 top-1/2 -translate-y-1/2" />
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Ej: Genshin Impact, Assassin's Creed, Minecraft..."
-          class="w-full pl-11 pr-24 py-3 theme-card border theme-text-primary placeholder:theme-text-secondary rounded-2xl text-sm focus:outline-none focus:border-indigo-500 transition-colors shadow-sm"
-        />
-        <button
-          type="submit"
-          class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer shadow-md"
-        >
-          Buscar
-        </button>
+      <!-- Buscador Principal y Controles de Filtros RAWG -->
+      <form id="search-form" class="mt-6 space-y-4">
+        <div class="relative">
+          <SearchIcon class="w-5 h-5 theme-text-secondary absolute left-4 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Ej: Genshin Impact, Assassin's Creed, Minecraft..."
+            class="w-full pl-11 pr-24 py-3 theme-card border theme-text-primary placeholder:theme-text-secondary rounded-2xl text-sm focus:outline-none focus:border-indigo-500 transition-colors shadow-sm"
+          />
+          <button
+            type="submit"
+            class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer shadow-md"
+          >
+            Buscar
+          </button>
+        </div>
+
+        <!-- Filtros Secundarios de RAWG -->
+        <div class="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+          <div class="flex items-center gap-1 text-xs theme-text-secondary font-semibold mr-1">
+            <Filter class="w-3.5 h-3.5 text-indigo-400" />
+            <span>Filtros:</span>
+          </div>
+
+          <!-- Filtro por Género -->
+          <select id="rawg-genre" class="px-3 py-1.5 theme-card border rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
+            <option value="">Todos los géneros</option>
+            <option value="action">Acción</option>
+            <option value="role-playing-games-rpg">RPG</option>
+            <option value="shooter">Shooter</option>
+            <option value="adventure">Aventura</option>
+            <option value="strategy">Estrategia</option>
+            <option value="indie">Indie</option>
+            <option value="puzzle">Puzle</option>
+            <option value="simulation">Simulación</option>
+            <option value="sports">Deportes</option>
+          </select>
+
+          <!-- Filtro por Plataforma -->
+          <select id="rawg-platform" class="px-3 py-1.5 theme-card border rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
+            <option value="">Todas las plataformas</option>
+            <option value="4">PC</option>
+            <option value="187">PlayStation 5</option>
+            <option value="18">PlayStation 4</option>
+            <option value="186">Xbox Series X/S</option>
+            <option value="1">Xbox One</option>
+            <option value="7">Nintendo Switch</option>
+            <option value="21">Android</option>
+            <option value="3">iOS</option>
+          </select>
+
+          <!-- Criterio de Ordenamiento -->
+          <select id="rawg-ordering" class="px-3 py-1.5 theme-card border rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
+            <option value="-relevance">Relevancia</option>
+            <option value="-added">Más Populares</option>
+            <option value="-rating">Mejor Valorados</option>
+            <option value="-released">Lanzamientos Recientes</option>
+          </select>
+        </div>
       </form>
     </div>
 
@@ -36,7 +82,7 @@ import { Search as SearchIcon, Loader2, X, Star } from 'lucide-astro';
     <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
   </main>
 
-  <!-- MODAL PARA AGREGAR JUEGO (Con más campos iniciales y fix de overflow) -->
+  <!-- MODAL PARA AGREGAR JUEGO -->
   <div id="add-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl relative overflow-hidden">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-500/20">
@@ -142,6 +188,10 @@ import { Search as SearchIcon, Loader2, X, Star } from 'lucide-astro';
   const resultsGrid = document.getElementById('results-grid') as HTMLDivElement;
   const loading = document.getElementById('loading') as HTMLDivElement;
 
+  const genreSelect = document.getElementById('rawg-genre') as HTMLSelectElement;
+  const platformFilterSelect = document.getElementById('rawg-platform') as HTMLSelectElement;
+  const orderingSelect = document.getElementById('rawg-ordering') as HTMLSelectElement;
+
   const modal = document.getElementById('add-modal') as HTMLDivElement;
   const closeModalBtn = document.getElementById('close-modal-btn') as HTMLButtonElement;
   const cancelModalBtn = document.getElementById('cancel-modal-btn') as HTMLButtonElement;
@@ -153,7 +203,6 @@ import { Search as SearchIcon, Loader2, X, Star } from 'lucide-astro';
   const favoriteCheckbox = document.getElementById('modal-favorite') as HTMLInputElement;
 
   let debounceTimer: ReturnType<typeof setTimeout>;
-  let lastSearchQuery = '';
 
   const platformStoresMap: Record<string, { label: string; value: string }[]> = {
     'PC': [
@@ -211,26 +260,32 @@ import { Search as SearchIcon, Loader2, X, Star } from 'lucide-astro';
     updateStoreOptions(selectedPlatform);
   });
 
-  async function executeSearch(query: string) {
-    if (!query) {
+  async function executeSearch() {
+    const query = input.value.trim();
+    const genre = genreSelect?.value || '';
+    const platform = platformFilterSelect?.value || '';
+    const ordering = orderingSelect?.value || '-relevance';
+
+    if (!query && !genre && !platform) {
       resultsGrid.innerHTML = '';
       loading.classList.add('hidden');
       return;
     }
 
-    if (query === lastSearchQuery) return;
-    lastSearchQuery = query;
-
     loading.classList.remove('hidden');
     resultsGrid.innerHTML = '';
 
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      let endpoint = `/api/search?q=${encodeURIComponent(query)}&ordering=${ordering}`;
+      if (genre) endpoint += `&genres=${genre}`;
+      if (platform) endpoint += `&platforms=${platform}`;
+
+      const res = await fetch(endpoint);
       const games = await res.json();
       loading.classList.add('hidden');
 
       if (!games || games.length === 0) {
-        resultsGrid.innerHTML = `<p class="col-span-full text-center theme-text-secondary py-8">No se encontraron videojuegos.</p>`;
+        resultsGrid.innerHTML = `<p class="col-span-full text-center theme-text-secondary py-8">No se encontraron videojuegos con los filtros seleccionados.</p>`;
         return;
       }
 
@@ -257,18 +312,21 @@ import { Search as SearchIcon, Loader2, X, Star } from 'lucide-astro';
     }
   }
 
-  input?.addEventListener('input', (e) => {
-    const query = (e.target as HTMLInputElement).value.trim();
+  input?.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      executeSearch(query);
+      executeSearch();
     }, 800);
   });
+
+  genreSelect?.addEventListener('change', executeSearch);
+  platformFilterSelect?.addEventListener('change', executeSearch);
+  orderingSelect?.addEventListener('change', executeSearch);
 
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
     clearTimeout(debounceTimer);
-    executeSearch(input.value.trim());
+    executeSearch();
   });
 
   (window as any).openAddModal = async (rawgId: number, title: string, coverUrl: string) => {

@@ -305,37 +305,67 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
   };
 
   async function loadLibrary() {
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      window.location.href = '/login';
-      return;
+    // Si la app no tiene internet, cargar directamente desde la caché de respaldo local
+    if (!navigator.onLine) {
+      const cached = localStorage.getItem('kazechronik_library_cache');
+      if (cached) {
+        try {
+          allGames = JSON.parse(cached);
+          updateStatsAndRender();
+          if (typeof (window as any).showToast === 'function') {
+            (window as any).showToast('Cargado desde la caché local (Modo Offline)', 'info');
+          }
+          return;
+        } catch (e) {
+          console.error('Error al parsear la caché local:', e);
+        }
+      }
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('username')
-      .eq('id', session.user.id)
-      .maybeSingle();
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
 
-    if (!profile) {
-      window.location.href = '/onboarding';
-      return;
+      if (!session) {
+        window.location.href = '/login';
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      if (!profile) {
+        window.location.href = '/onboarding';
+        return;
+      }
+
+      const { data: games, error } = await supabase
+        .from('user_library')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      allGames = games || [];
+
+      // Guardar copia local para Modo Offline
+      localStorage.setItem('kazechronik_library_cache', JSON.stringify(allGames));
+      updateStatsAndRender();
+
+    } catch (err: any) {
+      console.warn('Conexión no disponible. Utilizando copia local:', err?.message);
+      const cached = localStorage.getItem('kazechronik_library_cache');
+      if (cached) {
+        allGames = JSON.parse(cached);
+        updateStatsAndRender();
+      }
     }
+  }
 
-    const { data: games, error } = await supabase
-      .from('user_library')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error al cargar la biblioteca:', error.message);
-      return;
-    }
-
-    allGames = games || [];
-
+  function updateStatsAndRender() {
     const totalHours = allGames.reduce((acc, curr) => acc + (Number(curr.hours_played) || 0), 0);
     const completedCount = allGames.filter(g => g.status === 'completed').length;
 
