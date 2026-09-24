@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangle } from 'lucide-astro';
+import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangle, Loader2 } from 'lucide-astro';
 ---
 
 <Layout title="Mi Biblioteca | KazeChronik">
@@ -17,7 +17,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
 
       <a
         href="/search"
-        class="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20"
+        class="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20 hover:scale-[1.02] active:scale-[0.98]"
       >
         <Plus class="w-4 h-4" />
         <span>Agregar Juego</span>
@@ -26,7 +26,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
 
     <!-- Tarjetas de Métricas -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4 shadow-sm transition-transform hover:-translate-y-0.5">
         <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-500">
           <Library class="w-6 h-6" />
         </div>
@@ -36,7 +36,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
         </div>
       </div>
 
-      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4 shadow-sm transition-transform hover:-translate-y-0.5">
         <div class="p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-500">
           <Clock class="w-6 h-6" />
         </div>
@@ -46,7 +46,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
         </div>
       </div>
 
-      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+      <div class="theme-card border p-5 rounded-2xl flex items-center gap-4 shadow-sm transition-transform hover:-translate-y-0.5">
         <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-500">
           <Trophy class="w-6 h-6" />
         </div>
@@ -137,27 +137,75 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
       </div>
     </div>
 
-    <!-- Galería / Contenedor -->
+    <!-- Galería / Contenedor con Skeleton Fidelidad Altísima -->
     <div id="library-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
-        <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
-        <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
-        <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+      <div class="theme-card border rounded-2xl p-0 overflow-hidden animate-pulse flex flex-col justify-between h-[340px]">
+        <div class="w-full h-44 bg-slate-500/20"></div>
+        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <div class="h-3.5 bg-slate-500/20 rounded w-16"></div>
+              <div class="h-3.5 bg-slate-500/20 rounded w-20"></div>
+            </div>
+            <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
+            <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+          </div>
+          <div class="flex gap-2 pt-3 border-t border-slate-500/10">
+            <div class="h-7 bg-slate-500/20 rounded-lg flex-1"></div>
+            <div class="h-7 bg-slate-500/20 rounded-lg w-16"></div>
+          </div>
+        </div>
       </div>
-      <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
-        <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
-        <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
-        <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+      <div class="theme-card border rounded-2xl p-0 overflow-hidden animate-pulse flex flex-col justify-between h-[340px]">
+        <div class="w-full h-44 bg-slate-500/20"></div>
+        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <div class="h-3.5 bg-slate-500/20 rounded w-16"></div>
+              <div class="h-3.5 bg-slate-500/20 rounded w-20"></div>
+            </div>
+            <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
+            <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+          </div>
+          <div class="flex gap-2 pt-3 border-t border-slate-500/10">
+            <div class="h-7 bg-slate-500/20 rounded-lg flex-1"></div>
+            <div class="h-7 bg-slate-500/20 rounded-lg w-16"></div>
+          </div>
+        </div>
       </div>
-      <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
-        <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
-        <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
-        <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+      <div class="theme-card border rounded-2xl p-0 overflow-hidden animate-pulse flex flex-col justify-between h-[340px]">
+        <div class="w-full h-44 bg-slate-500/20"></div>
+        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <div class="h-3.5 bg-slate-500/20 rounded w-16"></div>
+              <div class="h-3.5 bg-slate-500/20 rounded w-20"></div>
+            </div>
+            <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
+            <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+          </div>
+          <div class="flex gap-2 pt-3 border-t border-slate-500/10">
+            <div class="h-7 bg-slate-500/20 rounded-lg flex-1"></div>
+            <div class="h-7 bg-slate-500/20 rounded-lg w-16"></div>
+          </div>
+        </div>
       </div>
-      <div class="theme-card border rounded-2xl p-4 animate-pulse h-72 flex flex-col justify-between">
-        <div class="w-full h-40 bg-slate-500/20 rounded-xl mb-3"></div>
-        <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
-        <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+      <div class="theme-card border rounded-2xl p-0 overflow-hidden animate-pulse flex flex-col justify-between h-[340px]">
+        <div class="w-full h-44 bg-slate-500/20"></div>
+        <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <div class="h-3.5 bg-slate-500/20 rounded w-16"></div>
+              <div class="h-3.5 bg-slate-500/20 rounded w-20"></div>
+            </div>
+            <div class="h-4 bg-slate-500/20 rounded w-3/4 mb-2"></div>
+            <div class="h-3 bg-slate-500/20 rounded w-1/2"></div>
+          </div>
+          <div class="flex gap-2 pt-3 border-t border-slate-500/10">
+            <div class="h-7 bg-slate-500/20 rounded-lg flex-1"></div>
+            <div class="h-7 bg-slate-500/20 rounded-lg w-16"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -226,8 +274,8 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
           <button type="button" id="cancel-modal-btn" class="flex-1 py-2.5 px-4 theme-button text-sm font-semibold rounded-xl transition-colors">
             Cancelar
           </button>
-          <button type="submit" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20 cursor-pointer">
-            Guardar Cambios
+          <button type="submit" id="save-edit-btn" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20 cursor-pointer flex items-center justify-center gap-2">
+            <span>Guardar Cambios</span>
           </button>
         </div>
       </form>
@@ -249,8 +297,8 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
         <button id="cancel-delete-btn" type="button" class="flex-1 py-2.5 px-4 theme-button text-xs font-semibold rounded-xl transition-colors">
           Cancelar
         </button>
-        <button id="confirm-delete-btn" type="button" class="flex-1 py-2.5 px-4 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-all shadow-lg shadow-rose-600/20 cursor-pointer">
-          Sí, Eliminar
+        <button id="confirm-delete-btn" type="button" class="flex-1 py-2.5 px-4 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-all shadow-lg shadow-rose-600/20 cursor-pointer flex items-center justify-center gap-1.5">
+          <span>Sí, Eliminar</span>
         </button>
       </div>
     </div>
@@ -278,6 +326,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
   const editStatus = document.getElementById('edit-status') as HTMLSelectElement;
   const editHours = document.getElementById('edit-hours') as HTMLInputElement;
   const modalGameTitle = document.getElementById('modal-game-title') as HTMLHeadingElement;
+  const saveEditBtn = document.getElementById('save-edit-btn') as HTMLButtonElement;
 
   const deleteModal = document.getElementById('delete-modal') as HTMLDivElement;
   const deleteModalMsg = document.getElementById('delete-modal-msg') as HTMLParagraphElement;
@@ -305,7 +354,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
   };
 
   async function loadLibrary() {
-    // Si la app no tiene internet, cargar directamente desde la caché de respaldo local
+    // Modo Offline con respaldo de caché local
     if (!navigator.onLine) {
       const cached = localStorage.getItem('kazechronik_library_cache');
       if (cached) {
@@ -351,7 +400,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
 
       allGames = games || [];
 
-      // Guardar copia local para Modo Offline
+      // Guardar respaldo actualizado para lectura sin conexión
       localStorage.setItem('kazechronik_library_cache', JSON.stringify(allGames));
       updateStatsAndRender();
 
@@ -447,7 +496,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
 
     if (filteredGames.length === 0) {
       if (paginationControls) paginationControls.classList.add('hidden');
-      container.className = "theme-card border rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px]";
+      container.className = "theme-card border rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px] transition-all";
       container.innerHTML = `
         <div class="p-4 theme-button rounded-2xl mb-4 theme-text-secondary">
           <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
@@ -496,7 +545,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
       const isFav = game.is_favorite === true;
 
       return `
-        <div class="theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all shadow-md group relative">
+        <div class="theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-xl group relative">
           
           <div class="relative overflow-hidden h-44 bg-slate-800">
             <a href="/game/${game.id}" class="block w-full h-full">
@@ -515,7 +564,7 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
             <button 
               type="button"
               onclick="toggleFavorite('${game.id}', ${isFav})"
-              class="absolute top-2 right-2 p-1.5 rounded-xl bg-slate-950/80 backdrop-blur-md text-amber-400 hover:scale-110 transition-all z-20 cursor-pointer shadow-lg border border-white/10"
+              class="absolute top-2 right-2 p-1.5 rounded-xl bg-slate-950/80 backdrop-blur-md text-amber-400 hover:scale-110 active:scale-95 transition-all z-20 cursor-pointer shadow-lg border border-white/10"
               title="${isFav ? 'Quitar de favoritos' : 'Marcar como favorito'}"
             >
               ${isFav ? '★' : '☆'}
@@ -639,10 +688,23 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
     const hours = parseFloat(editHours.value) || 0;
     const status = editStatus.value;
 
+    // Estado de Carga en Botón de Edición
+    saveEditBtn.disabled = true;
+    saveEditBtn.innerHTML = `
+      <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span>Guardando...</span>
+    `;
+
     const { error } = await supabase
       .from('user_library')
       .update({ hours_played: hours, status: status, updated_at: new Date() })
       .eq('id', id);
+
+    saveEditBtn.disabled = false;
+    saveEditBtn.innerHTML = `<span>Guardar Cambios</span>`;
 
     if (error) {
       if (typeof (window as any).showToast === 'function') {
@@ -678,10 +740,23 @@ import { Gamepad2, Clock, Trophy, Plus, Library, X, Filter, Search, AlertTriangl
   confirmDeleteBtn?.addEventListener('click', async () => {
     if (!gameToDeleteId) return;
 
+    // Estado de Carga en Botón de Eliminación
+    confirmDeleteBtn.disabled = true;
+    confirmDeleteBtn.innerHTML = `
+      <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span>Eliminando...</span>
+    `;
+
     const { error } = await supabase
       .from('user_library')
       .delete()
       .eq('id', gameToDeleteId);
+
+    confirmDeleteBtn.disabled = false;
+    confirmDeleteBtn.innerHTML = `<span>Sí, Eliminar</span>`;
 
     if (error) {
       if (typeof (window as any).showToast === 'function') {

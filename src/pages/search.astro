@@ -1,19 +1,42 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
+import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, ExternalLink } from 'lucide-astro';
 ---
 
-<Layout title="Buscar Juegos | KazeChronik">
+<Layout title="Búsqueda Unificada | KazeChronik">
   <Navbar />
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
-    <div class="max-w-2xl mx-auto text-center mb-8">
-      <h1 class="text-3xl font-bold theme-text-primary tracking-tight">Buscar Videojuegos</h1>
-      <p class="text-sm theme-text-secondary mt-1">Encuentra tus títulos favoritos para agregarlos a tu colección</p>
-      
-      <!-- Buscador Principal y Controles de Filtros RAWG -->
-      <form id="search-form" class="mt-6 space-y-4">
+    
+    <!-- Encabezado y Selector de Pestañas (Juegos vs Perfiles) -->
+    <div class="max-w-2xl mx-auto text-center mb-8 space-y-4">
+      <h1 class="text-3xl font-bold theme-text-primary tracking-tight">Centro de Búsqueda</h1>
+      <p class="text-sm theme-text-secondary">Encuentra videojuegos para tu colección o descubre perfiles de la comunidad</p>
+
+      <!-- Botones de Pestaña -->
+      <div class="inline-flex p-1 theme-card border rounded-2xl gap-1 shadow-sm">
+        <button
+          id="tab-btn-games"
+          class="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-md cursor-pointer"
+        >
+          <Gamepad2 class="w-4 h-4" />
+          <span>Videojuegos</span>
+        </button>
+
+        <button
+          id="tab-btn-users"
+          class="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all theme-button theme-text-secondary hover:theme-text-primary cursor-pointer"
+        >
+          <Users class="w-4 h-4" />
+          <span>Perfiles Comunidad</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 1: BÚSQUEDA DE JUEGOS (RAWG) -->
+    <section id="section-games" class="space-y-8">
+      <form id="search-form" class="max-w-2xl mx-auto space-y-4">
         <div class="relative">
           <SearchIcon class="w-5 h-5 theme-text-secondary absolute left-4 top-1/2 -translate-y-1/2" />
           <input
@@ -24,7 +47,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
           />
           <button
             type="submit"
-            class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer shadow-md"
+            class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-all cursor-pointer shadow-md hover:scale-[1.02] active:scale-[0.98]"
           >
             Buscar
           </button>
@@ -37,7 +60,6 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
             <span>Filtros:</span>
           </div>
 
-          <!-- Filtro por Género -->
           <select id="rawg-genre" class="px-3 py-1.5 theme-card border rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
             <option value="">Todos los géneros</option>
             <option value="action">Acción</option>
@@ -51,7 +73,6 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
             <option value="sports">Deportes</option>
           </select>
 
-          <!-- Filtro por Plataforma -->
           <select id="rawg-platform" class="px-3 py-1.5 theme-card border rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
             <option value="">Todas las plataformas</option>
             <option value="4">PC</option>
@@ -64,7 +85,6 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
             <option value="3">iOS</option>
           </select>
 
-          <!-- Criterio de Ordenamiento -->
           <select id="rawg-ordering" class="px-3 py-1.5 theme-card border rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
             <option value="-relevance">Relevancia</option>
             <option value="-added">Más Populares</option>
@@ -73,13 +93,25 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
           </select>
         </div>
       </form>
-    </div>
 
-    <div id="loading" class="hidden flex justify-center py-12">
-      <Loader2 class="w-8 h-8 text-indigo-500 animate-spin" />
-    </div>
+      <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    </section>
 
-    <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    <!-- SECCIÓN 2: BÚSQUEDA DE PERFILES (SUPABASE PROFILES) -->
+    <section id="section-users" class="space-y-8 hidden">
+      <div class="max-w-2xl mx-auto relative">
+        <Users class="w-5 h-5 theme-text-secondary absolute left-4 top-1/2 -translate-y-1/2" />
+        <input
+          type="text"
+          id="search-users-input"
+          placeholder="Buscar por nombre de usuario o gamer tag..."
+          class="w-full pl-11 pr-4 py-3 theme-card border theme-text-primary placeholder:theme-text-secondary rounded-2xl text-sm focus:outline-none focus:border-indigo-500 transition-colors shadow-sm"
+        />
+      </div>
+
+      <div id="users-results-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+    </section>
+
   </main>
 
   <!-- MODAL PARA AGREGAR JUEGO -->
@@ -171,8 +203,8 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
           <button type="button" id="cancel-modal-btn" class="flex-1 py-2.5 px-4 theme-button border hover:bg-slate-500/10 theme-text-secondary text-sm font-semibold rounded-xl transition-colors">
             Cancelar
           </button>
-          <button type="submit" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20 cursor-pointer">
-            Guardar
+          <button type="submit" id="save-add-btn" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20 cursor-pointer flex items-center justify-center gap-2">
+            <span>Guardar</span>
           </button>
         </div>
       </form>
@@ -183,10 +215,31 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
 <script>
   import { supabase } from '../lib/supabase';
 
+  // CONTROL DE PESTAÑAS
+  const tabBtnGames = document.getElementById('tab-btn-games') as HTMLButtonElement;
+  const tabBtnUsers = document.getElementById('tab-btn-users') as HTMLButtonElement;
+  const sectionGames = document.getElementById('section-games') as HTMLElement;
+  const sectionUsers = document.getElementById('section-users') as HTMLElement;
+
+  tabBtnGames?.addEventListener('click', () => {
+    tabBtnGames.className = "flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-md cursor-pointer";
+    tabBtnUsers.className = "flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all theme-button theme-text-secondary hover:theme-text-primary cursor-pointer";
+    sectionGames.classList.remove('hidden');
+    sectionUsers.classList.add('hidden');
+  });
+
+  tabBtnUsers?.addEventListener('click', () => {
+    tabBtnUsers.className = "flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-md cursor-pointer";
+    tabBtnGames.className = "flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all theme-button theme-text-secondary hover:theme-text-primary cursor-pointer";
+    sectionUsers.classList.remove('hidden');
+    sectionGames.classList.add('hidden');
+    executeUsersSearch();
+  });
+
+  // BÚSQUEDA DE JUEGOS (RAWG)
   const form = document.getElementById('search-form') as HTMLFormElement;
   const input = document.getElementById('search-input') as HTMLInputElement;
   const resultsGrid = document.getElementById('results-grid') as HTMLDivElement;
-  const loading = document.getElementById('loading') as HTMLDivElement;
 
   const genreSelect = document.getElementById('rawg-genre') as HTMLSelectElement;
   const platformFilterSelect = document.getElementById('rawg-platform') as HTMLSelectElement;
@@ -196,6 +249,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
   const closeModalBtn = document.getElementById('close-modal-btn') as HTMLButtonElement;
   const cancelModalBtn = document.getElementById('cancel-modal-btn') as HTMLButtonElement;
   const addForm = document.getElementById('add-form') as HTMLFormElement;
+  const saveAddBtn = document.getElementById('save-add-btn') as HTMLButtonElement;
 
   const platformSelect = document.getElementById('modal-platform') as HTMLSelectElement;
   const storeSelect = document.getElementById('modal-store') as HTMLSelectElement;
@@ -260,6 +314,19 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
     updateStoreOptions(selectedPlatform);
   });
 
+  function renderSkeletons() {
+    if (!resultsGrid) return;
+    resultsGrid.innerHTML = Array(8).fill(0).map(() => `
+      <div class="theme-card border rounded-2xl overflow-hidden p-0 animate-pulse flex flex-col justify-between h-[280px]">
+        <div class="w-full h-40 bg-slate-500/20"></div>
+        <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+          <div class="h-4 bg-slate-500/20 rounded w-3/4"></div>
+          <div class="h-8 bg-slate-500/20 rounded-xl w-full mt-2"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
   async function executeSearch() {
     const query = input.value.trim();
     const genre = genreSelect?.value || '';
@@ -268,12 +335,10 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
 
     if (!query && !genre && !platform) {
       resultsGrid.innerHTML = '';
-      loading.classList.add('hidden');
       return;
     }
 
-    loading.classList.remove('hidden');
-    resultsGrid.innerHTML = '';
+    renderSkeletons();
 
     try {
       let endpoint = `/api/search?q=${encodeURIComponent(query)}&ordering=${ordering}`;
@@ -282,23 +347,29 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
 
       const res = await fetch(endpoint);
       const games = await res.json();
-      loading.classList.add('hidden');
 
       if (!games || games.length === 0) {
-        resultsGrid.innerHTML = `<p class="col-span-full text-center theme-text-secondary py-8">No se encontraron videojuegos con los filtros seleccionados.</p>`;
+        resultsGrid.innerHTML = `<p class="col-span-full text-center theme-text-secondary py-12 theme-card border rounded-2xl border-dashed border-slate-500/20">No se encontraron videojuegos con los filtros seleccionados.</p>`;
         return;
       }
 
+      resultsGrid.innerHTML = '';
       games.forEach((game: any) => {
         const card = document.createElement('div');
-        card.className = 'theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all shadow-md';
+        card.className = 'theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-xl group';
         card.innerHTML = `
-          <img src="${game.background_image || '/placeholder.jpg'}" alt="Portada de ${game.name}" class="w-full h-40 object-cover" />
+          <div class="relative overflow-hidden h-40 bg-slate-800">
+            <img 
+              src="${game.background_image || '/placeholder.jpg'}" 
+              alt="Portada de ${game.name}" 
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+            />
+          </div>
           <div class="p-4 flex-1 flex flex-col justify-between">
-            <h3 class="font-bold theme-text-primary text-sm line-clamp-1 mb-2">${game.name}</h3>
+            <h3 class="font-bold theme-text-primary text-sm line-clamp-1 mb-2" title="${game.name}">${game.name}</h3>
             <button 
               onclick="openAddModal(${game.id}, '${game.name.replace(/'/g, "\\'")}', '${game.background_image || ''}')"
-              class="w-full mt-3 py-2 px-3 bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/30 text-indigo-400 hover:text-white text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              class="w-full mt-3 py-2 px-3 bg-indigo-600/20 hover:bg-indigo-600 border border-indigo-500/30 text-indigo-400 hover:text-white text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
             >
               + Agregar a Mi Biblioteca
             </button>
@@ -307,8 +378,8 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
         resultsGrid.appendChild(card);
       });
     } catch (err) {
-      loading.classList.add('hidden');
       console.error(err);
+      resultsGrid.innerHTML = `<p class="col-span-full text-center text-rose-400 py-8 theme-card border rounded-2xl">Error al realizar la búsqueda. Comprueba tu conexión a internet.</p>`;
     }
   }
 
@@ -329,6 +400,88 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
     executeSearch();
   });
 
+  // BÚSQUEDA DE PERFILES (SUPABASE)
+  const searchUsersInput = document.getElementById('search-users-input') as HTMLInputElement;
+  const usersResultsGrid = document.getElementById('users-results-grid') as HTMLDivElement;
+  let userDebounceTimer: ReturnType<typeof setTimeout>;
+
+  async function executeUsersSearch() {
+    if (!usersResultsGrid) return;
+    const query = searchUsersInput?.value.trim() || '';
+
+    usersResultsGrid.innerHTML = Array(6).fill(0).map(() => `
+      <div class="theme-card border rounded-2xl p-5 animate-pulse space-y-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-slate-500/20 rounded-full"></div>
+          <div class="space-y-1.5 flex-1">
+            <div class="h-3.5 bg-slate-500/20 rounded w-1/2"></div>
+            <div class="h-3 bg-slate-500/20 rounded w-1/3"></div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    try {
+      let supabaseQuery = supabase
+        .from('profiles')
+        .select('id, username, display_name, avatar_url, bio')
+        .limit(12);
+
+      if (query) {
+        supabaseQuery = supabaseQuery.or(`username.ilike.%${query}%,display_name.ilike.%${query}%`);
+      }
+
+      const { data: users, error } = await supabaseQuery;
+
+      if (error) throw error;
+
+      if (!users || users.length === 0) {
+        usersResultsGrid.innerHTML = `<p class="col-span-full text-center theme-text-secondary py-12 theme-card border rounded-2xl border-dashed border-slate-500/20">No se encontraron usuarios en la comunidad.</p>`;
+        return;
+      }
+
+      usersResultsGrid.innerHTML = users.map(user => `
+        <div class="theme-card border rounded-2xl p-5 flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-md group">
+          <div class="flex items-start gap-3.5 mb-3">
+            <div class="w-12 h-12 rounded-full overflow-hidden bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+              ${user.avatar_url ? `
+                <img src="${user.avatar_url}" alt="${user.username}" class="w-full h-full object-cover" />
+              ` : `
+                <span class="text-indigo-400 font-bold text-lg">${(user.username || 'U')[0].toUpperCase()}</span>
+              `}
+            </div>
+            <div class="overflow-hidden">
+              <h3 class="font-bold theme-text-primary text-sm truncate">${user.display_name || user.username}</h3>
+              <p class="text-xs theme-text-secondary truncate">@${user.username}</p>
+            </div>
+          </div>
+
+          <p class="text-xs theme-text-secondary line-clamp-2 mb-4 h-8">${user.bio || 'Sin biografía disponible.'}</p>
+
+          <a 
+            href="/user/${user.username}" 
+            class="w-full py-2 px-3 theme-button border hover:border-indigo-500/40 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 theme-text-primary group-hover:text-indigo-400 cursor-pointer"
+          >
+            <span>Ver Perfil Público</span>
+            <span class="text-indigo-400">→</span>
+          </a>
+        </div>
+      `).join('');
+
+    } catch (err) {
+      console.error(err);
+      usersResultsGrid.innerHTML = `<p class="col-span-full text-center text-rose-400 py-8 theme-card border rounded-2xl">Error al buscar perfiles.</p>`;
+    }
+  }
+
+  searchUsersInput?.addEventListener('input', () => {
+    clearTimeout(userDebounceTimer);
+    userDebounceTimer = setTimeout(() => {
+      executeUsersSearch();
+    }, 500);
+  });
+
+  // MODAL LOGIC
   (window as any).openAddModal = async (rawgId: number, title: string, coverUrl: string) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
@@ -346,7 +499,6 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
       .eq('rawg_id', rawgId)
       .maybeSingle();
 
-    const submitBtn = addForm.querySelector('button[type="submit"]') as HTMLButtonElement;
     const modalTitle = document.getElementById('modal-title') as HTMLHeadingElement;
 
     (document.getElementById('modal-rawg-id') as HTMLInputElement).value = rawgId.toString();
@@ -357,15 +509,15 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
 
     if (existingGame) {
       modalTitle.textContent = `⚠️ ${title} (Ya en biblioteca)`;
-      submitBtn.disabled = true;
-      submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      saveAddBtn.disabled = true;
+      saveAddBtn.classList.add('opacity-50', 'cursor-not-allowed');
       if (typeof (window as any).showToast === 'function') {
         (window as any).showToast('Este juego ya forma parte de tu colección.', 'error');
       }
     } else {
       modalTitle.textContent = `Agregar: ${title}`;
-      submitBtn.disabled = false;
-      submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      saveAddBtn.disabled = false;
+      saveAddBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     }
 
     const currentPlatform = platformSelect.value || 'PC';
@@ -395,6 +547,15 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
     const hours = parseFloat(hoursInput.value) || 0;
     const isFavorite = favoriteCheckbox.checked;
 
+    saveAddBtn.disabled = true;
+    saveAddBtn.innerHTML = `
+      <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span>Guardando...</span>
+    `;
+
     const { error } = await supabase.from('user_library').insert({
       user_id: session.user.id,
       rawg_id: rawgId,
@@ -407,6 +568,9 @@ import { Search as SearchIcon, Loader2, X, Star, Filter } from 'lucide-astro';
       is_favorite: isFavorite,
       achievements_progress: 0
     });
+
+    saveAddBtn.disabled = false;
+    saveAddBtn.innerHTML = `<span>Guardar</span>`;
 
     if (error) {
       if (typeof (window as any).showToast === 'function') {
