@@ -1,0 +1,158 @@
+---
+import { Keyboard, X, Gamepad2, Search, BarChart2, MessageSquare, Home } from 'lucide-astro';
+---
+
+<!-- Modal de Ayuda de Atajos de Teclado -->
+<div id="shortcuts-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center hidden p-4">
+  <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl relative overflow-hidden space-y-4">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-500/20">
+      <div class="flex items-center gap-2">
+        <div class="p-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-xl">
+          <Keyboard class="w-5 h-5" />
+        </div>
+        <div>
+          <h3 class="text-base font-bold theme-text-primary">Atajos de Teclado</h3>
+          <p class="text-[11px] theme-text-secondary">Navega por KazeChronik a la velocidad de la luz</p>
+        </div>
+      </div>
+      <button id="close-shortcuts-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg hover:bg-slate-500/10 transition-colors cursor-pointer">
+        <X class="w-5 h-5" />
+      </button>
+    </div>
+
+    <!-- Lista de Atajos -->
+    <div class="space-y-2 text-xs">
+      <div class="flex items-center justify-between p-2.5 theme-button border rounded-xl">
+        <span class="flex items-center gap-2 theme-text-primary font-medium">
+          <Gamepad2 class="w-4 h-4 text-indigo-400" /> Mi Biblioteca
+        </span>
+        <div class="flex items-center gap-1">
+          <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono theme-text-primary">G</kbd>
+          <span class="theme-text-secondary">+</span>
+          <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono theme-text-primary">B</kbd>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between p-2.5 theme-button border rounded-xl">
+        <span class="flex items-center gap-2 theme-text-primary font-medium">
+          <Search class="w-4 h-4 text-sky-400" /> Búsqueda Unificada
+        </span>
+        <div class="flex items-center gap-1">
+          <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono theme-text-primary">G</kbd>
+          <span class="theme-text-secondary">+</span>
+          <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono theme-text-primary">S</kbd>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between p-2.5 theme-button border rounded-xl">
+        <span class="flex items-center gap-2 theme-text-primary font-medium">
+          <BarChart2 class="w-4 h-4 text-emerald-400" /> Analíticas & Métricas
+        </span>
+        <div class="flex items-center gap-1">
+          <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono theme-text-primary">G</kbd>
+          <span class="theme-text-secondary">+</span>
+          <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono theme-text-primary">A</kbd>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between p-2.5 theme-button border rounded-xl">
+        <span class="flex items-center gap-2 theme-text-primary font-medium">
+          <MessageSquare class="w-4 h-4 text-purple-400" /> Reseñas
+        </span>
+        <div class="flex items-center gap-1">
+          <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono theme-text-primary">G</kbd>
+          <span class="theme-text-secondary">+</span>
+          <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono theme-text-primary">R</kbd>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between p-2.5 theme-button border rounded-xl">
+        <span class="flex items-center gap-2 theme-text-primary font-medium">
+          <Home class="w-4 h-4 text-amber-400" /> Inicio / Landing
+        </span>
+        <div class="flex items-center gap-1">
+          <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono theme-text-primary">G</kbd>
+          <span class="theme-text-secondary">+</span>
+          <kbd class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono theme-text-primary">I</kbd>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between p-2.5 theme-button border rounded-xl">
+        <span class="flex items-center gap-2 theme-text-primary font-medium">
+          <Keyboard class="w-4 h-4 text-rose-400" /> Abrir esta Guía de Atajos
+        </span>
+        <kbd class="px-2.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono theme-text-primary">?</kbd>
+      </div>
+    </div>
+
+    <div class="pt-2 text-center border-t border-slate-500/20">
+      <p class="text-[10px] theme-text-secondary">Presiona <kbd class="px-1.5 py-0.5 bg-slate-800 border rounded text-slate-300">Esc</kbd> para cerrar esta ventana</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setupShortcuts() {
+    const modal = document.getElementById('shortcuts-modal');
+    const closeBtn = document.getElementById('close-shortcuts-btn');
+    let lastKey = '';
+    let lastKeyTime = 0;
+
+    function toggleModal() {
+      if (modal) modal.classList.toggle('hidden');
+    }
+
+    closeBtn?.addEventListener('click', () => {
+      if (modal) modal.classList.add('hidden');
+    });
+
+    window.addEventListener('keydown', (e) => {
+      // Ignorar si el usuario está escribiendo en campos de entrada
+      const target = e.target as HTMLElement;
+      const isInput = target.tagName === 'INPUT' || 
+                      target.tagName === 'TEXTAREA' || 
+                      target.tagName === 'SELECT' || 
+                      target.isContentEditable;
+
+      if (isInput) return;
+
+      const currentTime = Date.now();
+      const key = e.key.toLowerCase();
+
+      // Tecla '?' para mostrar u ocultar el modal
+      if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
+        e.preventDefault();
+        toggleModal();
+        return;
+      }
+
+      // Tecla 'Escape' para cerrar el modal
+      if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+        modal.classList.add('hidden');
+        return;
+      }
+
+      // Lógica de secuencia (G + [tecla])
+      if (lastKey === 'g' && currentTime - lastKeyTime < 1000) {
+        if (key === 'b' || key === 'h') {
+          window.location.href = '/dashboard';
+        } else if (key === 's') {
+          window.location.href = '/search';
+        } else if (key === 'a') {
+          window.location.href = '/analytics';
+        } else if (key === 'r') {
+          window.location.href = '/reviews';
+        } else if (key === 'i') {
+          window.location.href = '/';
+        }
+        lastKey = '';
+      } else {
+        lastKey = key;
+        lastKeyTime = currentTime;
+      }
+    });
+  }
+
+  setupShortcuts();
+  document.addEventListener('astro:page-load', setupShortcuts);
+</script>

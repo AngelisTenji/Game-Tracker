@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Toast from '../components/common/Toast.astro';
 import CookieBanner from '../components/CookieBanner.astro';
 import SEO from '../components/common/SEO.astro';
+import KeyboardShortcuts from '../components/common/KeyboardShortcuts.astro';
 
 interface Props {
   title?: string;
@@ -46,6 +47,9 @@ const {
     <slot />
     <Toast />
     <CookieBanner />
+
+    <!-- Componente Global de Atajos de Teclado -->
+    <KeyboardShortcuts />
 
     <!-- Registro de Service Worker para PWA -->
     <script is:inline>

@@ -3,15 +3,25 @@ export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { BookOpen, Star, Clock, Calendar, MessageSquare, ExternalLink } from 'lucide-astro';
+import { 
+  BookOpen, 
+  Star, 
+  Clock, 
+  Calendar, 
+  MessageSquare, 
+  Search, 
+  Filter, 
+  Share2,
+  SlidersHorizontal 
+} from 'lucide-astro';
 ---
 
 <Layout title="Mi Feed de Bitácoras | KazeChronik">
   <Navbar />
 
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8 theme-text-primary">
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8 theme-text-primary space-y-6">
     <!-- Encabezado -->
-    <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
           <BookOpen class="w-8 h-8 text-indigo-400" />
@@ -23,16 +33,63 @@ import { BookOpen, Star, Clock, Calendar, MessageSquare, ExternalLink } from 'lu
       </div>
 
       <div class="flex items-center gap-2">
-        <span id="reviews-count-badge" class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold text-xs rounded-xl">
+        <span id="reviews-count-badge" class="px-3.5 py-1.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold text-xs rounded-xl shadow-sm">
           0 Reseñas
         </span>
       </div>
     </div>
 
-    <!-- Skeleton de Carga -->
+    <!-- Controles de Búsqueda y Filtros -->
+    <div id="reviews-controls" class="hidden flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 theme-card border rounded-2xl shadow-sm">
+      <div class="relative flex-1">
+        <Search class="w-4 h-4 theme-text-secondary absolute left-3 top-1/2 -translate-y-1/2" />
+        <input 
+          type="text" 
+          id="reviews-search" 
+          placeholder="Buscar por título de juego o contenido..." 
+          class="w-full pl-9 pr-3 py-2 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500 transition-colors"
+        />
+      </div>
+
+      <div class="flex items-center gap-2 overflow-x-auto">
+        <div class="flex items-center gap-1 text-xs theme-text-secondary font-semibold mr-1">
+          <Filter class="w-3.5 h-3.5 text-indigo-400" />
+          <span>Filtrar:</span>
+        </div>
+
+        <select id="reviews-filter-rating" class="px-3 py-2 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
+          <option value="all">Todas las notas</option>
+          <option value="high">Altas (8.0 - 10)</option>
+          <option value="mid">Medias (5.0 - 7.9)</option>
+          <option value="low">Bajas (&lt; 5.0)</option>
+        </select>
+
+        <select id="reviews-order" class="px-3 py-2 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
+          <option value="recent">Más Recientes</option>
+          <option value="rating_desc">Mejor Valorados</option>
+          <option value="hours_desc">Más Horas Jugadas</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Skeleton de Carga High-Fidelity -->
     <div id="reviews-skeleton" class="space-y-4 animate-pulse">
-      <div class="h-44 bg-slate-800/40 rounded-2xl w-full border border-slate-800"></div>
-      <div class="h-44 bg-slate-800/40 rounded-2xl w-full border border-slate-800"></div>
+      <div class="h-48 bg-slate-800/40 rounded-2xl w-full border border-slate-800 p-6 flex gap-6">
+        <div class="w-36 h-full bg-slate-700/30 rounded-xl"></div>
+        <div class="flex-1 space-y-3">
+          <div class="h-5 bg-slate-700/30 rounded w-1/3"></div>
+          <div class="h-4 bg-slate-700/30 rounded w-1/4"></div>
+          <div class="h-16 bg-slate-700/30 rounded w-full"></div>
+        </div>
+      </div>
+      <div class="h-48 bg-slate-800/40 rounded-2xl w-full border border-slate-800 p-6 flex gap-6">
+        <div class="w-36 h-full bg-slate-700/30 rounded-xl"></div>
+        <div class="flex-1 space-y-3">
+          <div class="h-5 bg-slate-700/30 rounded w-1/3"></div>
+          <div class="h-4 bg-slate-700/30 rounded w-1/4"></div>
+          <div class="h-16 bg-slate-700/30 rounded w-full"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Empty State -->
@@ -40,11 +97,11 @@ import { BookOpen, Star, Clock, Calendar, MessageSquare, ExternalLink } from 'lu
       <div class="p-4 theme-button rounded-2xl mb-4 theme-text-secondary">
         <MessageSquare class="w-10 h-10 text-slate-500" />
       </div>
-      <h3 class="text-lg font-semibold theme-text-primary">Aún no has escrito reseñas</h3>
-      <p class="text-sm theme-text-secondary max-w-sm mt-1 mb-6">
+      <h3 class="text-lg font-semibold theme-text-primary" id="empty-title">Aún no has escrito reseñas</h3>
+      <p class="text-sm theme-text-secondary max-w-sm mt-1 mb-6" id="empty-desc">
         Ingresa a cualquier juego de tu biblioteca para agregar tu puntuación personal y redactar tu bitácora.
       </p>
-      <a href="/dashboard" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20">
+      <a href="/dashboard" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 hover:scale-[1.02]">
         Ir a la Biblioteca
       </a>
     </div>
@@ -59,130 +116,241 @@ import { BookOpen, Star, Clock, Calendar, MessageSquare, ExternalLink } from 'lu
 <script>
   import { supabase } from '../lib/supabase';
 
+  let rawReviews: any[] = [];
+  let searchQuery = '';
+  let ratingFilter = 'all';
+  let sortOrder = 'recent';
+
   async function loadUserReviews() {
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      window.location.href = '/login';
-      return;
-    }
-
     const skeleton = document.getElementById('reviews-skeleton');
     const emptyState = document.getElementById('reviews-empty');
     const feed = document.getElementById('reviews-feed');
+    const controls = document.getElementById('reviews-controls');
+
+    // Modo Offline: Lectura desde caché local si no hay conexión
+    if (!navigator.onLine) {
+      const cached = localStorage.getItem('kazechronik_reviews_cache');
+      if (cached) {
+        try {
+          rawReviews = JSON.parse(cached);
+          if (skeleton) skeleton.classList.add('hidden');
+          renderReviews();
+          if (typeof (window as any).showToast === 'function') {
+            (window as any).showToast('Reseñas cargadas en Modo Offline', 'info');
+          }
+          return;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        window.location.href = '/login';
+        return;
+      }
+
+      const { data: reviews, error } = await supabase
+        .from('user_library')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .not('review', 'is', null)
+        .order('updated_at', { ascending: false });
+
+      if (skeleton) skeleton.classList.add('hidden');
+
+      if (error || !reviews || reviews.length === 0) {
+        if (emptyState) emptyState.classList.remove('hidden');
+        updateCountBadge(0);
+        return;
+      }
+
+      rawReviews = reviews;
+      localStorage.setItem('kazechronik_reviews_cache', JSON.stringify(rawReviews));
+
+      if (controls) controls.classList.remove('hidden');
+      renderReviews();
+
+    } catch (err) {
+      console.warn('Usando respaldo de caché local:', err);
+      const cached = localStorage.getItem('kazechronik_reviews_cache');
+      if (cached) {
+        rawReviews = JSON.parse(cached);
+        if (skeleton) skeleton.classList.add('hidden');
+        renderReviews();
+      }
+    }
+  }
+
+  function updateCountBadge(count: number) {
     const countBadge = document.getElementById('reviews-count-badge');
+    if (countBadge) {
+      countBadge.textContent = `${count} ${count === 1 ? 'Reseña' : 'Reseñas'}`;
+    }
+  }
 
-    // Consultar juegos con reseña o puntuación redactada
-    const { data: reviews, error } = await supabase
-      .from('user_library')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .not('review', 'is', null)
-      .order('updated_at', { ascending: false });
+  function renderReviews() {
+    const feed = document.getElementById('reviews-feed');
+    const emptyState = document.getElementById('reviews-empty');
+    const controls = document.getElementById('reviews-controls');
+    const emptyTitle = document.getElementById('empty-title');
+    const emptyDesc = document.getElementById('empty-desc');
 
-    if (skeleton) skeleton.classList.add('hidden');
+    if (!feed) return;
 
-    if (error || !reviews || reviews.length === 0) {
-      if (emptyState) emptyState.classList.remove('hidden');
-      if (countBadge) countBadge.textContent = '0 Reseñas';
+    // Aplicar Filtros
+    let filtered = rawReviews.filter(item => {
+      const matchSearch = searchQuery === '' || 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (item.review && item.review.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      let matchRating = true;
+      const numRating = Number(item.rating) || 0;
+
+      if (ratingFilter === 'high') matchRating = numRating >= 8;
+      else if (ratingFilter === 'mid') matchRating = numRating >= 5 && numRating < 8;
+      else if (ratingFilter === 'low') matchRating = numRating > 0 && numRating < 5;
+
+      return matchSearch && matchRating;
+    });
+
+    // Ordenamiento
+    filtered.sort((a, b) => {
+      if (sortOrder === 'rating_desc') return (Number(b.rating) || 0) - (Number(a.rating) || 0);
+      if (sortOrder === 'hours_desc') return (Number(b.hours_played) || 0) - (Number(a.hours_played) || 0);
+      return new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime();
+    });
+
+    updateCountBadge(filtered.length);
+
+    if (filtered.length === 0) {
+      feed.classList.add('hidden');
+      if (emptyState) {
+        emptyState.classList.remove('hidden');
+        if (emptyTitle) emptyTitle.textContent = 'No se encontraron reseñas';
+        if (emptyDesc) emptyDesc.textContent = 'Intenta cambiar el término de búsqueda o limpiar los filtros seleccionados.';
+      }
       return;
     }
 
-    if (countBadge) countBadge.textContent = `${reviews.length} ${reviews.length === 1 ? 'Reseña' : 'Reseñas'}`;
-    if (feed) feed.classList.remove('hidden');
+    if (emptyState) emptyState.classList.add('hidden');
+    if (controls) controls.classList.remove('hidden');
+    feed.classList.remove('hidden');
 
-    if (feed) {
-      feed.innerHTML = reviews.map(item => {
-        const rating = item.rating ? Number(item.rating).toFixed(1) : null;
-        const formattedDate = new Date(item.updated_at || item.created_at).toLocaleDateString('es-ES', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        });
+    feed.innerHTML = filtered.map(item => {
+      const rating = item.rating ? Number(item.rating).toFixed(1) : null;
+      const formattedDate = new Date(item.updated_at || item.created_at).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
 
-        return `
-          <article class="theme-card border rounded-2xl p-6 shadow-md hover:border-indigo-500/40 transition-all flex flex-col md:flex-row gap-6">
-            <!-- Portada e Info del Juego -->
-            <a href="/game/${item.id}" class="w-full md:w-36 h-48 md:h-auto rounded-xl overflow-hidden bg-slate-800 flex-shrink-0 relative group">
-              <img 
-                src="${item.cover_url || '/placeholder.jpg'}" 
-                alt="${item.title}" 
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <span class="text-xs font-bold text-white bg-indigo-600/90 px-2.5 py-1 rounded-lg backdrop-blur-md">
-                  Editar →
-                </span>
-              </div>
-            </a>
+      // Formateo visual de notas con checkboxes [x]
+      let formattedNotes = item.notes || '';
+      if (formattedNotes) {
+        formattedNotes = formattedNotes
+          .replace(/\[x\]/gi, '<span class="text-emerald-400 font-bold">[✔]</span>')
+          .replace(/\[ \]/g, '<span class="text-amber-400 font-bold">[⏳]</span>');
+      }
 
-            <!-- Contenido de la Bitácora -->
-            <div class="flex-1 flex flex-col justify-between space-y-4">
-              <div>
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <a href="/game/${item.id}" class="hover:text-indigo-400 transition-colors">
-                    <h2 class="text-xl font-bold theme-text-primary tracking-tight">${item.title}</h2>
-                  </a>
+      return `
+        <article class="theme-card border rounded-3xl p-6 shadow-md hover:border-indigo-500/40 transition-all flex flex-col md:flex-row gap-6 relative group">
+          
+          <!-- Portada del Juego -->
+          <a href="/game/${item.id}" class="w-full md:w-36 h-48 md:h-auto rounded-2xl overflow-hidden bg-slate-800 flex-shrink-0 relative group/cover">
+            <img 
+              src="${item.cover_url || '/placeholder.jpg'}" 
+              alt="${item.title}" 
+              class="w-full h-full object-cover group-hover/cover:scale-105 transition-transform duration-300"
+            />
+            <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover/cover:opacity-100 transition-opacity flex items-center justify-center">
+              <span class="text-xs font-bold text-white bg-indigo-600/90 px-2.5 py-1 rounded-lg backdrop-blur-md">
+                Ver Bitácora →
+              </span>
+            </div>
+          </a>
 
-                  ${rating ? `
-                    <div class="flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 font-black text-sm rounded-xl">
-                      <span>★</span>
-                      <span>${rating} / 10</span>
-                    </div>
-                  ` : ''}
-                </div>
+          <!-- Contenido de la Reseña -->
+          <div class="flex-1 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <a href="/game/${item.id}" class="hover:text-indigo-400 transition-colors">
+                  <h2 class="text-xl font-bold theme-text-primary tracking-tight">${item.title}</h2>
+                </a>
 
-                <div class="flex items-center gap-4 text-xs theme-text-secondary mb-3">
-                  <span class="flex items-center gap-1">
-                    <span class="text-indigo-400 font-semibold">${item.platform || 'PC'}</span>
-                  </span>
-                  •
-                  <span class="flex items-center gap-1">
-                    <span>${item.hours_played || 0}h jugadas</span>
-                  </span>
-                  •
-                  <span class="flex items-center gap-1">
-                    <span>${formattedDate}</span>
-                  </span>
-                </div>
-
-                <!-- Texto de Reseña -->
-                <p class="text-sm theme-text-primary leading-relaxed whitespace-pre-line bg-slate-900/40 p-4 rounded-xl border border-slate-800/60">
-                  "${item.review}"
-                </p>
-
-                ${item.notes ? `
-                  <div class="mt-3 p-3 bg-indigo-950/20 border border-indigo-500/10 rounded-xl">
-                    <p class="text-xs text-indigo-300 font-semibold mb-0.5">📌 Notas Privadas:</p>
-                    <p class="text-xs theme-text-secondary italic">${item.notes}</p>
+                ${rating ? `
+                  <div class="flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 font-black text-sm rounded-xl shadow-sm">
+                    <span>★</span>
+                    <span>${rating} / 10</span>
                   </div>
                 ` : ''}
               </div>
 
-              <!-- Enlaces directos y etiquetas -->
-              <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-800/60">
-                <div class="flex flex-wrap gap-1">
-                  ${(item.tags || []).map((t: string) => `
-                    <span class="text-[10px] font-semibold px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-md">
-                      #${t}
-                    </span>
-                  `).join('')}
-                </div>
-
-                <a 
-                  href="/game/${item.id}" 
-                  class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
-                >
-                  <span>Ver Bitácora Completa</span>
-                  <span>→</span>
-                </a>
+              <div class="flex items-center gap-3 text-xs theme-text-secondary mb-3">
+                <span class="font-bold text-indigo-400 uppercase">${item.platform || 'PC'}</span>
+                <span>•</span>
+                <span>${item.hours_played || 0} hrs jugadas</span>
+                <span>•</span>
+                <span>${formattedDate}</span>
               </div>
+
+              <!-- Bloque de Texto de Reseña -->
+              <p class="text-xs sm:text-sm theme-text-primary leading-relaxed whitespace-pre-line bg-slate-900/40 p-4 rounded-2xl border border-slate-800/60 shadow-inner italic">
+                "${item.review}"
+              </p>
+
+              ${formattedNotes ? `
+                <div class="mt-3 p-3 bg-indigo-950/20 border border-indigo-500/10 rounded-2xl space-y-1">
+                  <p class="text-xs text-indigo-300 font-semibold flex items-center gap-1">
+                    <span>📌 Notas Privadas:</span>
+                  </p>
+                  <div class="text-xs theme-text-secondary font-mono leading-relaxed">${formattedNotes}</div>
+                </div>
+              ` : ''}
             </div>
-          </article>
-        `;
-      }).join('');
-    }
+
+            <!-- Etiquetas y Enlace directo -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-800/60">
+              <div class="flex flex-wrap gap-1">
+                ${(item.tags || []).map((t: string) => `
+                  <span class="text-[10px] font-semibold px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-md">
+                    #${t}
+                  </span>
+                `).join('')}
+              </div>
+
+              <a 
+                href="/game/${item.id}" 
+                class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
+              >
+                <span>Ver Bitácora Completa</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
   }
+
+  // Event Listeners para Filtros y Búsqueda
+  document.getElementById('reviews-search')?.addEventListener('input', (e) => {
+    searchQuery = (e.target as HTMLInputElement).value.trim();
+    renderReviews();
+  });
+
+  document.getElementById('reviews-filter-rating')?.addEventListener('change', (e) => {
+    ratingFilter = (e.target as HTMLSelectElement).value;
+    renderReviews();
+  });
+
+  document.getElementById('reviews-order')?.addEventListener('change', (e) => {
+    sortOrder = (e.target as HTMLSelectElement).value;
+    renderReviews();
+  });
 
   loadUserReviews();
   document.addEventListener('astro:page-load', loadUserReviews);
