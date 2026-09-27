@@ -1,20 +1,36 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } from 'lucide-astro';
+import { 
+  Palette, 
+  Check, 
+  Sun, 
+  Moon, 
+  Monitor, 
+  Share2, 
+  FileSpreadsheet, 
+  HardDrive, 
+  RefreshCw, 
+  Trash2,
+  Image,
+  Lock,
+  Download,
+  Upload,
+  UserCheck
+} from 'lucide-astro';
 ---
 
 <Layout title="Ajustes | KazeChronik">
   <Navbar />
 
-  <main class="flex-1 max-w-xl w-full mx-auto px-4 py-8">
-    <div class="mb-6">
+  <main class="flex-1 max-w-xl w-full mx-auto px-4 py-8 space-y-6">
+    <div class="mb-2">
       <h1 class="text-2xl font-bold theme-text-primary tracking-tight">Ajustes</h1>
-      <p class="text-xs theme-text-secondary mt-0.5">Personaliza la apariencia y preferencias de tu cuenta</p>
+      <p class="text-xs theme-text-secondary mt-0.5">Personaliza la apariencia, perfil público y preferencias de tu cuenta</p>
     </div>
 
-    <!-- Sección de Apariencia -->
-    <div class="theme-card border rounded-2xl p-5 shadow-xl mb-6">
+    <!-- SECCIÓN DE APARIENCIA -->
+    <div class="theme-card border rounded-2xl p-5 shadow-xl">
       <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-500/20">
         <div class="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-500">
           <Palette class="w-4 h-4" />
@@ -25,7 +41,6 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
         </div>
       </div>
 
-      <!-- Retícula Horizontal Compacta -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <!-- Legacy Dark -->
         <button
@@ -77,10 +92,13 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
       </div>
     </div>
 
-    <!-- Formulario de Perfil Público -->
-    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mb-6">
+    <!-- SECCIÓN DE PERFIL PÚBLICO -->
+    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm">
       <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
-        <h2 class="font-bold text-lg theme-text-primary flex items-center gap-2">👤 Perfil Público</h2>
+        <h2 class="font-bold text-base theme-text-primary flex items-center gap-2">
+          <UserCheck class="w-4 h-4 text-indigo-400" />
+          <span>Perfil Público</span>
+        </h2>
         <button
           id="copy-profile-link-btn"
           type="button"
@@ -102,7 +120,6 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
             disabled
             class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm font-bold theme-text-secondary opacity-60 cursor-not-allowed"
           />
-          <p class="text-[10px] theme-text-secondary mt-1">El nombre de usuario es tu identificador único e inmodificable.</p>
         </div>
 
         <div>
@@ -111,6 +128,16 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
             type="text" 
             id="profile-display-name" 
             placeholder="ej: Ángel González"
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary mb-1">Foto de Perfil (URL de imagen)</label>
+          <input 
+            type="url" 
+            id="profile-avatar-url" 
+            placeholder="https://ejemplo.com/mi-avatar.png"
             class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500"
           />
         </div>
@@ -127,60 +154,93 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
 
         <button 
           type="submit" 
-          class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer"
+          id="save-profile-btn"
+          class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer flex items-center justify-center gap-2"
         >
-          Guardar Perfil
+          <span>Guardar Perfil</span>
         </button>
       </form>
     </section>
 
-    <!-- Copia de Seguridad & Datos -->
-    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mb-6">
-      <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
-        📦 Copia de Seguridad & Datos
-      </h2>
-      <p class="text-xs theme-text-secondary">
-        Exporta tu biblioteca en JSON para respaldos completos, o en formato CSV para usar en Excel / Google Sheets.
+    <!-- SECCIÓN DE ALMACENAMIENTO OFFLINE -->
+    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+        <h2 class="font-bold text-base theme-text-primary flex items-center gap-2">
+          <HardDrive class="w-4 h-4 text-emerald-400" />
+          <span>Gestión Offline & Caché Local</span>
+        </h2>
+        <span id="cache-size-badge" class="px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold rounded-lg">
+          Calculando...
+        </span>
+      </div>
+
+      <p class="text-xs theme-text-secondary leading-relaxed">
+        KazeChronik guarda tus juegos y bitácoras en tu dispositivo para que puedas consultarlos sin conexión a internet.
       </p>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-        <!-- Exportar JSON -->
+      <div class="flex flex-wrap items-center gap-3 pt-1">
+        <button 
+          id="sync-offline-btn"
+          type="button"
+          class="flex-1 py-2 px-3 theme-button hover:border-indigo-500/50 text-xs font-semibold rounded-xl border transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+        >
+          <RefreshCw class="w-3.5 h-3.5 text-indigo-400" />
+          <span>Refrescar Caché</span>
+        </button>
+
+        <button 
+          id="clear-cache-btn"
+          type="button"
+          class="py-2 px-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+        >
+          <Trash2 class="w-3.5 h-3.5" />
+          <span>Limpiar Caché</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SECCIÓN DE RESPALDOS & EXPORTACIÓN -->
+    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm">
+      <h2 class="font-bold text-base border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
+        <Download class="w-4 h-4 text-sky-400" />
+        <span>Copia de Seguridad & Exportación</span>
+      </h2>
+      <p class="text-xs theme-text-secondary">
+        Respalda tu colección completa en JSON o exspórtala en formato CSV compatible con Excel.
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
         <button 
           id="export-backup-btn"
           type="button"
           class="px-3 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer flex items-center justify-center gap-1.5"
         >
-          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-          </svg>
+          <Download class="w-3.5 h-3.5 shrink-0" />
           <span>JSON</span>
         </button>
 
-        <!-- Exportar CSV -->
         <button 
           id="export-csv-btn"
           type="button"
           class="px-3 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-emerald-600/20 cursor-pointer flex items-center justify-center gap-1.5"
         >
-          <FileSpreadsheet class="w-4 h-4 shrink-0" />
+          <FileSpreadsheet class="w-3.5 h-3.5 shrink-0" />
           <span>CSV (Excel)</span>
         </button>
 
-        <!-- Importar JSON -->
         <label class="px-3 py-2.5 theme-button hover:border-indigo-500/50 theme-text-primary font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border text-center">
-          <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-          </svg>
+          <Upload class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
           <span>Restaurar</span>
           <input type="file" id="import-backup-input" accept=".json" class="hidden" />
         </label>
       </div>
     </section>
 
-    <!-- Sección de Seguridad & Contraseña -->
-    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm mb-6">
-      <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
-        🔒 Seguridad & Contraseña
+    <!-- SECCIÓN DE SEGURIDAD & CONTRASEÑA -->
+    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm">
+      <h2 class="font-bold text-base border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
+        <Lock class="w-4 h-4 text-purple-400" />
+        <span>Seguridad & Contraseña</span>
       </h2>
       
       <form id="password-form" class="space-y-4">
@@ -211,9 +271,9 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
         <button 
           type="submit" 
           id="change-password-btn"
-          class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer"
+          class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer flex items-center justify-center gap-2"
         >
-          Actualizar Contraseña
+          <span>Actualizar Contraseña</span>
         </button>
       </form>
     </section>
@@ -223,7 +283,6 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
 <script>
   import { supabase } from '../lib/supabase';
 
-  // Lógica del Conmutador de Temas Visuales
   function initThemeSelector() {
     const buttons = document.querySelectorAll<HTMLButtonElement>('.theme-opt');
     const currentTheme = localStorage.getItem('theme') || 'legacy';
@@ -241,9 +300,7 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
     }
 
     const initialBtn = document.querySelector<HTMLButtonElement>(`.theme-opt[data-theme="${currentTheme}"]`);
-    if (initialBtn) {
-      applyActiveStyles(initialBtn);
-    }
+    if (initialBtn) applyActiveStyles(initialBtn);
 
     buttons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -255,19 +312,31 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
     });
   }
 
+  function calculateCacheSize() {
+    let totalBytes = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('kazechronik_')) {
+        const val = localStorage.getItem(key) || '';
+        totalBytes += key.length + val.length;
+      }
+    }
+    const kb = (totalBytes / 1024).toFixed(1);
+    const badge = document.getElementById('cache-size-badge');
+    if (badge) badge.textContent = `${kb} KB almacenados`;
+  }
+
   async function initSettingsPage() {
     initThemeSelector();
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      window.location.href = '/login';
-      return;
-    }
+    calculateCacheSize();
 
     const usernameInput = document.getElementById('profile-username') as HTMLInputElement;
     const nameInput = document.getElementById('profile-display-name') as HTMLInputElement;
+    const avatarUrlInput = document.getElementById('profile-avatar-url') as HTMLInputElement;
     const bioInput = document.getElementById('profile-bio') as HTMLTextAreaElement;
     const profileForm = document.getElementById('profile-form') as HTMLFormElement;
+    const saveProfileBtn = document.getElementById('save-profile-btn') as HTMLButtonElement;
+
     const passwordForm = document.getElementById('password-form');
     const newPasswordInput = document.getElementById('new-password') as HTMLInputElement;
     const confirmPasswordInput = document.getElementById('confirm-password') as HTMLInputElement;
@@ -275,7 +344,28 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
     const copyProfileBtn = document.getElementById('copy-profile-link-btn');
     const copyBtnText = document.getElementById('copy-btn-text');
 
-    // 1. Cargar perfil actual desde Supabase
+    // Cargar en Modo Offline si no hay red
+    if (!navigator.onLine) {
+      const cachedProfile = localStorage.getItem('kazechronik_profile_cache');
+      if (cachedProfile) {
+        try {
+          const p = JSON.parse(cachedProfile);
+          if (usernameInput) usernameInput.value = p.username || '';
+          if (nameInput) nameInput.value = p.display_name || '';
+          if (avatarUrlInput) avatarUrlInput.value = p.avatar_url || '';
+          if (bioInput) bioInput.value = p.bio || '';
+        } catch (e) { console.error(e); }
+      }
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = '/login';
+      return;
+    }
+
+    // 1. Obtener perfil
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
@@ -285,89 +375,146 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
     if (profile) {
       if (usernameInput) usernameInput.value = profile.username || '';
       if (nameInput) nameInput.value = profile.display_name || '';
+      if (avatarUrlInput) avatarUrlInput.value = profile.avatar_url || '';
       if (bioInput) bioInput.value = profile.bio || '';
+
+      localStorage.setItem('kazechronik_profile_cache', JSON.stringify(profile));
     }
 
-    // Copiar Enlace de Perfil Público al Portapapeles
+    // Copiar Enlace
     copyProfileBtn?.addEventListener('click', () => {
       const username = usernameInput.value;
       if (!username) return;
 
-      const profileUrl = `${window.location.origin}/u/${username}`;
+      const profileUrl = `${window.location.origin}/user/${username}`;
       navigator.clipboard.writeText(profileUrl).then(() => {
         if (copyBtnText) copyBtnText.textContent = '¡Copiado!';
         if (typeof (window as any).showToast === 'function') {
           (window as any).showToast('Enlace de perfil copiado al portapapeles', 'success');
         }
-        setTimeout(() => {
-          if (copyBtnText) copyBtnText.textContent = 'Copiar Perfil';
-        }, 2000);
+        setTimeout(() => { if (copyBtnText) copyBtnText.textContent = 'Copiar Perfil'; }, 2000);
       });
     });
 
-    // 2. Listener para Guardar Perfil Público
+    // Guardar Perfil
     profileForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const displayNameVal = nameInput.value.trim();
-      const bioVal = bioInput.value.trim();
+      saveProfileBtn.disabled = true;
+      saveProfileBtn.innerHTML = `
+        <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Guardando...</span>
+      `;
+
+      const updateData = {
+        display_name: nameInput.value.trim() || usernameInput.value,
+        avatar_url: avatarUrlInput.value.trim() || null,
+        bio: bioInput.value.trim() || null,
+        updated_at: new Date().toISOString()
+      };
 
       const { error } = await supabase
         .from('profiles')
-        .update({
-          display_name: displayNameVal || usernameInput.value,
-          bio: bioVal,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', session.user.id);
 
+      saveProfileBtn.disabled = false;
+      saveProfileBtn.innerHTML = `<span>Guardar Perfil</span>`;
+
       if (error) {
-        alert('Error al actualizar el perfil: ' + error.message);
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Error al actualizar: ' + error.message, 'error');
+        } else {
+          alert('Error al actualizar: ' + error.message);
+        }
       } else {
-        alert('¡Perfil actualizado con éxito!');
+        localStorage.setItem('kazechronik_profile_cache', JSON.stringify({ ...profile, ...updateData }));
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('¡Perfil actualizado con éxito!', 'success');
+        } else {
+          alert('¡Perfil actualizado con éxito!');
+        }
       }
     });
 
+    // Cambiar Contraseña
     passwordForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const newPassword = newPasswordInput.value;
-      const confirmPassword = confirmPasswordInput.value;
-
-      if (newPassword !== confirmPassword) {
-        alert('Las contraseñas no coinciden. Por favor verifica.');
+      if (newPasswordInput.value !== confirmPasswordInput.value) {
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Las contraseñas no coinciden.', 'error');
+        } else {
+          alert('Las contraseñas no coinciden.');
+        }
         return;
       }
 
       changePasswordBtn.disabled = true;
-      changePasswordBtn.textContent = 'Actualizando...';
+      changePasswordBtn.innerHTML = `<span>Actualizando...</span>`;
 
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      const { error } = await supabase.auth.updateUser({ password: newPasswordInput.value });
 
       changePasswordBtn.disabled = false;
-      changePasswordBtn.textContent = 'Actualizar Contraseña';
+      changePasswordBtn.innerHTML = `<span>Actualizar Contraseña</span>`;
 
       if (error) {
-        alert('Error al actualizar contraseña: ' + error.message);
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Error: ' + error.message, 'error');
+        } else {
+          alert('Error: ' + error.message);
+        }
       } else {
-        alert('¡Tu contraseña ha sido actualizada con éxito!');
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('¡Contraseña actualizada correctamente!', 'success');
+        } else {
+          alert('¡Contraseña actualizada correctamente!');
+        }
         newPasswordInput.value = '';
         confirmPasswordInput.value = '';
       }
     });
 
-    // 3. Listener para Exportar Backup (JSON)
-    const exportBtn = document.getElementById('export-backup-btn');
-    exportBtn?.addEventListener('click', async () => {
-      const { data: games, error } = await supabase
+    // Refrescar Caché
+    document.getElementById('sync-offline-btn')?.addEventListener('click', async () => {
+      const { data: games } = await supabase
         .from('user_library')
         .select('*')
         .eq('user_id', session.user.id);
 
-      if (error || !games) {
-        alert('Error al obtener datos para la copia de seguridad.');
-        return;
+      if (games) {
+        localStorage.setItem('kazechronik_library_cache', JSON.stringify(games));
+        calculateCacheSize();
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Caché local sincronizada con la base de datos', 'success');
+        }
       }
+    });
+
+    // Limpiar Caché Local
+    document.getElementById('clear-cache-btn')?.addEventListener('click', () => {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('kazechronik_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      calculateCacheSize();
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Caché local eliminada correctamente', 'info');
+      }
+    });
+
+    // Exportar Backup JSON
+    document.getElementById('export-backup-btn')?.addEventListener('click', async () => {
+      const { data: games } = await supabase
+        .from('user_library')
+        .select('*')
+        .eq('user_id', session.user.id);
+
+      if (!games) return;
 
       const backupData = {
         app: 'KazeChronik',
@@ -390,18 +537,14 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
       URL.revokeObjectURL(url);
     });
 
-    // Exportar Biblioteca a CSV (Excel)
-    const exportCsvBtn = document.getElementById('export-csv-btn');
-    exportCsvBtn?.addEventListener('click', async () => {
-      const { data: games, error } = await supabase
+    // Exportar CSV
+    document.getElementById('export-csv-btn')?.addEventListener('click', async () => {
+      const { data: games } = await supabase
         .from('user_library')
         .select('*')
         .eq('user_id', session.user.id);
 
-      if (error || !games || games.length === 0) {
-        alert('No hay datos disponibles para exportar.');
-        return;
-      }
+      if (!games || games.length === 0) return;
 
       const headers = ['Título', 'Plataforma', 'Tienda', 'Estado', 'Horas Jugadas', 'Calificación', 'Favorito', 'Reseña'];
       const rows = games.map(g => [
@@ -428,7 +571,7 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
       URL.revokeObjectURL(url);
     });
 
-    // 4. Listener para Importar Backup (JSON)
+    // Importar Backup
     const importInput = document.getElementById('import-backup-input') as HTMLInputElement;
     importInput?.addEventListener('change', async (e: any) => {
       const file = e.target.files?.[0];
@@ -440,14 +583,9 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
           const content = JSON.parse(event.target?.result as string);
           const gamesToImport = content.library || content;
 
-          if (!Array.isArray(gamesToImport)) {
-            alert('El archivo JSON no tiene un formato válido de biblioteca.');
-            return;
-          }
+          if (!Array.isArray(gamesToImport)) return;
 
-          if (!confirm(`Se van a importar ${gamesToImport.length} juegos a tu cuenta. ¿Deseas continuar?`)) {
-            return;
-          }
+          if (!confirm(`Se van a importar ${gamesToImport.length} juegos a tu cuenta. ¿Deseas continuar?`)) return;
 
           const preparedGames = gamesToImport.map(g => ({
             user_id: session.user.id,
@@ -465,21 +603,18 @@ import { Palette, Check, Sun, Moon, Monitor, Share2, FileSpreadsheet, Copy } fro
             updated_at: new Date().toISOString()
           }));
 
-          const { error } = await supabase
-            .from('user_library')
-            .insert(preparedGames);
+          const { error } = await supabase.from('user_library').insert(preparedGames);
 
           if (!error) {
-            alert('¡Copia de seguridad restaurada con éxito!');
+            if (typeof (window as any).showToast === 'function') {
+              (window as any).showToast('¡Copia de seguridad restaurada con éxito!', 'success');
+            }
             window.location.href = '/dashboard';
-          } else {
-            alert('Error al importar algunos datos: ' + error.message);
           }
         } catch (err) {
-          alert('Error al leer el archivo JSON.');
+          console.error(err);
         }
       };
-
       reader.readAsText(file);
     });
   }

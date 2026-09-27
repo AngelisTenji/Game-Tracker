@@ -3,7 +3,7 @@ export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/common/Navbar.astro';
-import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'lucide-astro';
+import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare, Share2 } from 'lucide-astro';
 ---
 
 <Layout title="Cargando Juego... | KazeChronik">
@@ -12,7 +12,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
   <main class="min-h-screen pt-24 pb-16 px-4 max-w-6xl mx-auto theme-text-primary">
     <!-- Estado de Carga (Skeleton) -->
     <div id="loading-skeleton" class="animate-pulse space-y-6">
-      <div class="h-64 bg-slate-800/50 rounded-2xl w-full"></div>
+      <div class="h-64 bg-slate-800/50 rounded-3xl w-full"></div>
       <div class="h-10 bg-slate-800/50 rounded-xl w-1/3"></div>
       <div class="h-32 bg-slate-800/50 rounded-xl w-full"></div>
     </div>
@@ -21,7 +21,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
     <div id="error-container" class="hidden text-center py-20 space-y-4">
       <h2 class="text-2xl font-bold text-rose-500">No se pudo cargar el juego</h2>
       <p class="text-sm theme-text-secondary">Es posible que el juego no exista o no tengas permisos para verlo.</p>
-      <a href="/dashboard" class="inline-block px-5 py-2.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl">
+      <a href="/dashboard" class="inline-block px-5 py-2.5 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20">
         Volver a la Biblioteca
       </a>
     </div>
@@ -123,9 +123,9 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
 
             <button 
               id="save-progress-btn" 
-              class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer"
+              class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/20 cursor-pointer flex items-center justify-center gap-2"
             >
-              Guardar Cambios
+              <span>Guardar Cambios</span>
             </button>
           </div>
 
@@ -195,9 +195,9 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
 
             <button 
               id="save-review-btn" 
-              class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-xl transition-all border border-slate-700 cursor-pointer"
+              class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-xl transition-all border border-slate-700 cursor-pointer flex items-center justify-center gap-2"
             >
-              Guardar Bitácora
+              <span>Guardar Bitácora</span>
             </button>
           </div>
 
@@ -252,12 +252,12 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
               </div>
 
               <div>
-                <label class="block text-[11px] font-semibold theme-text-secondary mb-1">Contenido / Detalles</label>
+                <label class="block text-[11px] font-semibold theme-text-secondary mb-1">Contenido / Detalles (Usa [ ] y [x] para checklists)</label>
                 <textarea 
                   id="note-content" 
                   rows="3" 
                   placeholder="Escribe artefactos, atributos, armas, secuencias de puzle o notas directas..."
-                  class="w-full px-3 py-2 theme-card border rounded-lg text-xs focus:outline-none focus:border-indigo-500 resize-none"
+                  class="w-full px-3 py-2 theme-card border rounded-lg text-xs focus:outline-none focus:border-indigo-500 resize-none font-mono"
                 ></textarea>
               </div>
 
@@ -371,7 +371,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
         try {
           data = JSON.parse(cachedGame);
           if (typeof (window as any).showToast === 'function') {
-            (window as any).showToast('Bitácora cargada en Modo Offline (Lectura)', 'info');
+            (window as any).showToast('Bitácora cargada en Modo Offline', 'info');
           }
         } catch (e) {
           console.error('Error al leer caché del juego:', e);
@@ -399,7 +399,6 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
         }
 
         data = res.data;
-        // Guardar respaldo local del juego
         localStorage.setItem(cacheKey, JSON.stringify(data));
       } catch (err) {
         const cachedGame = localStorage.getItem(cacheKey);
@@ -489,7 +488,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
       }
     });
 
-    // --- LÓGICA DEL GAMER NOTEBOOK (CON CACHÉ OFFLINE) ---
+    // --- GAMER NOTEBOOK CON SUPPORT OFFLINE Y CHECKLISTS INTERACTIVAS ---
     async function loadGameNotes() {
       if (!notesListContainer) return;
 
@@ -555,16 +554,16 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
         
         const formattedContent = (n.content || '').split('\n').map((line: string) => {
           if (line.startsWith('[x]') || line.startsWith('[X]')) {
-            return `<span class="line-through opacity-60 text-emerald-400 font-medium">✓ ${line.replace(/^\[[xX]\]/, '').trim()}</span>`;
+            return `<span class="line-through opacity-60 text-emerald-400 font-medium flex items-center gap-1.5"><span class="text-emerald-400 font-bold">✓</span> ${line.replace(/^\[[xX]\]/, '').trim()}</span>`;
           }
           if (line.startsWith('[ ]')) {
-            return `<span class="font-medium">☐ ${line.replace(/^\[ \]/, '').trim()}</span>`;
+            return `<span class="font-medium flex items-center gap-1.5"><span class="text-amber-400 font-bold">☐</span> ${line.replace(/^\[ \]/, '').trim()}</span>`;
           }
           return line;
         }).join('<br/>');
 
         return `
-          <div class="theme-input border rounded-xl p-4 space-y-2 relative transition-all ${n.is_pinned ? 'border-amber-500/40 bg-amber-500/5' : ''}">
+          <div class="theme-input border rounded-2xl p-4 space-y-2 relative transition-all ${n.is_pinned ? 'border-amber-500/40 bg-amber-500/5 shadow-md' : 'shadow-sm'}">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2 overflow-hidden">
                 <span class="text-[10px] font-bold px-2 py-0.5 border rounded-md shrink-0 ${cat.color}">
@@ -587,10 +586,10 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
               </div>
             </div>
 
-            ${n.content ? `<div class="text-xs theme-text-secondary leading-relaxed">${formattedContent}</div>` : ''}
+            ${n.content ? `<div class="text-xs theme-text-secondary leading-relaxed bg-slate-900/30 p-3 rounded-xl border border-slate-800/40">${formattedContent}</div>` : ''}
 
             ${n.image_url ? `
-              <div class="mt-2 rounded-lg overflow-hidden border border-slate-500/20 max-h-60 bg-slate-950">
+              <div class="mt-2 rounded-xl overflow-hidden border border-slate-500/20 max-h-60 bg-slate-950">
                 <img src="${n.image_url}" alt="Guía / Build" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer" onclick="window.open('${n.image_url}', '_blank')" />
               </div>
             ` : ''}
@@ -651,6 +650,23 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
         updated_at: new Date().toISOString()
       };
 
+      if (!navigator.onLine) {
+        if (editingNoteId) {
+          const idx = loadedNotes.findIndex(n => n.id === editingNoteId);
+          if (idx !== -1) loadedNotes[idx] = { ...loadedNotes[idx], ...noteData };
+        } else {
+          loadedNotes.unshift({ id: `offline_${Date.now()}`, ...noteData });
+        }
+        localStorage.setItem(notesCacheKey, JSON.stringify(loadedNotes));
+        renderNotesList();
+        createNoteForm.reset();
+        createNoteForm.classList.add('hidden');
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Nota guardada localmente (Modo Offline)', 'info');
+        }
+        return;
+      }
+
       let error;
       if (editingNoteId) {
         const res = await supabase.from('game_notes').update(noteData).eq('id', editingNoteId);
@@ -664,13 +680,28 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
         editingNoteId = null;
         createNoteForm.reset();
         createNoteForm.classList.add('hidden');
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Nota guardada en tu Gamer Notebook', 'success');
+        }
         loadGameNotes();
       } else {
-        alert('Error al guardar la nota: ' + error.message);
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Error al guardar: ' + error.message, 'error');
+        } else {
+          alert('Error al guardar la nota: ' + error.message);
+        }
       }
     });
 
     (window as any).togglePinNote = async (noteId: string, currentPinned: boolean) => {
+      if (!navigator.onLine) {
+        const note = loadedNotes.find(n => n.id === noteId);
+        if (note) note.is_pinned = !currentPinned;
+        localStorage.setItem(notesCacheKey, JSON.stringify(loadedNotes));
+        renderNotesList();
+        return;
+      }
+
       await supabase
         .from('game_notes')
         .update({ is_pinned: !currentPinned })
@@ -681,6 +712,13 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
 
     (window as any).deleteNote = async (noteId: string) => {
       if (!confirm('¿Seguro que deseas eliminar esta nota?')) return;
+
+      if (!navigator.onLine) {
+        loadedNotes = loadedNotes.filter(n => n.id !== noteId);
+        localStorage.setItem(notesCacheKey, JSON.stringify(loadedNotes));
+        renderNotesList();
+        return;
+      }
 
       await supabase
         .from('game_notes')
@@ -697,70 +735,114 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle } from 'luci
 
     loadGameNotes();
 
-    // 3. Listeners para guardar cambios de la Bitácora
+    // 3. LISTENERS PARA GUARDAR PROGRESO Y RESEÑA (CON CACHÉ OFFLINE Y TOASTS)
     saveProgressBtn?.addEventListener('click', async () => {
       saveProgressBtn.disabled = true;
-      saveProgressBtn.textContent = 'Guardando...';
+      saveProgressBtn.innerHTML = `
+        <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Guardando...</span>
+      `;
+
+      const updatedProgress = {
+        status: statusSelect.value,
+        hours_played: parseFloat(hoursInput.value) || 0,
+        achievements_progress: parseInt(achievementsInput.value) || 0,
+        tags: currentTags,
+        is_favorite: isFavorite,
+        updated_at: new Date().toISOString()
+      };
+
+      // Guardar inmediatamente en caché local
+      data = { ...data, ...updatedProgress };
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+
+      if (!navigator.onLine) {
+        saveProgressBtn.disabled = false;
+        saveProgressBtn.innerHTML = `<span>Guardar Cambios</span>`;
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Progreso guardado localmente (Modo Offline)', 'info');
+        }
+        return;
+      }
 
       const { error } = await supabase
         .from('user_library')
-        .update({
-          status: statusSelect.value,
-          hours_played: parseFloat(hoursInput.value) || 0,
-          achievements_progress: parseInt(achievementsInput.value) || 0,
-          tags: currentTags,
-          is_favorite: isFavorite,
-          updated_at: new Date().toISOString()
-        })
+        .update(updatedProgress)
         .eq('id', gameId);
 
       saveProgressBtn.disabled = false;
-      saveProgressBtn.textContent = 'Guardar Cambios';
+      saveProgressBtn.innerHTML = `<span>Guardar Cambios</span>`;
 
       if (!error) {
-        // Actualizar caché local tras guardar
-        data.status = statusSelect.value;
-        data.hours_played = parseFloat(hoursInput.value) || 0;
-        data.achievements_progress = parseInt(achievementsInput.value) || 0;
-        data.tags = currentTags;
-        data.is_favorite = isFavorite;
-        localStorage.setItem(cacheKey, JSON.stringify(data));
-
-        alert('¡Progreso guardado!');
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('¡Progreso guardado con éxito!', 'success');
+        } else {
+          alert('¡Progreso guardado!');
+        }
       } else {
-        alert('Error al guardar: ' + error.message);
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Error al guardar: ' + error.message, 'error');
+        } else {
+          alert('Error al guardar: ' + error.message);
+        }
       }
     });
 
     saveReviewBtn?.addEventListener('click', async () => {
       saveReviewBtn.disabled = true;
-      saveReviewBtn.textContent = 'Guardando...';
+      saveReviewBtn.innerHTML = `
+        <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Guardando Bitácora...</span>
+      `;
+
+      const updatedReview = {
+        rating: ratingInput.value ? parseFloat(ratingInput.value) : null,
+        review: reviewInput.value.trim() || null,
+        notes: notesInput.value.trim() || null,
+        tags: currentTags,
+        is_favorite: isFavorite,
+        updated_at: new Date().toISOString()
+      };
+
+      // Guardar en caché local
+      data = { ...data, ...updatedReview };
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+
+      if (!navigator.onLine) {
+        saveReviewBtn.disabled = false;
+        saveReviewBtn.innerHTML = `<span>Guardar Bitácora</span>`;
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Bitácora guardada localmente (Modo Offline)', 'info');
+        }
+        return;
+      }
 
       const { error } = await supabase
         .from('user_library')
-        .update({
-          rating: ratingInput.value ? parseFloat(ratingInput.value) : null,
-          review: reviewInput.value.trim() || null,
-          notes: notesInput.value.trim() || null,
-          tags: currentTags,
-          is_favorite: isFavorite,
-          updated_at: new Date().toISOString()
-        })
+        .update(updatedReview)
         .eq('id', gameId);
 
       saveReviewBtn.disabled = false;
-      saveReviewBtn.textContent = 'Guardar Bitácora';
+      saveReviewBtn.innerHTML = `<span>Guardar Bitácora</span>`;
 
       if (!error) {
-        // Actualizar caché local tras guardar
-        data.rating = ratingInput.value ? parseFloat(ratingInput.value) : null;
-        data.review = reviewInput.value.trim() || null;
-        data.notes = notesInput.value.trim() || null;
-        localStorage.setItem(cacheKey, JSON.stringify(data));
-
-        alert('¡Bitácora guardada con éxito!');
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('¡Bitácora guardada con éxito!', 'success');
+        } else {
+          alert('¡Bitácora guardada con éxito!');
+        }
       } else {
-        alert('Error al guardar bitácora: ' + error.message);
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Error al guardar: ' + error.message, 'error');
+        } else {
+          alert('Error al guardar bitácora: ' + error.message);
+        }
       }
     });
   }

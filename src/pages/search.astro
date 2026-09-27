@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, ExternalLink } from 'lucide-astro';
+import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, ExternalLink, WifiOff } from 'lucide-astro';
 ---
 
 <Layout title="Búsqueda Unificada | KazeChronik">
@@ -11,7 +11,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
     
     <!-- Encabezado y Selector de Pestañas (Juegos vs Perfiles) -->
     <div class="max-w-2xl mx-auto text-center mb-8 space-y-4">
-      <h1 class="text-3xl font-bold theme-text-primary tracking-tight">Centro de Búsqueda</h1>
+      <h1 class="text-3xl font-black theme-text-primary tracking-tight">Centro de Búsqueda</h1>
       <p class="text-sm theme-text-secondary">Encuentra videojuegos para tu colección o descubre perfiles de la comunidad</p>
 
       <!-- Botones de Pestaña -->
@@ -119,7 +119,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
     <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl relative overflow-hidden">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-500/20">
         <h3 id="modal-title" class="text-lg font-bold theme-text-primary truncate">Agregar a la Biblioteca</h3>
-        <button id="close-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg hover:bg-slate-500/10 transition-colors">
+        <button id="close-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg hover:bg-slate-500/10 transition-colors cursor-pointer">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -200,7 +200,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
         </div>
 
         <div class="flex gap-3 pt-2">
-          <button type="button" id="cancel-modal-btn" class="flex-1 py-2.5 px-4 theme-button border hover:bg-slate-500/10 theme-text-secondary text-sm font-semibold rounded-xl transition-colors">
+          <button type="button" id="cancel-modal-btn" class="flex-1 py-2.5 px-4 theme-button border hover:bg-slate-500/10 theme-text-secondary text-sm font-semibold rounded-xl transition-colors cursor-pointer">
             Cancelar
           </button>
           <button type="submit" id="save-add-btn" class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20 cursor-pointer flex items-center justify-center gap-2">
@@ -333,6 +333,18 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
     const platform = platformFilterSelect?.value || '';
     const ordering = orderingSelect?.value || '-relevance';
 
+    if (!navigator.onLine) {
+      if (resultsGrid) {
+        resultsGrid.innerHTML = `
+          <div class="col-span-full theme-card border rounded-2xl p-8 text-center space-y-3">
+            <p class="text-rose-400 font-bold text-sm">📴 Estás en Modo Offline</p>
+            <p class="text-xs theme-text-secondary max-w-md mx-auto">La búsqueda de catálogo externo requiere conexión a internet. Puedes explorar tus juegos guardados localmente desde el Dashboard.</p>
+          </div>
+        `;
+      }
+      return;
+    }
+
     if (!query && !genre && !platform) {
       resultsGrid.innerHTML = '';
       return;
@@ -408,6 +420,11 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
   async function executeUsersSearch() {
     if (!usersResultsGrid) return;
     const query = searchUsersInput?.value.trim() || '';
+
+    if (!navigator.onLine) {
+      usersResultsGrid.innerHTML = `<p class="col-span-full text-center text-rose-400 py-8 theme-card border rounded-2xl">La búsqueda de comunidad no está disponible sin conexión.</p>`;
+      return;
+    }
 
     usersResultsGrid.innerHTML = Array(6).fill(0).map(() => `
       <div class="theme-card border rounded-2xl p-5 animate-pulse space-y-3">
@@ -533,6 +550,12 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
   closeModalBtn?.addEventListener('click', closeModal);
   cancelModalBtn?.addEventListener('click', closeModal);
 
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
   addForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const { data: { session } } = await supabase.auth.getSession();
@@ -556,7 +579,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
       <span>Guardando...</span>
     `;
 
-    const { error } = await supabase.from('user_library').insert({
+    const newGamePayload = {
       user_id: session.user.id,
       rawg_id: rawgId,
       title: title,
@@ -567,7 +590,13 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
       hours_played: hours,
       is_favorite: isFavorite,
       achievements_progress: 0
-    });
+    };
+
+    const { data: insertedGame, error } = await supabase
+      .from('user_library')
+      .insert(newGamePayload)
+      .select()
+      .single();
 
     saveAddBtn.disabled = false;
     saveAddBtn.innerHTML = `<span>Guardar</span>`;
@@ -579,6 +608,12 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
         alert('Error al agregar: ' + error.message);
       }
     } else {
+      // Actualizar Caché Local de forma inmediata
+      const cached = localStorage.getItem('kazechronik_library_cache');
+      let localGames = cached ? JSON.parse(cached) : [];
+      localGames.unshift(insertedGame || newGamePayload);
+      localStorage.setItem('kazechronik_library_cache', JSON.stringify(localGames));
+
       closeModal();
       if (typeof (window as any).showToast === 'function') {
         (window as any).showToast(`¡${title} se agregó a tu biblioteca!`, 'success');

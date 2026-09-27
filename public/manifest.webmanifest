@@ -1,17 +1,47 @@
 {
-  "name": "KazeChronik",
+  "name": "KazeChronik | Tu Bitácora Gamer & Cuaderno de Builds",
   "short_name": "KazeChronik",
-  "description": "Tu gestor personal de biblioteca de videojuegos y bitácora de progreso.",
-  "start_url": "/",
+  "description": "Tu gestor personal de biblioteca de videojuegos, seguimiento de progreso y bitácora de notas offline.",
+  "start_url": "/dashboard",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0a0f1d",
   "theme_color": "#4f46e5",
+  "categories": ["entertainment", "utilities", "games"],
   "icons": [
     {
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mi Biblioteca",
+      "short_name": "Biblioteca",
+      "description": "Acceso rápido a tu colección de videojuegos",
+      "url": "/dashboard",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Buscar Juegos",
+      "short_name": "Buscar",
+      "description": "Encuentra videojuegos o perfiles de la comunidad",
+      "url": "/search",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
     }
   ]
 }
