@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
 import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, ExternalLink, WifiOff } from 'lucide-astro';
@@ -15,7 +17,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
       <p class="text-sm theme-text-secondary">Encuentra videojuegos para tu colección o descubre perfiles de la comunidad</p>
 
       <!-- Botones de Pestaña -->
-      <div class="inline-flex p-1 theme-card border rounded-2xl gap-1 shadow-sm">
+      <div class="inline-flex p-1 theme-card border rounded-2xl gap-1 shadow-sm border-slate-500/20">
         <button
           id="tab-btn-games"
           class="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-md cursor-pointer"
@@ -60,7 +62,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
             <span>Filtros:</span>
           </div>
 
-          <select id="rawg-genre" class="px-3 py-1.5 theme-card border rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
+          <select id="rawg-genre" class="px-3 py-1.5 theme-card border border-slate-500/20 rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
             <option value="">Todos los géneros</option>
             <option value="action">Acción</option>
             <option value="role-playing-games-rpg">RPG</option>
@@ -73,7 +75,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
             <option value="sports">Deportes</option>
           </select>
 
-          <select id="rawg-platform" class="px-3 py-1.5 theme-card border rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
+          <select id="rawg-platform" class="px-3 py-1.5 theme-card border border-slate-500/20 rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
             <option value="">Todas las plataformas</option>
             <option value="4">PC</option>
             <option value="187">PlayStation 5</option>
@@ -85,7 +87,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
             <option value="3">iOS</option>
           </select>
 
-          <select id="rawg-ordering" class="px-3 py-1.5 theme-card border rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
+          <select id="rawg-ordering" class="px-3 py-1.5 theme-card border border-slate-500/20 rounded-xl text-xs theme-text-primary focus:outline-none focus:border-indigo-500 cursor-pointer shadow-sm">
             <option value="-relevance">Relevancia</option>
             <option value="-added">Más Populares</option>
             <option value="-rating">Mejor Valorados</option>
@@ -214,6 +216,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
 
 <script>
   import { supabase } from '../lib/supabase';
+  import { enqueueAction, processSyncQueue } from '../lib/syncQueue';
 
   // CONTROL DE PESTAÑAS
   const tabBtnGames = document.getElementById('tab-btn-games') as HTMLButtonElement;
@@ -336,13 +339,15 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
     if (!navigator.onLine) {
       if (resultsGrid) {
         resultsGrid.innerHTML = `
-          <div class="col-span-full theme-card border rounded-2xl p-8 text-center space-y-3">
+          <div class="col-span-full theme-card border rounded-2xl p-8 text-center space-y-3 border-slate-500/20">
             <p class="text-rose-400 font-bold text-sm">📴 Estás en Modo Offline</p>
             <p class="text-xs theme-text-secondary max-w-md mx-auto">La búsqueda de catálogo externo requiere conexión a internet. Puedes explorar tus juegos guardados localmente desde el Dashboard.</p>
           </div>
         `;
       }
       return;
+    } else {
+      processSyncQueue();
     }
 
     if (!query && !genre && !platform) {
@@ -370,7 +375,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
         const card = document.createElement('div');
         card.className = 'theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-xl group';
         card.innerHTML = `
-          <div class="relative overflow-hidden h-40 bg-slate-800">
+          <div class="relative overflow-hidden h-40 bg-slate-500/10">
             <img 
               src="${game.background_image || '/placeholder.jpg'}" 
               alt="Portada de ${game.name}" 
@@ -422,7 +427,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
     const query = searchUsersInput?.value.trim() || '';
 
     if (!navigator.onLine) {
-      usersResultsGrid.innerHTML = `<p class="col-span-full text-center text-rose-400 py-8 theme-card border rounded-2xl">La búsqueda de comunidad no está disponible sin conexión.</p>`;
+      usersResultsGrid.innerHTML = `<p class="col-span-full text-center text-rose-400 py-8 theme-card border border-slate-500/20 rounded-2xl">La búsqueda de comunidad no está disponible sin conexión.</p>`;
       return;
     }
 
@@ -500,21 +505,42 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
 
   // MODAL LOGIC
   (window as any).openAddModal = async (rawgId: number, title: string, coverUrl: string) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      if (typeof (window as any).showToast === 'function') {
-        (window as any).showToast('Debes iniciar sesión para guardar juegos.', 'error');
-      }
-      window.location.href = '/login';
-      return;
-    }
+    let existingGame: any = null;
 
-    const { data: existingGame } = await supabase
-      .from('user_library')
-      .select('id')
-      .eq('user_id', session.user.id)
-      .eq('rawg_id', rawgId)
-      .maybeSingle();
+    if (navigator.onLine) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          if (typeof (window as any).showToast === 'function') {
+            (window as any).showToast('Debes iniciar sesión para guardar juegos.', 'error');
+          }
+          window.location.href = '/login';
+          return;
+        }
+
+        const res = await supabase
+          .from('user_library')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .eq('rawg_id', rawgId)
+          .maybeSingle();
+
+        existingGame = res.data;
+      } catch (e) {
+        console.warn('Error verificando duplicados en red:', e);
+      }
+    } else {
+      // Verificación en caché local en modo offline
+      const cached = localStorage.getItem('kazechronik_library_cache');
+      if (cached) {
+        try {
+          const localGames = JSON.parse(cached);
+          existingGame = localGames.find((g: any) => g.rawg_id === rawgId);
+        } catch (e) {
+          console.error('Error leyendo caché local:', e);
+        }
+      }
+    }
 
     const modalTitle = document.getElementById('modal-title') as HTMLHeadingElement;
 
@@ -558,8 +584,6 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
 
   addForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
 
     const rawgId = parseInt((document.getElementById('modal-rawg-id') as HTMLInputElement).value);
     const title = (document.getElementById('modal-game-name') as HTMLInputElement).value;
@@ -570,6 +594,49 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
     const hours = parseFloat(hoursInput.value) || 0;
     const isFavorite = favoriteCheckbox.checked;
 
+    const newGamePayload = {
+      id: `offline_game_${Date.now()}`,
+      rawg_id: rawgId,
+      title: title,
+      cover_url: coverUrl,
+      platform: platform,
+      store: store,
+      status: status,
+      hours_played: hours,
+      is_favorite: isFavorite,
+      achievements_progress: 0,
+      created_at: new Date().toISOString()
+    };
+
+    // Actualizar Caché Local inmediatamente
+    const cached = localStorage.getItem('kazechronik_library_cache');
+    let localGames = cached ? JSON.parse(cached) : [];
+    localGames.unshift(newGamePayload);
+    localStorage.setItem('kazechronik_library_cache', JSON.stringify(localGames));
+
+    if (!navigator.onLine) {
+      enqueueAction('user_library', 'INSERT', {
+        rawg_id: rawgId,
+        title: title,
+        cover_url: coverUrl,
+        platform: platform,
+        store: store,
+        status: status,
+        hours_played: hours,
+        is_favorite: isFavorite,
+        achievements_progress: 0
+      });
+
+      closeModal();
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast(`¡${title} se guardó localmente! (Se sincronizará al conectar)`, 'info');
+      }
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
     saveAddBtn.disabled = true;
     saveAddBtn.innerHTML = `
       <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
@@ -579,7 +646,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
       <span>Guardando...</span>
     `;
 
-    const newGamePayload = {
+    const dbPayload = {
       user_id: session.user.id,
       rawg_id: rawgId,
       title: title,
@@ -594,7 +661,7 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
 
     const { data: insertedGame, error } = await supabase
       .from('user_library')
-      .insert(newGamePayload)
+      .insert(dbPayload)
       .select()
       .single();
 
@@ -608,11 +675,10 @@ import { Search as SearchIcon, Loader2, X, Star, Filter, Gamepad2, Users, User, 
         alert('Error al agregar: ' + error.message);
       }
     } else {
-      // Actualizar Caché Local de forma inmediata
-      const cached = localStorage.getItem('kazechronik_library_cache');
-      let localGames = cached ? JSON.parse(cached) : [];
-      localGames.unshift(insertedGame || newGamePayload);
-      localStorage.setItem('kazechronik_library_cache', JSON.stringify(localGames));
+      if (insertedGame) {
+        localGames[0] = insertedGame;
+        localStorage.setItem('kazechronik_library_cache', JSON.stringify(localGames));
+      }
 
       closeModal();
       if (typeof (window as any).showToast === 'function') {

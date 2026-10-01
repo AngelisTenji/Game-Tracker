@@ -1,0 +1,365 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/common/Navbar.astro';
+import { Target, Trophy, Clock, Plus, Flame, CheckCircle2, Sparkles, X } from 'lucide-astro';
+---
+
+<Layout title="Metas & Desafíos Anuales | KazeChronik">
+  <Navbar />
+
+  <main class="min-h-screen pt-24 pb-16 px-4 max-w-5xl mx-auto theme-text-primary space-y-8">
+    
+    <!-- Encabezado -->
+    <div class="border-b border-slate-500/20 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h1 class="text-3xl font-black tracking-tight flex items-center gap-3">
+          <Target class="w-8 h-8 text-amber-400" />
+          <span>Metas Gamer <span id="current-year-display" class="text-indigo-400">2026</span></span>
+        </h1>
+        <p class="text-sm theme-text-secondary mt-1">
+          Mide tu progreso anual, establece desafíos y supera tu backlog.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        id="edit-goals-btn"
+        class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2 cursor-pointer"
+      >
+        <span>🎯 Ajustar Metas</span>
+      </button>
+    </div>
+
+    <!-- TARJETAS DE PROGRESO DE METAS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Meta 1: Juegos Completados -->
+      <div class="theme-card border rounded-3xl p-6 space-y-5 shadow-sm relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-2xl">
+              <Trophy class="w-6 h-6" />
+            </div>
+            <div>
+              <h3 class="font-bold text-base theme-text-primary">Juegos Completados</h3>
+              <p class="text-xs theme-text-secondary">Meta del Año</p>
+            </div>
+          </div>
+          <span id="completed-badge" class="text-xs font-bold px-3 py-1 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            0%
+          </span>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between items-end text-sm font-bold">
+            <span id="completed-count" class="text-2xl theme-text-primary">0</span>
+            <span class="text-xs theme-text-secondary font-semibold">de <span id="target-completed-val">12</span> juegos</span>
+          </div>
+
+          <!-- Barra de Progreso Adaptable -->
+          <div class="w-full theme-button rounded-full h-3 overflow-hidden p-0.5 border border-slate-500/20">
+            <div id="completed-progress-bar" class="bg-gradient-to-r from-amber-500 to-amber-300 h-full rounded-full transition-all duration-500 w-0"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meta 2: Horas Jugadas -->
+      <div class="theme-card border rounded-3xl p-6 space-y-5 shadow-sm relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-2xl">
+              <Clock class="w-6 h-6" />
+            </div>
+            <div>
+              <h3 class="font-bold text-base theme-text-primary">Horas de Juego</h3>
+              <p class="text-xs theme-text-secondary">Tiempo Invertido</p>
+            </div>
+          </div>
+          <span id="hours-badge" class="text-xs font-bold px-3 py-1 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            0%
+          </span>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between items-end text-sm font-bold">
+            <span id="hours-count" class="text-2xl theme-text-primary">0 hrs</span>
+            <span class="text-xs theme-text-secondary font-semibold">meta de <span id="target-hours-val">100</span> hrs</span>
+          </div>
+
+          <!-- Barra de Progreso Adaptable -->
+          <div class="w-full theme-button rounded-full h-3 overflow-hidden p-0.5 border border-slate-500/20">
+            <div id="hours-progress-bar" class="bg-gradient-to-r from-indigo-500 to-sky-400 h-full rounded-full transition-all duration-500 w-0"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- JUEGOS COMPLETADOS ESTE AÑO -->
+    <div class="theme-card border rounded-3xl p-6 space-y-4 shadow-sm">
+      <h3 class="font-bold text-lg theme-text-primary flex items-center gap-2">
+        <Sparkles class="w-5 h-5 text-indigo-400" />
+        <span>Juegos Completados este Año</span>
+      </h3>
+
+      <div id="completed-games-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <!-- Inyectado dinámicamente -->
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL CONFIGURAR METAS -->
+  <div id="goals-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+        <h3 class="text-base font-bold theme-text-primary">Configurar Metas Anuales</h3>
+        <button id="close-goals-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg cursor-pointer">
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+
+      <form id="goals-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary mb-1">Meta de Juegos Completados</label>
+          <input 
+            type="number" 
+            id="target-completed-input" 
+            min="1" 
+            required 
+            placeholder="ej: 12" 
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary mb-1">Meta de Horas Jugadas</label>
+          <input 
+            type="number" 
+            id="target-hours-input" 
+            min="1" 
+            required 
+            placeholder="ej: 100" 
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" id="cancel-goals-modal-btn" class="flex-1 py-2.5 theme-button border border-slate-500/20 text-xs font-semibold rounded-xl cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/20 cursor-pointer">
+            Guardar Metas
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { enqueueAction, processSyncQueue } from '../lib/syncQueue';
+
+  const currentYear = new Date().getFullYear();
+  let goalData = { target_completed_games: 12, target_hours_played: 100 };
+  const goalsCacheKey = `kazechronik_goals_${currentYear}`;
+
+  async function loadGoalsAndProgress() {
+    let userGames: any[] = [];
+
+    if (!navigator.onLine) {
+      // Cargar Metas desde Caché Local
+      const cachedGoals = localStorage.getItem(goalsCacheKey);
+      if (cachedGoals) {
+        try {
+          goalData = JSON.parse(cachedGoals);
+        } catch (e) {
+          console.error('Error al parsear metas en caché:', e);
+        }
+      }
+
+      // Cargar Biblioteca desde Caché Local
+      const cachedLibrary = localStorage.getItem('kazechronik_library_cache');
+      if (cachedLibrary) {
+        try {
+          userGames = JSON.parse(cachedLibrary);
+        } catch (e) {
+          console.error('Error al parsear biblioteca en caché:', e);
+        }
+      }
+
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Metas cargadas desde la caché local (Modo Offline)', 'info');
+      }
+    } else {
+      processSyncQueue();
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          window.location.href = '/login';
+          return;
+        }
+
+        // 1. Cargar Metas de Supabase
+        const { data: goals } = await supabase
+          .from('user_goals')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .eq('year', currentYear)
+          .maybeSingle();
+
+        if (goals) {
+          goalData = goals;
+          localStorage.setItem(goalsCacheKey, JSON.stringify(goalData));
+        }
+
+        // 2. Cargar Biblioteca de Supabase
+        const { data: games } = await supabase
+          .from('user_library')
+          .select('id, title, cover_url, status, hours_played, updated_at')
+          .eq('user_id', session.user.id);
+
+        userGames = games || [];
+        localStorage.setItem('kazechronik_library_cache', JSON.stringify(userGames));
+
+      } catch (err) {
+        const cachedGoals = localStorage.getItem(goalsCacheKey);
+        if (cachedGoals) goalData = JSON.parse(cachedGoals);
+        const cachedLib = localStorage.getItem('kazechronik_library_cache');
+        if (cachedLib) userGames = JSON.parse(cachedLib);
+      }
+    }
+
+    // Renderizar Valores Objetivo
+    const completedValEl = document.getElementById('target-completed-val');
+    const hoursValEl = document.getElementById('target-hours-val');
+    if (completedValEl) completedValEl.textContent = (goalData.target_completed_games || 12).toString();
+    if (hoursValEl) hoursValEl.textContent = (goalData.target_hours_played || 100).toString();
+
+    // Calcular métricas
+    const completedGames = userGames.filter(g => g.status === 'completed');
+    const totalHours = userGames.reduce((acc, g) => acc + (parseFloat(g.hours_played) || 0), 0);
+
+    // UI completados
+    const completedCount = completedGames.length;
+    const targetComp = goalData.target_completed_games || 12;
+    const completedPct = Math.min(100, Math.round((completedCount / targetComp) * 100));
+
+    const countEl = document.getElementById('completed-count');
+    const badgeEl = document.getElementById('completed-badge');
+    const barEl = document.getElementById('completed-progress-bar');
+
+    if (countEl) countEl.textContent = completedCount.toString();
+    if (badgeEl) badgeEl.textContent = `${completedPct}%`;
+    if (barEl) barEl.style.width = `${completedPct}%`;
+
+    // UI Horas
+    const targetHours = goalData.target_hours_played || 100;
+    const hoursPct = Math.min(100, Math.round((totalHours / targetHours) * 100));
+
+    const hoursCountEl = document.getElementById('hours-count');
+    const hoursBadgeEl = document.getElementById('hours-badge');
+    const hoursBarEl = document.getElementById('hours-progress-bar');
+
+    if (hoursCountEl) hoursCountEl.textContent = `${totalHours.toFixed(1)} hrs`;
+    if (hoursBadgeEl) hoursBadgeEl.textContent = `${hoursPct}%`;
+    if (hoursBarEl) hoursBarEl.style.width = `${hoursPct}%`;
+
+    // Render Grilla de Juegos Completados con clases de temas dinámicas
+    const completedGrid = document.getElementById('completed-games-grid');
+    if (completedGrid) {
+      if (completedGames.length === 0) {
+        completedGrid.innerHTML = `
+          <div class="col-span-full text-center py-8 theme-text-secondary italic text-xs border border-dashed border-slate-500/20 rounded-2xl">
+            Aún no has marcado ningún juego como completado este año. ¡A por ellos!
+          </div>
+        `;
+      } else {
+        completedGrid.innerHTML = completedGames.map(g => `
+          <a href="/game/${g.id}" class="group relative rounded-2xl overflow-hidden border border-slate-500/20 theme-card aspect-[3/4] shadow-md hover:border-indigo-500/50 transition-all hover:-translate-y-1">
+            <img src="${g.cover_url || '/placeholder.jpg'}" alt="${g.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-2.5 flex flex-col justify-end">
+              <span class="text-xs font-bold text-white line-clamp-1 drop-shadow-md">${g.title}</span>
+            </div>
+          </a>
+        `).join('');
+      }
+    }
+  }
+
+  // MODAL Y FORMULARIO DE METAS
+  const modal = document.getElementById('goals-modal');
+  const editBtn = document.getElementById('edit-goals-btn');
+  const closeBtn = document.getElementById('close-goals-modal-btn');
+  const cancelBtn = document.getElementById('cancel-goals-modal-btn');
+  const form = document.getElementById('goals-form') as HTMLFormElement;
+
+  editBtn?.addEventListener('click', () => {
+    const inputCompleted = document.getElementById('target-completed-input') as HTMLInputElement;
+    const inputHours = document.getElementById('target-hours-input') as HTMLInputElement;
+    if (inputCompleted) inputCompleted.value = (goalData.target_completed_games || 12).toString();
+    if (inputHours) inputHours.value = (goalData.target_hours_played || 100).toString();
+    modal?.classList.remove('hidden');
+  });
+
+  closeBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
+  cancelBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const targetCompleted = parseInt((document.getElementById('target-completed-input') as HTMLInputElement)?.value) || 12;
+    const targetHours = parseFloat((document.getElementById('target-hours-input') as HTMLInputElement)?.value) || 100;
+
+    goalData.target_completed_games = targetCompleted;
+    goalData.target_hours_played = targetHours;
+    localStorage.setItem(goalsCacheKey, JSON.stringify(goalData));
+
+    modal?.classList.add('hidden');
+
+    if (!navigator.onLine) {
+      enqueueAction('user_goals', 'UPSERT', {
+        year: currentYear,
+        target_completed_games: targetCompleted,
+        target_hours_played: targetHours
+      });
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Metas guardadas localmente (se sincronizarán al conectar)', 'info');
+      }
+      loadGoalsAndProgress();
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { error } = await supabase
+      .from('user_goals')
+      .upsert({
+        user_id: session.user.id,
+        year: currentYear,
+        target_completed_games: targetCompleted,
+        target_hours_played: targetHours
+      }, { onConflict: 'user_id,year' });
+
+    if (error) {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Error al guardar metas: ' + error.message, 'error');
+      } else {
+        alert('Error al guardar metas: ' + error.message);
+      }
+      return;
+    }
+
+    if (typeof (window as any).showToast === 'function') {
+      (window as any).showToast('¡Metas actualizadas correctamente!', 'success');
+    }
+    loadGoalsAndProgress();
+  });
+
+  loadGoalsAndProgress();
+  document.addEventListener('astro:page-load', loadGoalsAndProgress);
+</script>

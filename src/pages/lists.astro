@@ -1,0 +1,356 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/common/Navbar.astro';
+import { ListPlus, Plus, FolderHeart, Trash2, Share2, Gamepad2, Globe, Lock, X } from 'lucide-astro';
+---
+
+<Layout title="Listas Personalizadas | KazeChronik">
+  <Navbar />
+
+  <main class="min-h-screen pt-24 pb-16 px-4 max-w-6xl mx-auto theme-text-primary space-y-8">
+    <!-- Encabezado y Botón Crear -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-500/20 pb-6">
+      <div>
+        <h1 class="text-3xl font-black tracking-tight flex items-center gap-3">
+          <FolderHeart class="w-8 h-8 text-indigo-400" />
+          <span>Listas Personalizadas</span>
+        </h1>
+        <p class="text-sm theme-text-secondary mt-1">
+          Crea colecciones temáticas, selecciona tus sagas favoritas y compártelas con la comunidad.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        id="open-create-list-modal"
+        class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2 cursor-pointer"
+      >
+        <Plus class="w-4 h-4" />
+        <span>Nueva Lista</span>
+      </button>
+    </div>
+
+    <!-- Skeleton de Carga Adaptable -->
+    <div id="lists-skeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+      <div class="h-44 theme-card border rounded-2xl"></div>
+      <div class="h-44 theme-card border rounded-2xl"></div>
+      <div class="h-44 theme-card border rounded-2xl"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="lists-empty" class="hidden theme-card border rounded-3xl p-12 text-center flex flex-col items-center justify-center min-h-[300px] space-y-4">
+      <div class="p-4 theme-button border rounded-2xl theme-text-secondary">
+        <ListPlus class="w-10 h-10 text-indigo-400" />
+      </div>
+      <h3 class="text-xl font-bold theme-text-primary">No has creado listas aún</h3>
+      <p class="text-xs sm:text-sm theme-text-secondary max-w-md">
+        Organiza tus juegos por sagas, géneros o desafíos para el fin de semana.
+      </p>
+    </div>
+
+    <!-- Grilla de Listas -->
+    <div id="lists-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Inyectado dinámicamente -->
+    </div>
+  </main>
+
+  <!-- MODAL CREAR LISTA -->
+  <div id="create-list-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl relative space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+        <h3 class="text-base font-bold theme-text-primary">Nueva Lista Personalizada</h3>
+        <button id="close-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg hover:bg-slate-500/10 cursor-pointer">
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+
+      <form id="create-list-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary mb-1">Título de la Lista</label>
+          <input 
+            type="text" 
+            id="list-title-input" 
+            required 
+            placeholder="ej: Juegos para jugar en Verano"
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary mb-1">Descripción (Opcional)</label>
+          <textarea 
+            id="list-desc-input" 
+            rows="3" 
+            placeholder="¿De qué trata esta colección?"
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500 resize-none"
+          ></textarea>
+        </div>
+
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" id="list-public-checkbox" checked class="rounded accent-indigo-600 w-4 h-4 cursor-pointer" />
+          <span class="text-xs font-semibold theme-text-primary">Hacer lista pública en mi perfil</span>
+        </label>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" id="cancel-modal-btn" class="flex-1 py-2.5 theme-button border border-slate-500/20 text-xs font-semibold rounded-xl cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" id="save-list-btn" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/20 cursor-pointer">
+            Crear Lista
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { enqueueAction, processSyncQueue } from '../lib/syncQueue';
+
+  let customLists: any[] = [];
+  const listsCacheKey = 'kazechronik_custom_lists_cache';
+
+  async function loadCustomLists() {
+    const skeleton = document.getElementById('lists-skeleton');
+    const emptyState = document.getElementById('lists-empty');
+    const grid = document.getElementById('lists-grid');
+
+    if (!navigator.onLine) {
+      const cached = localStorage.getItem(listsCacheKey);
+      if (cached) {
+        try {
+          customLists = JSON.parse(cached);
+          if (skeleton) skeleton.classList.add('hidden');
+          
+          if (customLists.length === 0) {
+            if (emptyState) emptyState.classList.remove('hidden');
+          } else {
+            if (grid) grid.classList.remove('hidden');
+            renderListsGrid();
+          }
+
+          if (typeof (window as any).showToast === 'function') {
+            (window as any).showToast('Listas cargadas desde la caché local (Modo Offline)', 'info');
+          }
+          return;
+        } catch (e) {
+          console.error('Error al leer caché de listas:', e);
+        }
+      }
+    } else {
+      processSyncQueue();
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = '/login';
+        return;
+      }
+
+      const { data: lists, error } = await supabase
+        .from('custom_lists')
+        .select(`
+          *,
+          items:custom_list_items(
+            game:user_library(id, title, cover_url)
+          )
+        `)
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
+
+      if (skeleton) skeleton.classList.add('hidden');
+
+      if (error || !lists || lists.length === 0) {
+        customLists = [];
+        localStorage.setItem(listsCacheKey, JSON.stringify([]));
+        if (emptyState) emptyState.classList.remove('hidden');
+        if (grid) grid.classList.add('hidden');
+        return;
+      }
+
+      customLists = lists;
+      localStorage.setItem(listsCacheKey, JSON.stringify(customLists));
+      if (emptyState) emptyState.classList.add('hidden');
+      if (grid) grid.classList.remove('hidden');
+      renderListsGrid();
+
+    } catch (err) {
+      console.error(err);
+      const cached = localStorage.getItem(listsCacheKey);
+      if (cached) {
+        customLists = JSON.parse(cached);
+        if (skeleton) skeleton.classList.add('hidden');
+        if (grid) grid.classList.remove('hidden');
+        renderListsGrid();
+      }
+    }
+  }
+
+  function renderListsGrid() {
+    const grid = document.getElementById('lists-grid');
+    if (!grid) return;
+
+    grid.innerHTML = customLists.map(list => {
+      const gameCovers = (list.items || []).map((item: any) => item.game?.cover_url || '/placeholder.jpg');
+
+      return `
+        <div class="theme-card border rounded-3xl p-5 space-y-4 shadow-sm hover:border-indigo-500/40 transition-all flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-lg border flex items-center gap-1 ${list.is_public ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}">
+                ${list.is_public ? '🌐 Pública' : '🔒 Privada'}
+              </span>
+              <button onclick="deleteList('${list.id}')" class="text-xs text-rose-500/70 hover:text-rose-400 p-1 cursor-pointer" title="Eliminar lista">
+                🗑️
+              </button>
+            </div>
+
+            <h3 class="font-bold text-base theme-text-primary line-clamp-1">${list.title}</h3>
+            <p class="text-xs theme-text-secondary line-clamp-2 h-8">${list.description || 'Sin descripción.'}</p>
+          </div>
+
+          <!-- Muestra de portadas con clases adaptables a temas -->
+          <div class="flex items-center gap-1 my-2 theme-input p-2 rounded-2xl border border-slate-500/20 overflow-x-auto min-h-[64px]">
+            ${gameCovers.length > 0 ? gameCovers.map((cover: string) => `
+              <img src="${cover}" class="w-10 h-12 object-cover rounded-lg border border-slate-500/20 shrink-0" />
+            `).join('') : '<span class="text-[11px] theme-text-secondary italic px-2">Sin juegos añadidos</span>'}
+          </div>
+
+          <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-500/20">
+            <span class="font-mono text-indigo-400 font-semibold">${list.items?.length || 0} juegos</span>
+            <div class="flex items-center gap-2">
+              <a href="/dashboard" class="text-xs text-indigo-400 font-semibold hover:underline">
+                + Ir a la Biblioteca
+              </a>
+              <button onclick="copyListLink('${list.id}')" class="text-indigo-400 hover:text-indigo-300 font-semibold p-1 cursor-pointer" title="Compartir enlace">
+                🔗
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // MODAL CONTROLES
+  const modal = document.getElementById('create-list-modal');
+  const openModalBtn = document.getElementById('open-create-list-modal');
+  const closeModalBtn = document.getElementById('close-modal-btn');
+  const cancelModalBtn = document.getElementById('cancel-modal-btn');
+  const form = document.getElementById('create-list-form') as HTMLFormElement;
+
+  openModalBtn?.addEventListener('click', () => modal?.classList.remove('hidden'));
+  closeModalBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
+  cancelModalBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const title = (document.getElementById('list-title-input') as HTMLInputElement).value.trim();
+    const description = (document.getElementById('list-desc-input') as HTMLTextAreaElement).value.trim();
+    const isPublic = (document.getElementById('list-public-checkbox') as HTMLInputElement).checked;
+
+    if (!title) return;
+
+    if (!navigator.onLine) {
+      const newList = {
+        id: `offline_list_${Date.now()}`,
+        title,
+        description: description || null,
+        is_public: isPublic,
+        items: []
+      };
+
+      customLists.unshift(newList);
+      localStorage.setItem(listsCacheKey, JSON.stringify(customLists));
+
+      enqueueAction('custom_lists', 'INSERT', {
+        title,
+        description: description || null,
+        is_public: isPublic
+      });
+
+      modal?.classList.add('hidden');
+      form.reset();
+
+      const emptyState = document.getElementById('lists-empty');
+      const grid = document.getElementById('lists-grid');
+      if (emptyState) emptyState.classList.add('hidden');
+      if (grid) grid.classList.remove('hidden');
+
+      renderListsGrid();
+
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Lista creada localmente (se sincronizará al conectar)', 'info');
+      }
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { error } = await supabase.from('custom_lists').insert([{
+      user_id: session.user.id,
+      title,
+      description: description || null,
+      is_public: isPublic
+    }]);
+
+    if (error) {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Error al crear lista: ' + error.message, 'error');
+      } else {
+        alert('Error al crear lista: ' + error.message);
+      }
+      return;
+    }
+
+    modal?.classList.add('hidden');
+    form.reset();
+    if (typeof (window as any).showToast === 'function') {
+      (window as any).showToast('¡Lista creada correctamente!', 'success');
+    }
+    loadCustomLists();
+  });
+
+  (window as any).deleteList = async (id: string) => {
+    if (!confirm('¿Seguro que deseas eliminar esta lista?')) return;
+
+    customLists = customLists.filter(l => l.id !== id);
+    localStorage.setItem(listsCacheKey, JSON.stringify(customLists));
+
+    if (customLists.length === 0) {
+      const emptyState = document.getElementById('lists-empty');
+      const grid = document.getElementById('lists-grid');
+      if (emptyState) emptyState.classList.remove('hidden');
+      if (grid) grid.classList.add('hidden');
+    } else {
+      renderListsGrid();
+    }
+
+    if (!navigator.onLine) {
+      enqueueAction('custom_lists', 'DELETE', { id });
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Lista eliminada localmente (se sincronizará al conectar)', 'info');
+      }
+      return;
+    }
+
+    await supabase.from('custom_lists').delete().eq('id', id);
+    loadCustomLists();
+  };
+
+  (window as any).copyListLink = (id: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/list/${id}`);
+    if (typeof (window as any).showToast === 'function') {
+      (window as any).showToast('Enlace de la lista copiado al portapapeles', 'info');
+    }
+  };
+
+  loadCustomLists();
+  document.addEventListener('astro:page-load', loadCustomLists);
+</script>

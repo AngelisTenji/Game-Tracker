@@ -3,18 +3,18 @@ export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/common/Navbar.astro';
-import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare, Share2 } from 'lucide-astro';
+import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare, Share2, FolderPlus, X } from 'lucide-astro';
 ---
 
 <Layout title="Cargando Juego... | KazeChronik">
   <Navbar />
 
   <main class="min-h-screen pt-24 pb-16 px-4 max-w-6xl mx-auto theme-text-primary">
-    <!-- Estado de Carga (Skeleton) -->
+    <!-- Estado de Carga (Skeleton Adaptable) -->
     <div id="loading-skeleton" class="animate-pulse space-y-6">
-      <div class="h-64 bg-slate-800/50 rounded-3xl w-full"></div>
-      <div class="h-10 bg-slate-800/50 rounded-xl w-1/3"></div>
-      <div class="h-32 bg-slate-800/50 rounded-xl w-full"></div>
+      <div class="h-64 theme-card border rounded-3xl w-full"></div>
+      <div class="h-10 theme-card border rounded-xl w-1/3"></div>
+      <div class="h-32 theme-card border rounded-xl w-full"></div>
     </div>
 
     <!-- Mensaje de Error / No Encontrado -->
@@ -29,25 +29,25 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
     <!-- Contenido del Juego -->
     <article id="game-content" class="hidden space-y-8">
       <!-- Banner Principal -->
-      <header class="relative h-72 sm:h-96 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl">
+      <header class="relative h-72 sm:h-96 rounded-3xl overflow-hidden border border-slate-500/20 shadow-2xl theme-card">
         <img 
           id="game-cover" 
           src="" 
           alt="" 
           class="w-full h-full object-cover filter brightness-75"
         />
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
         
         <div class="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
             <div class="flex items-center gap-2 mb-2">
               <span id="game-store" class="px-2.5 py-1 bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-semibold rounded-lg backdrop-blur-md"></span>
-              <span id="game-platform" class="px-2.5 py-1 bg-slate-800/80 text-slate-300 text-xs font-semibold rounded-lg backdrop-blur-md"></span>
+              <span id="game-platform" class="px-2.5 py-1 theme-card text-xs font-semibold rounded-lg backdrop-blur-md border border-slate-500/20"></span>
             </div>
             <h1 id="game-title" class="text-3xl sm:text-5xl font-black tracking-tight text-white drop-shadow-md"></h1>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
             <!-- Botón de Favorito -->
             <button 
               type="button" 
@@ -58,9 +58,19 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
               <span id="favorite-text">Añadir a Favoritos</span>
             </button>
 
+            <!-- Botón Añadir a Lista Personalizada -->
+            <button 
+              type="button" 
+              id="open-add-to-list-btn" 
+              class="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 backdrop-blur-md"
+            >
+              <FolderPlus class="w-4 h-4" />
+              <span>Añadir a Lista</span>
+            </button>
+
             <a 
               href="/dashboard" 
-              class="px-4 py-2 bg-slate-900/80 hover:bg-slate-800 text-slate-300 text-sm font-medium rounded-xl border border-slate-700/50 transition-all flex items-center gap-2 backdrop-blur-md"
+              class="px-4 py-2 theme-button text-xs font-medium rounded-xl border border-slate-500/20 transition-all flex items-center gap-2 backdrop-blur-md"
             >
               ← Volver
             </a>
@@ -72,7 +82,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
         <!-- Columna Izquierda: Ajustes y Etiquetas -->
         <section class="lg:col-span-1 space-y-6">
           <div class="theme-card border p-6 rounded-2xl space-y-5 shadow-sm">
-            <h2 class="font-bold text-lg border-b border-slate-800/80 pb-3 flex items-center gap-2">
+            <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 flex items-center gap-2">
               🎮 Estado & Progreso
             </h2>
 
@@ -156,7 +166,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
         <!-- Columna Derecha: Reseña y Bitácora -->
         <section class="lg:col-span-2 space-y-6">
           <div class="theme-card border p-6 rounded-2xl space-y-5 shadow-sm">
-            <h2 class="font-bold text-lg border-b border-slate-800/80 pb-3 flex items-center gap-2">
+            <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 flex items-center gap-2">
               📝 Tu Bitácora y Reseña
             </h2>
 
@@ -195,7 +205,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
 
             <button 
               id="save-review-btn" 
-              class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-xl transition-all border border-slate-700 cursor-pointer flex items-center justify-center gap-2"
+              class="px-6 py-2.5 theme-button hover:opacity-80 font-semibold text-sm rounded-xl transition-all border border-slate-500/20 cursor-pointer flex items-center justify-center gap-2"
             >
               <span>Guardar Bitácora</span>
             </button>
@@ -203,7 +213,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
 
           <!-- SECCIÓN: GAMER NOTEBOOK (NOTAS & BUILDS ESPECIALIZADAS) -->
           <div class="theme-card border p-6 rounded-2xl space-y-5 shadow-sm">
-            <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
               <div>
                 <h2 class="font-bold text-lg theme-text-primary flex items-center gap-2">
                   📓 Gamer Notebook
@@ -278,10 +288,10 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
                 </label>
 
                 <div class="flex gap-2">
-                  <button type="button" id="cancel-note-btn" class="px-3 py-1.5 theme-button text-xs font-semibold rounded-lg">
+                  <button type="button" id="cancel-note-btn" class="px-3 py-1.5 theme-button text-xs font-semibold rounded-lg cursor-pointer">
                     Cancelar
                   </button>
-                  <button type="submit" id="save-note-btn" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-lg transition-all shadow-md">
+                  <button type="submit" id="save-note-btn" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-lg transition-all shadow-md cursor-pointer">
                     Guardar
                   </button>
                 </div>
@@ -299,10 +309,35 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
       </div>
     </article>
   </main>
+
+  <!-- MODAL PARA AÑADIR A LISTA PERSONALIZADA -->
+  <div id="add-to-list-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+        <h3 class="text-base font-bold theme-text-primary">Añadir a una Lista</h3>
+        <button id="close-add-list-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg cursor-pointer">
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+
+      <p class="text-xs theme-text-secondary">Selecciona las listas donde deseas incluir este videojuego:</p>
+
+      <div id="user-lists-selection-container" class="space-y-2 max-h-60 overflow-y-auto py-2">
+        <p class="text-xs theme-text-secondary italic text-center">Cargando tus listas...</p>
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-slate-500/20">
+        <button type="button" id="cancel-add-list-modal-btn" class="px-4 py-2 theme-button border border-slate-500/20 text-xs font-semibold rounded-xl cursor-pointer">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
 </Layout>
 
 <script>
   import { supabase } from '../../lib/supabase';
+  import { enqueueAction, processSyncQueue } from '../../lib/syncQueue';
 
   async function initGameDetail() {
     const cleanPath = window.location.pathname.replace(/\/$/, '');
@@ -334,7 +369,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
     const newTagInput = document.getElementById('new-tag-input') as HTMLInputElement;
     const addTagBtn = document.getElementById('add-tag-btn');
 
-    // Elementos del Gamer Notebook
+    // Gamer Notebook
     const toggleNoteFormBtn = document.getElementById('toggle-note-form-btn');
     const createNoteForm = document.getElementById('create-note-form') as HTMLFormElement;
     const cancelNoteBtn = document.getElementById('cancel-note-btn');
@@ -344,6 +379,13 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
     const noteImageUrlInput = document.getElementById('note-image-url') as HTMLInputElement;
     const notePinnedCheckbox = document.getElementById('note-pinned') as HTMLInputElement;
     const notesListContainer = document.getElementById('notes-list-container');
+
+    // Modal Listas
+    const addToListModal = document.getElementById('add-to-list-modal');
+    const openAddToListBtn = document.getElementById('open-add-to-list-btn');
+    const closeAddListModalBtn = document.getElementById('close-add-list-modal-btn');
+    const cancelAddListModalBtn = document.getElementById('cancel-add-list-modal-btn');
+    const userListsContainer = document.getElementById('user-lists-selection-container');
 
     let currentTags: string[] = [];
     let isFavorite = false;
@@ -360,7 +402,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
       if (achievementsVal) achievementsVal.textContent = `${e.target.value}%`;
     });
 
-    // 1. Cargar Registro (Online con Fallback a Caché Offline)
+    // 1. Cargar Registro (Online con Fallback Offline)
     let data: any = null;
     const cacheKey = `kazechronik_game_${gameId}`;
     const notesCacheKey = `kazechronik_notes_${gameId}`;
@@ -377,6 +419,8 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
           console.error('Error al leer caché del juego:', e);
         }
       }
+    } else {
+      processSyncQueue();
     }
 
     if (!data) {
@@ -412,7 +456,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
       }
     }
 
-    // 2. Poblar Datos y UI del Juego
+    // 2. Poblar Datos y UI
     isFavorite = Boolean(data.is_favorite);
     
     function updateFavoriteUI() {
@@ -423,11 +467,11 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
       if (!btn || !icon || !text) return;
 
       if (isFavorite) {
-        btn.className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 border-amber-500/30 text-amber-400 transition-all cursor-pointer flex items-center gap-1.5 backdrop-blur-md";
+        btn.className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-400 transition-all cursor-pointer flex items-center gap-1.5 backdrop-blur-md";
         icon.textContent = "★";
         text.textContent = "Favorito";
       } else {
-        btn.className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-700/50 transition-all cursor-pointer flex items-center gap-1.5 backdrop-blur-md";
+        btn.className = "px-3.5 py-2 rounded-xl text-xs font-semibold theme-button text-slate-200 border border-slate-500/20 transition-all cursor-pointer flex items-center gap-1.5 backdrop-blur-md";
         icon.textContent = "☆";
         text.textContent = "Añadir a Favoritos";
       }
@@ -488,7 +532,98 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
       }
     });
 
-    // --- GAMER NOTEBOOK CON SUPPORT OFFLINE Y CHECKLISTS INTERACTIVAS ---
+    // --- MODAL DE LISTAS ---
+    openAddToListBtn?.addEventListener('click', async () => {
+      addToListModal?.classList.remove('hidden');
+      await loadUserListsForSelection();
+    });
+
+    closeAddListModalBtn?.addEventListener('click', () => addToListModal?.classList.add('hidden'));
+    cancelAddListModalBtn?.addEventListener('click', () => addToListModal?.classList.add('hidden'));
+
+    async function loadUserListsForSelection() {
+      if (!userListsContainer) return;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data: lists } = await supabase
+        .from('custom_lists')
+        .select('id, title')
+        .eq('user_id', session.user.id);
+
+      if (!lists || lists.length === 0) {
+        userListsContainer.innerHTML = `
+          <div class="text-center py-4 space-y-2">
+            <p class="text-xs theme-text-secondary">No tienes listas creadas aún.</p>
+            <a href="/lists" class="inline-block text-xs font-bold text-indigo-400 hover:underline">Crear mi primera lista →</a>
+          </div>
+        `;
+        return;
+      }
+
+      const { data: existingItems } = await supabase
+        .from('custom_list_items')
+        .select('list_id')
+        .eq('game_id', gameId);
+
+      const existingListIds = (existingItems || []).map(i => i.list_id);
+
+      userListsContainer.innerHTML = lists.map(list => {
+        const isAdded = existingListIds.includes(list.id);
+        return `
+          <div class="flex items-center justify-between p-3 theme-card border rounded-xl">
+            <span class="text-xs font-bold theme-text-primary truncate pr-2">${list.title}</span>
+            <button 
+              type="button"
+              onclick="toggleGameInList('${list.id}', ${isAdded})"
+              class="px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${isAdded ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}"
+            >
+              ${isAdded ? 'Quitar' : '+ Añadir'}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    (window as any).toggleGameInList = async (listId: string, isCurrentlyAdded: boolean) => {
+      if (!navigator.onLine) {
+        if (isCurrentlyAdded) {
+          enqueueAction('custom_list_items', 'DELETE', { list_id: listId, game_id: gameId });
+        } else {
+          enqueueAction('custom_list_items', 'INSERT', { list_id: listId, game_id: gameId });
+        }
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Lista actualizada localmente (Modo Offline)', 'info');
+        }
+        addToListModal?.classList.add('hidden');
+        return;
+      }
+
+      if (isCurrentlyAdded) {
+        await supabase
+          .from('custom_list_items')
+          .delete()
+          .eq('list_id', listId)
+          .eq('game_id', gameId);
+
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Juego removido de la lista', 'info');
+        }
+      } else {
+        await supabase
+          .from('custom_list_items')
+          .insert([{ list_id: listId, game_id: gameId }]);
+
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('¡Juego añadido a la lista!', 'success');
+        }
+      }
+
+      await loadUserListsForSelection();
+    };
+
+    // --- GAMER NOTEBOOK (CON ENCOLE OFFLINE Y CHECKLISTS INTERACTIVAS) ---
     async function loadGameNotes() {
       if (!notesListContainer) return;
 
@@ -563,7 +698,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
         }).join('<br/>');
 
         return `
-          <div class="theme-input border rounded-2xl p-4 space-y-2 relative transition-all ${n.is_pinned ? 'border-amber-500/40 bg-amber-500/5 shadow-md' : 'shadow-sm'}">
+          <div class="theme-input border border-slate-500/20 rounded-2xl p-4 space-y-2 relative transition-all ${n.is_pinned ? 'border-amber-500/40 bg-amber-500/5 shadow-md' : 'shadow-sm'}">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2 overflow-hidden">
                 <span class="text-[10px] font-bold px-2 py-0.5 border rounded-md shrink-0 ${cat.color}">
@@ -586,10 +721,10 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
               </div>
             </div>
 
-            ${n.content ? `<div class="text-xs theme-text-secondary leading-relaxed bg-slate-900/30 p-3 rounded-xl border border-slate-800/40">${formattedContent}</div>` : ''}
+            ${n.content ? `<div class="text-xs theme-text-secondary leading-relaxed theme-card p-3 rounded-xl border border-slate-500/20">${formattedContent}</div>` : ''}
 
             ${n.image_url ? `
-              <div class="mt-2 rounded-xl overflow-hidden border border-slate-500/20 max-h-60 bg-slate-950">
+              <div class="mt-2 rounded-xl overflow-hidden border border-slate-500/20 max-h-60 bg-slate-500/10">
                 <img src="${n.image_url}" alt="Guía / Build" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer" onclick="window.open('${n.image_url}', '_blank')" />
               </div>
             ` : ''}
@@ -654,15 +789,19 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
         if (editingNoteId) {
           const idx = loadedNotes.findIndex(n => n.id === editingNoteId);
           if (idx !== -1) loadedNotes[idx] = { ...loadedNotes[idx], ...noteData };
+          enqueueAction('game_notes', 'UPDATE', { id: editingNoteId, ...noteData });
         } else {
-          loadedNotes.unshift({ id: `offline_${Date.now()}`, ...noteData });
+          const tempId = `offline_${Date.now()}`;
+          loadedNotes.unshift({ id: tempId, ...noteData });
+          enqueueAction('game_notes', 'INSERT', noteData);
         }
+
         localStorage.setItem(notesCacheKey, JSON.stringify(loadedNotes));
         renderNotesList();
         createNoteForm.reset();
         createNoteForm.classList.add('hidden');
         if (typeof (window as any).showToast === 'function') {
-          (window as any).showToast('Nota guardada localmente (Modo Offline)', 'info');
+          (window as any).showToast('Nota guardada localmente (se sincronizará al conectar)', 'info');
         }
         return;
       }
@@ -694,11 +833,13 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
     });
 
     (window as any).togglePinNote = async (noteId: string, currentPinned: boolean) => {
+      const note = loadedNotes.find(n => n.id === noteId);
+      if (note) note.is_pinned = !currentPinned;
+      localStorage.setItem(notesCacheKey, JSON.stringify(loadedNotes));
+      renderNotesList();
+
       if (!navigator.onLine) {
-        const note = loadedNotes.find(n => n.id === noteId);
-        if (note) note.is_pinned = !currentPinned;
-        localStorage.setItem(notesCacheKey, JSON.stringify(loadedNotes));
-        renderNotesList();
+        enqueueAction('game_notes', 'UPDATE', { id: noteId, is_pinned: !currentPinned });
         return;
       }
 
@@ -713,10 +854,12 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
     (window as any).deleteNote = async (noteId: string) => {
       if (!confirm('¿Seguro que deseas eliminar esta nota?')) return;
 
+      loadedNotes = loadedNotes.filter(n => n.id !== noteId);
+      localStorage.setItem(notesCacheKey, JSON.stringify(loadedNotes));
+      renderNotesList();
+
       if (!navigator.onLine) {
-        loadedNotes = loadedNotes.filter(n => n.id !== noteId);
-        localStorage.setItem(notesCacheKey, JSON.stringify(loadedNotes));
-        renderNotesList();
+        enqueueAction('game_notes', 'DELETE', { id: noteId });
         return;
       }
 
@@ -735,7 +878,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
 
     loadGameNotes();
 
-    // 3. LISTENERS PARA GUARDAR PROGRESO Y RESEÑA (CON CACHÉ OFFLINE Y TOASTS)
+    // 3. LISTENERS DE GUARDADO PROGRESO Y RESEÑA (CON ENCOLE OFFLINE)
     saveProgressBtn?.addEventListener('click', async () => {
       saveProgressBtn.disabled = true;
       saveProgressBtn.innerHTML = `
@@ -755,15 +898,15 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
         updated_at: new Date().toISOString()
       };
 
-      // Guardar inmediatamente en caché local
       data = { ...data, ...updatedProgress };
       localStorage.setItem(cacheKey, JSON.stringify(data));
 
       if (!navigator.onLine) {
+        enqueueAction('user_library', 'UPDATE', { id: gameId, ...updatedProgress });
         saveProgressBtn.disabled = false;
         saveProgressBtn.innerHTML = `<span>Guardar Cambios</span>`;
         if (typeof (window as any).showToast === 'function') {
-          (window as any).showToast('Progreso guardado localmente (Modo Offline)', 'info');
+          (window as any).showToast('Progreso guardado localmente (se sincronizará al conectar)', 'info');
         }
         return;
       }
@@ -810,15 +953,15 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
         updated_at: new Date().toISOString()
       };
 
-      // Guardar en caché local
       data = { ...data, ...updatedReview };
       localStorage.setItem(cacheKey, JSON.stringify(data));
 
       if (!navigator.onLine) {
+        enqueueAction('user_library', 'UPDATE', { id: gameId, ...updatedReview });
         saveReviewBtn.disabled = false;
         saveReviewBtn.innerHTML = `<span>Guardar Bitácora</span>`;
         if (typeof (window as any).showToast === 'function') {
-          (window as any).showToast('Bitácora guardada localmente (Modo Offline)', 'info');
+          (window as any).showToast('Bitácora guardada localmente (se sincronizará al conectar)', 'info');
         }
         return;
       }
