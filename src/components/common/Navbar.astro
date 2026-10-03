@@ -1,9 +1,8 @@
 ---
-import { Library, Search, Settings, BarChart2, BookOpen, User, LogOut, WifiOff, Target, FolderHeart, ChevronDown } from 'lucide-astro';
+import { Library, Search, Settings, BarChart2, BookOpen, User, LogOut, WifiOff, Wifi, Target, FolderHeart, ChevronDown, RefreshCw } from 'lucide-astro';
 ---
 
-<header class="theme-card border-b sticky top-0 z-40 backdrop-blur-md bg-opacity-80">
-  <!-- Se remueve 'overflow-hidden' de este div para evitar recortar el modal flotante -->
+<header class="theme-card border-b border-slate-500/20 sticky top-0 z-40 backdrop-blur-md bg-opacity-80">
   <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
     <!-- Logotipo e Isotipo KazeChronik -->
     <a href="/dashboard" class="flex items-center gap-2.5 group shrink-0">
@@ -21,10 +20,46 @@ import { Library, Search, Settings, BarChart2, BookOpen, User, LogOut, WifiOff, 
       </span>
     </a>
 
-    <!-- Badge Flotante de Estado Offline -->
-    <div id="offline-badge" class="hidden items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full text-xs font-semibold animate-pulse shrink-0">
-      <WifiOff class="w-3.5 h-3.5" />
-      <span class="hidden sm:inline">Sin conexión - Modo Lectura</span>
+    <!-- BADGE DE ESTADO DE RED Y COLA DE SINCRONIZACIÓN -->
+    <div class="relative shrink-0">
+      <button 
+        id="network-status-btn" 
+        type="button" 
+        class="hidden items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full text-xs font-semibold cursor-pointer transition-all hover:scale-105 shadow-sm"
+        title="Ver estado de conexión y cola de sincronización"
+      >
+        <WifiOff id="network-icon-offline" class="w-3.5 h-3.5 text-amber-400" />
+        <Wifi id="network-icon-online" class="w-3.5 h-3.5 text-sky-400 hidden" />
+        <span id="network-status-text" class="hidden sm:inline">Sin Conexión</span>
+        <span id="sync-queue-badge" class="hidden ml-1 px-1.5 py-0.2 bg-amber-500/20 text-amber-300 font-bold rounded-full text-[10px]">0</span>
+      </button>
+
+      <!-- POP-OVER / DESPLEGABLE DE INFORMACIÓN DE RED -->
+      <div 
+        id="network-popover" 
+        class="hidden absolute left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0 mt-2 w-72 theme-card border border-slate-500/20 rounded-2xl shadow-2xl p-4 z-50 space-y-3 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
+      >
+        <div class="flex items-center justify-between border-b border-slate-500/20 pb-2">
+          <span class="font-bold text-xs theme-text-primary flex items-center gap-1.5">
+            <span id="popover-status-indicator" class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+            <span id="popover-status-title">Modo Offline Activo</span>
+          </span>
+          <span id="popover-sync-count" class="text-[10px] font-mono text-indigo-400 font-bold">0 pendientes</span>
+        </div>
+
+        <p id="popover-status-desc" class="text-xs theme-text-secondary leading-relaxed">
+          Los cambios realizados se guardan en tu dispositivo y se enviarán automáticamente a la nube cuando recuperes tu conexión a internet.
+        </p>
+
+        <button 
+          id="force-sync-btn"
+          type="button"
+          class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RefreshCw class="w-3.5 h-3.5" />
+          <span>Sincronizar Ahora</span>
+        </button>
+      </div>
     </div>
 
     <!-- Menú de Navegación Esencial -->
@@ -66,7 +101,7 @@ import { Library, Search, Settings, BarChart2, BookOpen, User, LogOut, WifiOff, 
         <!-- POP-OVER / MENÚ DESPLEGABLE DE PERFIL -->
         <div
           id="profile-dropdown-menu"
-          class="hidden absolute right-0 mt-2 w-60 theme-card border rounded-2xl shadow-2xl p-2 z-50 space-y-1 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
+          class="hidden absolute right-0 mt-2 w-60 theme-card border border-slate-500/20 rounded-2xl shadow-2xl p-2 z-50 space-y-1 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
         >
           <!-- Encabezado de Usuario -->
           <div class="p-2.5 border-b border-slate-500/20 mb-1 space-y-0.5">
@@ -145,6 +180,19 @@ import { Library, Search, Settings, BarChart2, BookOpen, User, LogOut, WifiOff, 
 
 <script>
   import { supabase } from '../../lib/supabase';
+  import { processSyncQueue } from '../../lib/syncQueue';
+
+  // Capturar Prompt de Instalación PWA Globalmente
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    (window as any).deferredPwaPrompt = e;
+    window.dispatchEvent(new CustomEvent('pwa-install-ready'));
+  });
+
+  window.addEventListener('appinstalled', () => {
+    (window as any).deferredPwaPrompt = null;
+    window.dispatchEvent(new CustomEvent('pwa-install-ready'));
+  });
 
   async function initNavbar() {
     const trigger = document.getElementById('profile-menu-trigger');
@@ -152,13 +200,34 @@ import { Library, Search, Settings, BarChart2, BookOpen, User, LogOut, WifiOff, 
     const arrow = document.getElementById('menu-arrow');
     const logoutBtn = document.getElementById('logout-btn');
     const profileLink = document.getElementById('nav-profile-link') as HTMLAnchorElement;
-    const offlineBadge = document.getElementById('offline-badge');
 
-    // Manejo de apertura / cierre del desplegable
+    // Elementos del Badge de Red & Popover
+    const statusBtn = document.getElementById('network-status-btn');
+    const statusText = document.getElementById('network-status-text');
+    const iconOffline = document.getElementById('network-icon-offline');
+    const iconOnline = document.getElementById('network-icon-online');
+    const queueBadge = document.getElementById('sync-queue-badge');
+    const networkPopover = document.getElementById('network-popover');
+    const popoverTitle = document.getElementById('popover-status-title');
+    const popoverDesc = document.getElementById('popover-status-desc');
+    const popoverCount = document.getElementById('popover-sync-count');
+    const popoverIndicator = document.getElementById('popover-status-indicator');
+    const forceSyncBtn = document.getElementById('force-sync-btn') as HTMLButtonElement;
+
+    // Manejo de apertura / cierre del desplegable de Perfil
     trigger?.addEventListener('click', (e) => {
       e.stopPropagation();
+      networkPopover?.classList.add('hidden');
       dropdown?.classList.toggle('hidden');
       arrow?.classList.toggle('rotate-180');
+    });
+
+    // Manejo del Popover de Red
+    statusBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown?.classList.add('hidden');
+      arrow?.classList.remove('rotate-180');
+      networkPopover?.classList.toggle('hidden');
     });
 
     window.addEventListener('click', (e) => {
@@ -166,53 +235,144 @@ import { Library, Search, Settings, BarChart2, BookOpen, User, LogOut, WifiOff, 
         dropdown?.classList.add('hidden');
         arrow?.classList.remove('rotate-180');
       }
+      if (!networkPopover?.contains(e.target as Node) && !statusBtn?.contains(e.target as Node)) {
+        networkPopover?.classList.add('hidden');
+      }
     });
 
-    // Detección de Estado de Red (Online / Offline)
+    // Detección de Red y Sincronización
     function updateNetworkStatus() {
-      if (navigator.onLine) {
-        offlineBadge?.classList.add('hidden');
-        offlineBadge?.classList.remove('flex');
+      const rawQueue = localStorage.getItem('kazechronik_sync_queue');
+      const queue = rawQueue ? JSON.parse(rawQueue) : [];
+      const pendingCount = queue.length;
+
+      if (!navigator.onLine) {
+        statusBtn?.classList.remove('hidden');
+        statusBtn?.classList.add('flex');
+        statusBtn?.classList.replace('bg-sky-500/10', 'bg-amber-500/10');
+        statusBtn?.classList.replace('border-sky-500/30', 'border-amber-500/30');
+        statusBtn?.classList.replace('text-sky-400', 'text-amber-400');
+
+        iconOffline?.classList.remove('hidden');
+        iconOnline?.classList.add('hidden');
+
+        if (statusText) statusText.textContent = 'Modo Offline';
+
+        if (pendingCount > 0) {
+          queueBadge?.classList.remove('hidden');
+          if (queueBadge) queueBadge.textContent = pendingCount.toString();
+        } else {
+          queueBadge?.classList.add('hidden');
+        }
+
+        if (popoverTitle) popoverTitle.textContent = 'Modo Offline Activo';
+        if (popoverDesc) popoverDesc.textContent = 'Tus acciones se guardan localmente. Se sincronizarán automáticamente con la nube cuando vuelvas a tener conexión.';
+        if (popoverCount) popoverCount.textContent = `${pendingCount} pendientes`;
+        if (popoverIndicator) popoverIndicator.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+        if (forceSyncBtn) forceSyncBtn.disabled = true;
+
+      } else if (pendingCount > 0) {
+        statusBtn?.classList.remove('hidden');
+        statusBtn?.classList.add('flex');
+        statusBtn?.classList.replace('bg-amber-500/10', 'bg-sky-500/10');
+        statusBtn?.classList.replace('border-amber-500/30', 'border-sky-500/30');
+        statusBtn?.classList.replace('text-amber-400', 'text-sky-400');
+
+        iconOffline?.classList.add('hidden');
+        iconOnline?.classList.remove('hidden');
+
+        if (statusText) statusText.textContent = 'Sincronizando';
+        queueBadge?.classList.remove('hidden');
+        if (queueBadge) queueBadge.textContent = pendingCount.toString();
+
+        if (popoverTitle) popoverTitle.textContent = 'Acciones Pendientes';
+        if (popoverDesc) popoverDesc.textContent = 'Tienes cambios locales listos para enviarse a la nube.';
+        if (popoverCount) popoverCount.textContent = `${pendingCount} pendientes`;
+        if (popoverIndicator) popoverIndicator.className = 'w-2 h-2 rounded-full bg-sky-400 animate-pulse';
+        if (forceSyncBtn) forceSyncBtn.disabled = false;
+
       } else {
-        offlineBadge?.classList.remove('hidden');
-        offlineBadge?.classList.add('flex');
+        // En línea y sin pendientes
+        statusBtn?.classList.add('hidden');
+        statusBtn?.classList.remove('flex');
+        networkPopover?.classList.add('hidden');
       }
     }
 
+    forceSyncBtn?.addEventListener('click', async () => {
+      forceSyncBtn.disabled = true;
+      forceSyncBtn.innerHTML = `
+        <svg class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Sincronizando...</span>
+      `;
+
+      await processSyncQueue();
+      updateNetworkStatus();
+
+      forceSyncBtn.innerHTML = `
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+        <span>Sincronizar Ahora</span>
+      `;
+    });
+
     window.addEventListener('online', updateNetworkStatus);
     window.addEventListener('offline', updateNetworkStatus);
+    window.addEventListener('storage', updateNetworkStatus);
     updateNetworkStatus();
 
-    // Obtención de datos del perfil e imagen de avatar
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('username, display_name, avatar_url')
-          .eq('id', session.user.id)
-          .maybeSingle();
+    // Obtención de datos del perfil con caché local para offline
+    const profileCacheKey = 'kazechronik_user_profile_cache';
 
-        const nameEl = document.getElementById('nav-user-name');
-        const handleEl = document.getElementById('nav-user-handle');
-        const avatarBox = document.getElementById('nav-avatar-box');
+    function applyProfileData(displayName: string, username: string, avatarUrl?: string) {
+      const nameEl = document.getElementById('nav-user-name');
+      const handleEl = document.getElementById('nav-user-handle');
+      const avatarBox = document.getElementById('nav-avatar-box');
 
-        const displayName = profile?.display_name || profile?.username || session.user.email?.split('@')[0] || 'Jugador';
-        const username = profile?.username ? `@${profile.username}` : session.user.email;
+      if (nameEl) nameEl.textContent = displayName;
+      if (handleEl) handleEl.textContent = username || '';
 
-        if (nameEl) nameEl.textContent = displayName;
-        if (handleEl) handleEl.textContent = username || '';
-
-        if (profile?.username && profileLink) {
-          profileLink.href = `/u/${profile.username}`;
-        }
-
-        if (profile?.avatar_url && avatarBox) {
-          avatarBox.innerHTML = `<img src="${profile.avatar_url}" alt="${displayName}" class="w-full h-full object-cover" />`;
-        }
+      if (profileLink && username.startsWith('@')) {
+        profileLink.href = `/u/${username.substring(1)}`;
       }
-    } catch (err) {
-      console.log('Modo offline activo: utilizando enlaces locales de respaldo.');
+
+      if (avatarUrl && avatarBox) {
+        avatarBox.innerHTML = `<img src="${avatarUrl}" alt="${displayName}" class="w-full h-full object-cover" />`;
+      }
+    }
+
+    // 1. Carga inmediata desde Caché Local
+    const cachedProfile = localStorage.getItem(profileCacheKey);
+    if (cachedProfile) {
+      try {
+        const p = JSON.parse(cachedProfile);
+        applyProfileData(p.display_name, `@${p.username}`, p.avatar_url);
+      } catch (e) {}
+    }
+
+    // 2. Carga en vivo desde Supabase
+    if (navigator.onLine) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username, display_name, avatar_url')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          if (profile) {
+            localStorage.setItem(profileCacheKey, JSON.stringify(profile));
+            const displayName = profile.display_name || profile.username || session.user.email?.split('@')[0] || 'Jugador';
+            const username = profile.username ? `@${profile.username}` : (session.user.email || '');
+            applyProfileData(displayName, username, profile.avatar_url);
+          }
+        }
+      } catch (err) {
+        console.log('Modo offline activo: utilizando perfil desde caché.');
+      }
     }
 
     // Cierre de Sesión
@@ -222,6 +382,7 @@ import { Library, Search, Settings, BarChart2, BookOpen, User, LogOut, WifiOff, 
       const { error } = await supabase.auth.signOut();
 
       if (!error) {
+        localStorage.removeItem(profileCacheKey);
         window.location.href = '/login';
       } else {
         alert('Error al cerrar sesión: ' + error.message);

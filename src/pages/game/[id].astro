@@ -3,7 +3,24 @@ export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/common/Navbar.astro';
-import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare, Share2, FolderPlus, X } from 'lucide-astro';
+import { 
+  Pin, 
+  Trash2, 
+  Plus, 
+  FileText, 
+  Image, 
+  MapPin, 
+  Shield, 
+  Puzzle, 
+  CheckSquare, 
+  Share2, 
+  FolderPlus, 
+  X, 
+  Trophy, 
+  Award, 
+  CheckCircle2, 
+  RefreshCw 
+} from 'lucide-astro';
 ---
 
 <Layout title="Cargando Juego... | KazeChronik">
@@ -81,7 +98,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Columna Izquierda: Ajustes y Etiquetas -->
         <section class="lg:col-span-1 space-y-6">
-          <div class="theme-card border p-6 rounded-2xl space-y-5 shadow-sm">
+          <div class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-5 shadow-sm">
             <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 flex items-center gap-2">
               🎮 Estado & Progreso
             </h2>
@@ -91,7 +108,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
               <label class="block text-xs font-semibold theme-text-secondary mb-2">Estado en la biblioteca</label>
               <select 
                 id="status-select" 
-                class="w-full px-4 py-2.5 theme-input border rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500 cursor-pointer"
+                class="w-full px-4 py-2.5 theme-input border border-slate-500/20 rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
                 <option value="playing">🔥 Jugando</option>
                 <option value="completed">🏆 Completado</option>
@@ -110,13 +127,13 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
                   id="hours-input" 
                   step="0.1" 
                   min="0"
-                  class="flex-1 px-4 py-2.5 theme-input border rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500"
+                  class="flex-1 px-4 py-2.5 theme-input border border-slate-500/20 rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500"
                 />
                 <span class="text-sm theme-text-secondary font-medium">hrs</span>
               </div>
             </div>
 
-            <!-- Progreso de Logros -->
+            <!-- Progreso General de Logros -->
             <div>
               <div class="flex justify-between items-center mb-2">
                 <label class="text-xs font-semibold theme-text-secondary">Logros desbloqueados</label>
@@ -140,7 +157,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
           </div>
 
           <!-- Componente de Etiquetas -->
-          <div class="theme-card border p-6 rounded-2xl space-y-3 shadow-sm">
+          <div class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-3 shadow-sm">
             <label class="block text-xs font-semibold theme-text-secondary">Etiquetas / Categorías</label>
             <div id="tags-container" class="flex flex-wrap gap-1.5 mb-2">
               <!-- Inyectado dinámicamente -->
@@ -150,7 +167,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
                 type="text" 
                 id="new-tag-input" 
                 placeholder="Añadir etiqueta (ej: Sigilo, Coop)"
-                class="flex-1 px-3 py-1.5 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+                class="flex-1 px-3 py-1.5 theme-input border border-slate-500/20 rounded-xl text-xs focus:outline-none focus:border-indigo-500"
               />
               <button 
                 type="button" 
@@ -163,9 +180,62 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
           </div>
         </section>
 
-        <!-- Columna Derecha: Reseña y Bitácora -->
+        <!-- Columna Derecha: Reseña, Logros y Bitácora -->
         <section class="lg:col-span-2 space-y-6">
-          <div class="theme-card border p-6 rounded-2xl space-y-5 shadow-sm">
+
+          <!-- SECCIÓN: MÓDULO DE LOGROS Y TROFEOS -->
+          <div class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-500/20 pb-4">
+              <div>
+                <h2 class="font-bold text-lg theme-text-primary flex items-center gap-2">
+                  <Trophy class="w-5 h-5 text-amber-400" />
+                  <span>Logros & Trofeos</span>
+                </h2>
+                <p id="achievements-subtitle" class="text-xs theme-text-secondary mt-0.5">
+                  Sincronización oficial de trofeos y progreso de completitud.
+                </p>
+              </div>
+
+              <!-- BARRA Y BADGE DE PLATINADO -->
+              <div class="flex items-center gap-3">
+                <div id="platinum-badge" class="hidden px-3 py-1 bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border border-amber-500/40 text-amber-300 font-black text-xs rounded-xl shadow-lg shadow-amber-500/10 items-center gap-1.5 animate-pulse">
+                  <span>🏆</span>
+                  <span>100% PLATINADO</span>
+                </div>
+
+                <button 
+                  type="button" 
+                  id="sync-achievements-btn" 
+                  class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <RefreshCw class="w-3.5 h-3.5" />
+                  <span>Sincronizar Logros</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- CONTADOR DE LOGROS Y BARRA DE PROGRESO -->
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs font-bold">
+                <span id="achievements-count-label" class="theme-text-secondary">0 / 0 Logros desbloqueados</span>
+                <span id="achievements-pct-label" class="text-amber-400">0%</span>
+              </div>
+
+              <div class="w-full bg-slate-500/20 rounded-full h-2.5 overflow-hidden border border-slate-500/20">
+                <div id="achievements-progress-bar" class="bg-gradient-to-r from-amber-500 to-indigo-500 h-full w-0 transition-all duration-500"></div>
+              </div>
+            </div>
+
+            <!-- CONTENEDOR DE LISTADO DE LOGROS -->
+            <div id="achievements-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-1">
+              <div class="sm:col-span-2 p-6 text-center theme-button border border-dashed border-slate-500/20 rounded-xl text-xs theme-text-secondary">
+                Haz clic en "Sincronizar Logros" para obtener los trofeos del juego.
+              </div>
+            </div>
+          </div>
+
+          <!-- RESEÑA Y BITÁCORA -->
+          <div class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-5 shadow-sm">
             <h2 class="font-bold text-lg border-b border-slate-500/20 pb-3 flex items-center gap-2">
               📝 Tu Bitácora y Reseña
             </h2>
@@ -179,7 +249,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
                 max="10" 
                 step="0.5" 
                 placeholder="Ej: 9.5"
-                class="w-32 px-4 py-2.5 theme-input border rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500"
+                class="w-32 px-4 py-2.5 theme-input border border-slate-500/20 rounded-xl text-sm font-medium focus:outline-none focus:border-indigo-500"
               />
             </div>
 
@@ -189,7 +259,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
                 id="review-input" 
                 rows="4" 
                 placeholder="¿Qué te pareció la jugabilidad, historia, banda sonora...?"
-                class="w-full px-4 py-3 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500 resize-none"
+                class="w-full px-4 py-3 theme-input border border-slate-500/20 rounded-xl text-sm focus:outline-none focus:border-indigo-500 resize-none"
               ></textarea>
             </div>
 
@@ -199,7 +269,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
                 id="notes-input" 
                 rows="3" 
                 placeholder="Ej: Quedé en la misión secundaria X, conseguir el coleccionable Y..."
-                class="w-full px-4 py-3 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500 resize-none"
+                class="w-full px-4 py-3 theme-input border border-slate-500/20 rounded-xl text-sm focus:outline-none focus:border-indigo-500 resize-none"
               ></textarea>
             </div>
 
@@ -211,8 +281,8 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
             </button>
           </div>
 
-          <!-- SECCIÓN: GAMER NOTEBOOK (NOTAS & BUILDS ESPECIALIZADAS) -->
-          <div class="theme-card border p-6 rounded-2xl space-y-5 shadow-sm">
+          <!-- SECCIÓN: GAMER NOTEBOOK -->
+          <div class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-5 shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
               <div>
                 <h2 class="font-bold text-lg theme-text-primary flex items-center gap-2">
@@ -233,8 +303,8 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
               </button>
             </div>
 
-            <!-- Formulario de Creación de Nota (Colapsable) -->
-            <form id="create-note-form" class="hidden theme-input border p-4 rounded-xl space-y-3">
+            <!-- Formulario de Creación de Nota -->
+            <form id="create-note-form" class="hidden theme-input border border-slate-500/20 p-4 rounded-xl space-y-3">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label class="block text-[11px] font-semibold theme-text-secondary mb-1">Título de la Nota</label>
@@ -243,7 +313,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
                     id="note-title" 
                     required 
                     placeholder="ej: Build Raiden Shogun (Sub-DPS)"
-                    class="w-full px-3 py-2 theme-card border rounded-lg text-xs focus:outline-none focus:border-indigo-500"
+                    class="w-full px-3 py-2 theme-card border border-slate-500/20 rounded-lg text-xs focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -251,9 +321,9 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
                   <label class="block text-[11px] font-semibold theme-text-secondary mb-1">Categoría</label>
                   <select 
                     id="note-category" 
-                    class="w-full px-3 py-2 theme-card border rounded-lg text-xs focus:outline-none focus:border-indigo-500 cursor-pointer"
+                    class="w-full px-3 py-2 theme-card border border-slate-500/20 rounded-lg text-xs focus:outline-none focus:border-indigo-500 cursor-pointer"
                   >
-                    <option value="builds">🛡️ Build / Equipamiento</option>
+                    <option value="builds">🛡 Build / Equipamiento</option>
                     <option value="map">🗺️ Mapa / Misión / Coleccionable</option>
                     <option value="puzzle">🧩 Puzle / Código</option>
                     <option value="general">📝 General / Pendientes</option>
@@ -267,7 +337,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
                   id="note-content" 
                   rows="3" 
                   placeholder="Escribe artefactos, atributos, armas, secuencias de puzle o notas directas..."
-                  class="w-full px-3 py-2 theme-card border rounded-lg text-xs focus:outline-none focus:border-indigo-500 resize-none font-mono"
+                  class="w-full px-3 py-2 theme-card border border-slate-500/20 rounded-lg text-xs focus:outline-none focus:border-indigo-500 resize-none font-mono"
                 ></textarea>
               </div>
 
@@ -277,7 +347,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
                   type="url" 
                   id="note-image-url" 
                   placeholder="https://i.imgur.com/... o enlace de captura"
-                  class="w-full px-3 py-2 theme-card border rounded-lg text-xs focus:outline-none focus:border-indigo-500"
+                  class="w-full px-3 py-2 theme-card border border-slate-500/20 rounded-lg text-xs focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
@@ -288,7 +358,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
                 </label>
 
                 <div class="flex gap-2">
-                  <button type="button" id="cancel-note-btn" class="px-3 py-1.5 theme-button text-xs font-semibold rounded-lg cursor-pointer">
+                  <button type="button" id="cancel-note-btn" class="px-3 py-1.5 theme-button border border-slate-500/20 text-xs font-semibold rounded-lg cursor-pointer">
                     Cancelar
                   </button>
                   <button type="submit" id="save-note-btn" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-lg transition-all shadow-md cursor-pointer">
@@ -312,7 +382,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
 
   <!-- MODAL PARA AÑADIR A LISTA PERSONALIZADA -->
   <div id="add-to-list-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+    <div class="theme-card border border-slate-500/20 w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
         <h3 class="text-base font-bold theme-text-primary">Añadir a una Lista</h3>
         <button id="close-add-list-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg cursor-pointer">
@@ -338,6 +408,8 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
 <script>
   import { supabase } from '../../lib/supabase';
   import { enqueueAction, processSyncQueue } from '../../lib/syncQueue';
+
+  const defaultSvgFallback = '/placeholder.svg';
 
   async function initGameDetail() {
     const cleanPath = window.location.pathname.replace(/\/$/, '');
@@ -369,6 +441,15 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
     const newTagInput = document.getElementById('new-tag-input') as HTMLInputElement;
     const addTagBtn = document.getElementById('add-tag-btn');
 
+    // Módulo de Logros
+    const syncAchievementsBtn = document.getElementById('sync-achievements-btn');
+    const achievementsListContainer = document.getElementById('achievements-list-container');
+    const achievementsCountLabel = document.getElementById('achievements-count-label');
+    const achievementsPctLabel = document.getElementById('achievements-pct-label');
+    const achievementsProgressBar = document.getElementById('achievements-progress-bar');
+    const platinumBadge = document.getElementById('platinum-badge');
+    const achievementsSubtitle = document.getElementById('achievements-subtitle');
+
     // Gamer Notebook
     const toggleNoteFormBtn = document.getElementById('toggle-note-form-btn');
     const createNoteForm = document.getElementById('create-note-form') as HTMLFormElement;
@@ -390,6 +471,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
     let currentTags: string[] = [];
     let isFavorite = false;
     let loadedNotes: any[] = [];
+    let gameAchievements: any[] = [];
     let editingNoteId: string | null = null;
 
     if (!gameId || gameId === 'game') {
@@ -406,6 +488,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
     let data: any = null;
     const cacheKey = `kazechronik_game_${gameId}`;
     const notesCacheKey = `kazechronik_notes_${gameId}`;
+    const achievementsCacheKey = `kazechronik_achievements_${gameId}`;
 
     if (!navigator.onLine) {
       const cachedGame = localStorage.getItem(cacheKey);
@@ -532,6 +615,151 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
       }
     });
 
+    // --- MÓDULO DE LOGROS Y TROFEOS (STEAM + CHECKLIST MANUAL) ---
+    async function loadAchievements() {
+      const isSteam = data.store === 'Steam' || data.rawg_id < 0;
+
+      if (achievementsSubtitle) {
+        achievementsSubtitle.textContent = isSteam 
+          ? 'Sincronizado automáticamente desde la API de Steam.' 
+          : 'Sugerencias de RAWG y checklist manual interactiva.';
+      }
+
+      // 1. Carga desde Caché primero
+      const cached = localStorage.getItem(achievementsCacheKey);
+      if (cached) {
+        try {
+          gameAchievements = JSON.parse(cached);
+          renderAchievementsList();
+        } catch (e) {}
+      }
+
+      if (!navigator.onLine) return;
+
+      try {
+        if (isSteam && data.rawg_id) {
+          const appId = Math.abs(data.rawg_id);
+          
+          // OBTIENE EL STEAM ID DEL ALMACENAMIENTO LOCAL O PERFIL
+          const userSteamId = localStorage.getItem('kazechronik_steam_id') || '';
+
+          // ENVÍA TANTO EL APPID COMO EL STEAMID DEL JUGADOR
+          const res = await fetch(`/api/steam/achievements?appId=${appId}&steamId=${encodeURIComponent(userSteamId)}`);
+          const resData = await res.json();
+
+          if (resData.achievements && resData.achievements.length > 0) {
+            gameAchievements = resData.achievements;
+            localStorage.setItem(achievementsCacheKey, JSON.stringify(gameAchievements));
+            renderAchievementsList();
+            return;
+          }
+        }
+
+        // Fallback RAWG para consolas o juegos no-Steam
+        if (data.rawg_id && data.rawg_id > 0) {
+          const rawgKey = 'c53a703142404772979238f656999353';
+          const rawgRes = await fetch(`https://api.rawg.io/api/games/${data.rawg_id}/achievements?key=${rawgKey}`);
+          const rawgData = await rawgRes.json();
+
+          if (rawgData.results && rawgData.results.length > 0) {
+            gameAchievements = rawgData.results.map((a: any) => ({
+              id: a.id,
+              title: a.name,
+              description: a.description || 'Trofeo de la comunidad RAWG',
+              icon: a.image,
+              unlocked: false
+            }));
+            localStorage.setItem(achievementsCacheKey, JSON.stringify(gameAchievements));
+            renderAchievementsList();
+          }
+        }
+      } catch (err) {
+        console.warn('Error obteniendo logros:', err);
+      }
+    }
+
+    function renderAchievementsList() {
+      if (!achievementsListContainer) return;
+
+      if (gameAchievements.length === 0) {
+        achievementsListContainer.innerHTML = `
+          <div class="sm:col-span-2 p-6 text-center theme-button border border-dashed border-slate-500/20 rounded-xl text-xs theme-text-secondary">
+            No hay trofeos o logros registrados para este título.
+          </div>
+        `;
+        return;
+      }
+
+      const unlockedCount = gameAchievements.filter(a => a.unlocked).length;
+      const totalCount = gameAchievements.length;
+      const pct = Math.round((unlockedCount / totalCount) * 100);
+
+      if (achievementsCountLabel) achievementsCountLabel.textContent = `${unlockedCount} / ${totalCount} Logros desbloqueados`;
+      if (achievementsPctLabel) achievementsPctLabel.textContent = `${pct}%`;
+      if (achievementsProgressBar) achievementsProgressBar.style.width = `${pct}%`;
+
+      if (achievementsInput) achievementsInput.value = pct.toString();
+      if (achievementsVal) achievementsVal.textContent = `${pct}%`;
+
+      if (pct === 100) {
+        platinumBadge?.classList.remove('hidden');
+        platinumBadge?.classList.add('flex');
+      } else {
+        platinumBadge?.classList.add('hidden');
+        platinumBadge?.classList.remove('flex');
+      }
+
+      achievementsListContainer.innerHTML = gameAchievements.map((ach, idx) => {
+        // Limpiar el nombre técnico si la API no envió el título formateado
+        const displayTitle = ach.title ? ach.title.replace(/_/g, ' ') : `Logro ${idx + 1}`;
+        const iconSrc = ach.icon || defaultSvgFallback;
+
+        return `
+          <div 
+            onclick="toggleAchievementUnlocked(${idx})"
+            class="p-3 theme-input border rounded-xl flex items-center gap-3 transition-all cursor-pointer ${
+              ach.unlocked 
+                ? 'border-amber-500/40 bg-amber-500/5' 
+                : 'border-slate-500/20 opacity-70 hover:opacity-100'
+            }"
+          >
+            <img 
+              src="${iconSrc}" 
+              alt="${displayTitle}" 
+              onerror="this.src='/placeholder.svg';"
+              class="w-10 h-10 rounded-lg object-cover shrink-0 ${!ach.unlocked ? 'grayscale' : ''}"
+              loading="lazy"
+            />
+            <div class="flex-1 min-w-0">
+              <h4 class="text-xs font-bold theme-text-primary truncate flex items-center justify-between">
+                <span>${displayTitle}</span>
+                ${ach.unlocked ? '<span class="text-amber-400 text-xs">✓</span>' : ''}
+              </h4>
+              <p class="text-[10px] theme-text-secondary line-clamp-2 mt-0.5">${ach.description || 'Logro de jugador'}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    (window as any).toggleAchievementUnlocked = (index: number) => {
+      if (gameAchievements[index]) {
+        gameAchievements[index].unlocked = !gameAchievements[index].unlocked;
+        localStorage.setItem(achievementsCacheKey, JSON.stringify(gameAchievements));
+        renderAchievementsList();
+      }
+    };
+
+    syncAchievementsBtn?.addEventListener('click', () => {
+      syncAchievementsBtn.classList.add('animate-spin');
+      loadAchievements().finally(() => {
+        syncAchievementsBtn.classList.remove('animate-spin');
+      });
+    });
+
+    // Cargar logros al inicio
+    loadAchievements();
+
     // --- MODAL DE LISTAS ---
     openAddToListBtn?.addEventListener('click', async () => {
       addToListModal?.classList.remove('hidden');
@@ -572,7 +800,7 @@ import { Pin, Trash2, Plus, FileText, Image, MapPin, Shield, Puzzle, CheckSquare
       userListsContainer.innerHTML = lists.map(list => {
         const isAdded = existingListIds.includes(list.id);
         return `
-          <div class="flex items-center justify-between p-3 theme-card border rounded-xl">
+          <div class="flex items-center justify-between p-3 theme-card border border-slate-500/20 rounded-xl">
             <span class="text-xs font-bold theme-text-primary truncate pr-2">${list.title}</span>
             <button 
               type="button"

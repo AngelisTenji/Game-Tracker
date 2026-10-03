@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
 import { 
@@ -16,21 +18,24 @@ import {
   Lock,
   Download,
   Upload,
-  UserCheck
+  UserCheck,
+  Gamepad2,
+  ExternalLink,
+  Smartphone
 } from 'lucide-astro';
 ---
 
 <Layout title="Ajustes | KazeChronik">
   <Navbar />
 
-  <main class="flex-1 max-w-xl w-full mx-auto px-4 py-8 space-y-6">
+  <main class="flex-1 max-w-xl w-full mx-auto px-4 py-8 space-y-6 theme-text-primary">
     <div class="mb-2">
-      <h1 class="text-2xl font-bold theme-text-primary tracking-tight">Ajustes</h1>
-      <p class="text-xs theme-text-secondary mt-0.5">Personaliza la apariencia, perfil público y preferencias de tu cuenta</p>
+      <h1 class="text-2xl font-bold tracking-tight">Ajustes</h1>
+      <p class="text-xs theme-text-secondary mt-0.5">Personaliza la apariencia, perfil público, respaldos e integraciones</p>
     </div>
 
     <!-- SECCIÓN DE APARIENCIA -->
-    <div class="theme-card border rounded-2xl p-5 shadow-xl">
+    <div class="theme-card border border-slate-500/20 rounded-2xl p-5 shadow-xl">
       <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-500/20">
         <div class="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-500">
           <Palette class="w-4 h-4" />
@@ -46,7 +51,7 @@ import {
         <button
           type="button"
           data-theme="legacy"
-          class="theme-opt p-3 rounded-xl border theme-card text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-indigo-500/50"
+          class="theme-opt p-3 rounded-xl border border-slate-500/20 theme-card text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-indigo-500/50"
         >
           <div class="flex items-center justify-between">
             <Moon class="w-4 h-4 theme-text-secondary" />
@@ -62,7 +67,7 @@ import {
         <button
           type="button"
           data-theme="dark"
-          class="theme-opt p-3 rounded-xl border theme-card text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-indigo-500/50"
+          class="theme-opt p-3 rounded-xl border border-slate-500/20 theme-card text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-indigo-500/50"
         >
           <div class="flex items-center justify-between">
             <Monitor class="w-4 h-4 theme-text-secondary" />
@@ -78,7 +83,7 @@ import {
         <button
           type="button"
           data-theme="light"
-          class="theme-opt p-3 rounded-xl border theme-card text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-indigo-500/50"
+          class="theme-opt p-3 rounded-xl border border-slate-500/20 theme-card text-left transition-all relative flex flex-col justify-between h-24 cursor-pointer hover:border-indigo-500/50"
         >
           <div class="flex items-center justify-between">
             <Sun class="w-4 h-4 theme-text-secondary" />
@@ -92,8 +97,84 @@ import {
       </div>
     </div>
 
+    <!-- SECCIÓN NUEVA: INSTALACIÓN PWA -->
+    <section id="pwa-install-section" class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-4 shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+        <h2 class="font-bold text-base theme-text-primary flex items-center gap-2">
+          <Smartphone class="w-4 h-4 text-indigo-400" />
+          <span>Aplicación Nativa (PWA)</span>
+        </h2>
+        <span id="pwa-status-badge" class="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg uppercase">
+          Disponible
+        </span>
+      </div>
+
+      <p class="text-xs theme-text-secondary leading-relaxed">
+        Instala KazeChronik en tu escritorio o dispositivo móvil para acceder más rápido, usar pantalla completa y disfrutar de una experiencia fluida sin barras de navegador.
+      </p>
+
+      <div class="pt-1">
+        <button 
+          id="pwa-install-btn"
+          type="button"
+          class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Download class="w-4 h-4" />
+          <span>Instalar KazeChronik como App</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- SECCIÓN NUEVA: IMPORTAR DESDE STEAM -->
+    <section class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-4 shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+        <h2 class="font-bold text-base theme-text-primary flex items-center gap-2">
+          <Gamepad2 class="w-4 h-4 text-sky-400" />
+          <span>Importar desde Steam</span>
+        </h2>
+        <span class="px-2 py-0.5 bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[10px] font-bold rounded-lg uppercase">
+          Oficial API
+        </span>
+      </div>
+
+      <p class="text-xs theme-text-secondary leading-relaxed">
+        Ingresa tu **Steam Custom URL** o **SteamID64** (tu perfil debe ser público) para sincronizar automáticamente tus juegos y horas jugadas en PC.
+      </p>
+
+      <div class="space-y-3">
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="steam-id-input" 
+            placeholder="Ej: 76561198000000000 o tu alias de Steam" 
+            class="flex-1 px-4 py-2.5 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+          />
+          <button 
+            type="button" 
+            id="fetch-steam-btn" 
+            class="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-sky-600/20 cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <span>Consultar Steam</span>
+          </button>
+        </div>
+
+        <!-- Resultados de Consulta Steam (Pre-importación) -->
+        <div id="steam-preview-box" class="hidden p-4 theme-input border border-slate-500/20 rounded-xl space-y-3">
+          <div class="flex items-center justify-between text-xs font-bold border-b border-slate-500/20 pb-2">
+            <span id="steam-count-text" class="text-sky-400">0 juegos encontrados</span>
+            <button id="import-steam-confirmed-btn" type="button" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg shadow-sm cursor-pointer">
+              Importar Todo a la Biblioteca
+            </button>
+          </div>
+          <div id="steam-games-preview-list" class="max-h-40 overflow-y-auto space-y-1.5 text-xs text-slate-300">
+            <!-- Inyectado dinámicamente -->
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- SECCIÓN DE PERFIL PÚBLICO -->
-    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm">
+    <section class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-4 shadow-sm">
       <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
         <h2 class="font-bold text-base theme-text-primary flex items-center gap-2">
           <UserCheck class="w-4 h-4 text-indigo-400" />
@@ -163,7 +244,7 @@ import {
     </section>
 
     <!-- SECCIÓN DE ALMACENAMIENTO OFFLINE -->
-    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm">
+    <section class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-4 shadow-sm">
       <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
         <h2 class="font-bold text-base theme-text-primary flex items-center gap-2">
           <HardDrive class="w-4 h-4 text-emerald-400" />
@@ -182,7 +263,7 @@ import {
         <button 
           id="sync-offline-btn"
           type="button"
-          class="flex-1 py-2 px-3 theme-button hover:border-indigo-500/50 text-xs font-semibold rounded-xl border transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          class="flex-1 py-2 px-3 theme-button hover:border-indigo-500/50 text-xs font-semibold rounded-xl border border-slate-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <RefreshCw class="w-3.5 h-3.5 text-indigo-400" />
           <span>Refrescar Caché</span>
@@ -200,13 +281,13 @@ import {
     </section>
 
     <!-- SECCIÓN DE RESPALDOS & EXPORTACIÓN -->
-    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm">
+    <section class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-4 shadow-sm">
       <h2 class="font-bold text-base border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
         <Download class="w-4 h-4 text-sky-400" />
         <span>Copia de Seguridad & Exportación</span>
       </h2>
       <p class="text-xs theme-text-secondary">
-        Respalda tu colección completa en JSON o exspórtala en formato CSV compatible con Excel.
+        Respalda tu colección completa en JSON o expórtala en formato CSV compatible con Excel.
       </p>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
@@ -228,7 +309,7 @@ import {
           <span>CSV (Excel)</span>
         </button>
 
-        <label class="px-3 py-2.5 theme-button hover:border-indigo-500/50 theme-text-primary font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border text-center">
+        <label class="px-3 py-2.5 theme-button hover:border-indigo-500/50 theme-text-primary font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-slate-500/20 text-center">
           <Upload class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
           <span>Restaurar</span>
           <input type="file" id="import-backup-input" accept=".json" class="hidden" />
@@ -237,7 +318,7 @@ import {
     </section>
 
     <!-- SECCIÓN DE SEGURIDAD & CONTRASEÑA -->
-    <section class="theme-card border p-6 rounded-2xl space-y-4 shadow-sm">
+    <section class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-4 shadow-sm">
       <h2 class="font-bold text-base border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
         <Lock class="w-4 h-4 text-purple-400" />
         <span>Seguridad & Contraseña</span>
@@ -282,6 +363,9 @@ import {
 
 <script>
   import { supabase } from '../lib/supabase';
+  import { enqueueAction, processSyncQueue } from '../lib/syncQueue';
+
+  let fetchedSteamGames: any[] = [];
 
   function initThemeSelector() {
     const buttons = document.querySelectorAll<HTMLButtonElement>('.theme-opt');
@@ -344,6 +428,239 @@ import {
     const copyProfileBtn = document.getElementById('copy-profile-link-btn');
     const copyBtnText = document.getElementById('copy-btn-text');
 
+    // LÓGICA DE INSTALACIÓN PWA
+    const pwaInstallBtn = document.getElementById('pwa-install-btn') as HTMLButtonElement;
+    const pwaStatusBadge = document.getElementById('pwa-status-badge');
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
+
+    if (isStandalone) {
+      if (pwaStatusBadge) {
+        pwaStatusBadge.textContent = 'App Instalada';
+        pwaStatusBadge.className = 'px-2 py-0.5 bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[10px] font-bold rounded-lg uppercase';
+      }
+      if (pwaInstallBtn) {
+        pwaInstallBtn.disabled = true;
+        pwaInstallBtn.innerHTML = `<span>✓ Estás utilizando KazeChronik App</span>`;
+      }
+    } else {
+      function checkPwaPrompt() {
+        if ((window as any).deferredPwaPrompt) {
+          if (pwaInstallBtn) {
+            pwaInstallBtn.disabled = false;
+            pwaInstallBtn.innerHTML = `
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Instalar KazeChronik como App</span>
+            `;
+          }
+        } else {
+          if (pwaInstallBtn) {
+            pwaInstallBtn.disabled = true;
+            pwaInstallBtn.innerHTML = `<span>Instalación disponible desde el menú de tu navegador</span>`;
+          }
+        }
+      }
+
+      checkPwaPrompt();
+      window.addEventListener('pwa-install-ready', checkPwaPrompt);
+
+      pwaInstallBtn?.addEventListener('click', async () => {
+        const promptEvent = (window as any).deferredPwaPrompt;
+        if (!promptEvent) return;
+
+        promptEvent.prompt();
+        const { outcome } = await promptEvent.userChoice;
+
+        if (outcome === 'accepted') {
+          if (typeof (window as any).showToast === 'function') {
+            (window as any).showToast('¡KazeChronik se está instalando en tu dispositivo!', 'success');
+          }
+          (window as any).deferredPwaPrompt = null;
+          if (pwaInstallBtn) {
+            pwaInstallBtn.disabled = true;
+            pwaInstallBtn.innerHTML = `<span>✓ Instalación completada</span>`;
+          }
+        }
+      });
+    }
+
+    // LÓGICA DE IMPORTACIÓN DESDE STEAM
+    const steamIdInput = document.getElementById('steam-id-input') as HTMLInputElement;
+    const fetchSteamBtn = document.getElementById('fetch-steam-btn') as HTMLButtonElement;
+    const steamPreviewBox = document.getElementById('steam-preview-box');
+    const steamCountText = document.getElementById('steam-count-text');
+    const steamGamesList = document.getElementById('steam-games-preview-list');
+    const importSteamConfirmedBtn = document.getElementById('import-steam-confirmed-btn');
+
+    fetchSteamBtn?.addEventListener('click', async () => {
+      const steamId = steamIdInput?.value.trim();
+      if (!steamId) {
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Ingresa tu SteamID o Custom URL de Steam', 'error');
+        }
+        return;
+      }
+
+      if (!navigator.onLine) {
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('La consulta a la API de Steam requiere conexión a internet', 'error');
+        }
+        return;
+      }
+
+      fetchSteamBtn.disabled = true;
+      fetchSteamBtn.innerHTML = `<span>Consultando...</span>`;
+
+      try {
+        const res = await fetch(`/api/steam/library?steamId=${encodeURIComponent(steamId)}`);
+        const data = await res.json();
+        // Al importar en settings.astro, se guarda el steamId ingresado
+        localStorage.setItem('kazechronik_steam_id', steamId);
+
+        fetchSteamBtn.disabled = false;
+        fetchSteamBtn.innerHTML = `<span>Consultar Steam</span>`;
+
+        if (!data || !data.games || data.games.length === 0) {
+          if (typeof (window as any).showToast === 'function') {
+            (window as any).showToast('No se encontraron juegos. Asegúrate de que tu perfil de Steam sea público.', 'error');
+          }
+          return;
+        }
+
+        fetchedSteamGames = data.games;
+        if (steamCountText) steamCountText.textContent = `${fetchedSteamGames.length} juegos encontrados en Steam`;
+
+        if (steamGamesList) {
+          steamGamesList.innerHTML = fetchedSteamGames.slice(0, 15).map(g => `
+            <div class="flex justify-between items-center py-1 border-b border-slate-500/10">
+              <span class="truncate pr-2 font-semibold theme-text-primary">${g.name}</span>
+              <span class="text-[10px] font-mono text-indigo-400 font-bold shrink-0">${g.hours_played} hrs</span>
+            </div>
+          `).join('');
+
+          if (fetchedSteamGames.length > 15) {
+            steamGamesList.innerHTML += `<p class="text-[10px] theme-text-secondary italic pt-1">...y ${fetchedSteamGames.length - 15} títulos más.</p>`;
+          }
+        }
+
+        steamPreviewBox?.classList.remove('hidden');
+
+      } catch (err) {
+        console.error(err);
+        fetchSteamBtn.disabled = false;
+        fetchSteamBtn.innerHTML = `<span>Consultar Steam</span>`;
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Error al conectar con la API de Steam', 'error');
+        }
+      }
+    });
+
+    importSteamConfirmedBtn?.addEventListener('click', async () => {
+      if (fetchedSteamGames.length === 0) return;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      importSteamConfirmedBtn.setAttribute('disabled', 'true');
+      importSteamConfirmedBtn.textContent = 'Importando...';
+
+      const normalizeTitle = (str: string) => 
+        str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+
+      let existingRawgIds = new Set<number>();
+      let existingTitles = new Set<string>();
+
+      if (navigator.onLine) {
+        const { data: existingGames } = await supabase
+          .from('user_library')
+          .select('rawg_id, title')
+          .eq('user_id', session.user.id);
+
+        if (existingGames) {
+          existingGames.forEach(g => {
+            if (g.rawg_id) existingRawgIds.add(g.rawg_id);
+            if (g.title) existingTitles.add(normalizeTitle(g.title));
+          });
+        }
+      } else {
+        const cached = localStorage.getItem('kazechronik_library_cache');
+        if (cached) {
+          const localGames = JSON.parse(cached);
+          localGames.forEach((g: any) => {
+            if (g.rawg_id) existingRawgIds.add(g.rawg_id);
+            if (g.title) existingTitles.add(normalizeTitle(g.title));
+          });
+        }
+      }
+
+      const newGamesToInsert = fetchedSteamGames
+        .filter(g => {
+          const syntheticId = -Math.abs(Number(g.app_id));
+          const normalizedSteamTitle = normalizeTitle(g.name);
+
+          const isDuplicateId = existingRawgIds.has(syntheticId);
+          const isDuplicateTitle = existingTitles.has(normalizedSteamTitle);
+
+          return !isDuplicateId && !isDuplicateTitle;
+        })
+        .map(g => ({
+          user_id: session.user.id,
+          rawg_id: -Math.abs(Number(g.app_id)),
+          title: g.name,
+          cover_url: g.cover_url || g.fallback_cover_url || '/placeholder.jpg',
+          platform: 'PC',
+          store: 'Steam',
+          status: g.hours_played > 0 ? 'playing' : 'backlog',
+          hours_played: Number(g.hours_played) || 0,
+          achievements_progress: 0,
+          created_at: new Date().toISOString()
+        }));
+
+      if (newGamesToInsert.length === 0) {
+        importSteamConfirmedBtn.removeAttribute('disabled');
+        importSteamConfirmedBtn.textContent = 'Importar Todo a la Biblioteca';
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Todos tus juegos de Steam ya existen en tu biblioteca (RAWG o Manuales).', 'info');
+        }
+        return;
+      }
+
+      if (!navigator.onLine) {
+        newGamesToInsert.forEach(gamePayload => {
+          enqueueAction('user_library', 'INSERT', gamePayload);
+        });
+
+        const cached = localStorage.getItem('kazechronik_library_cache');
+        let localGames = cached ? JSON.parse(cached) : [];
+        localGames = [...newGamesToInsert, ...localGames];
+        localStorage.setItem('kazechronik_library_cache', JSON.stringify(localGames));
+
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast(`¡${newGamesToInsert.length} juegos nuevos importados localmente!`, 'info');
+        }
+        window.location.href = '/dashboard';
+        return;
+      }
+
+      const { error } = await supabase
+        .from('user_library')
+        .insert(newGamesToInsert);
+
+      importSteamConfirmedBtn.removeAttribute('disabled');
+      importSteamConfirmedBtn.textContent = 'Importar Todo a la Biblioteca';
+
+      if (!error) {
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast(`¡${newGamesToInsert.length} juegos nuevos de Steam agregados sin duplicar!`, 'success');
+        }
+        window.location.href = '/dashboard';
+      } else {
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Error al importar desde Steam: ' + error.message, 'error');
+        }
+      }
+    });
+
     // Cargar en Modo Offline si no hay red
     if (!navigator.onLine) {
       const cachedProfile = localStorage.getItem('kazechronik_profile_cache');
@@ -357,6 +674,8 @@ import {
         } catch (e) { console.error(e); }
       }
       return;
+    } else {
+      processSyncQueue();
     }
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -386,7 +705,7 @@ import {
       const username = usernameInput.value;
       if (!username) return;
 
-      const profileUrl = `${window.location.origin}/user/${username}`;
+      const profileUrl = `${window.location.origin}/u/${username}`;
       navigator.clipboard.writeText(profileUrl).then(() => {
         if (copyBtnText) copyBtnText.textContent = '¡Copiado!';
         if (typeof (window as any).showToast === 'function') {
@@ -400,21 +719,24 @@ import {
     profileForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      saveProfileBtn.disabled = true;
-      saveProfileBtn.innerHTML = `
-        <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span>Guardando...</span>
-      `;
-
       const updateData = {
         display_name: nameInput.value.trim() || usernameInput.value,
         avatar_url: avatarUrlInput.value.trim() || null,
         bio: bioInput.value.trim() || null,
         updated_at: new Date().toISOString()
       };
+
+      if (!navigator.onLine) {
+        localStorage.setItem('kazechronik_profile_cache', JSON.stringify({ ...profile, ...updateData }));
+        enqueueAction('profiles', 'UPDATE', { id: session.user.id, ...updateData });
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Perfil guardado localmente (se sincronizará al conectar)', 'info');
+        }
+        return;
+      }
+
+      saveProfileBtn.disabled = true;
+      saveProfileBtn.innerHTML = `<span>Guardando...</span>`;
 
       const { error } = await supabase
         .from('profiles')
@@ -571,7 +893,7 @@ import {
       URL.revokeObjectURL(url);
     });
 
-    // Importar Backup
+    // Importar Backup JSON
     const importInput = document.getElementById('import-backup-input') as HTMLInputElement;
     importInput?.addEventListener('change', async (e: any) => {
       const file = e.target.files?.[0];

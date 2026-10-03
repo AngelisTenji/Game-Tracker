@@ -13,6 +13,8 @@ import {
   Star, 
   Flame, 
   Layers,
+  Target,
+  FolderHeart,
   ArrowRight
 } from 'lucide-astro';
 ---
@@ -29,7 +31,7 @@ import {
           <span>Panel de Estadísticas</span>
         </h1>
         <p class="text-sm theme-text-secondary mt-1">
-          Análisis detallado de tu tiempo de juego, rendimiento y distribución de tu biblioteca.
+          Análisis detallado de tu tiempo de juego, rendimiento, metas y colecciones.
         </p>
       </div>
 
@@ -39,30 +41,30 @@ import {
       </div>
     </div>
 
-    <!-- Estado de Carga (Skeleton) -->
+    <!-- Estado de Carga (Skeleton Adaptable) -->
     <div id="analytics-skeleton" class="animate-pulse space-y-6">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="h-28 theme-card rounded-2xl border"></div>
-        <div class="h-28 theme-card rounded-2xl border"></div>
-        <div class="h-28 theme-card rounded-2xl border"></div>
-        <div class="h-28 theme-card rounded-2xl border"></div>
+        <div class="h-28 theme-card rounded-2xl border border-slate-500/20"></div>
+        <div class="h-28 theme-card rounded-2xl border border-slate-500/20"></div>
+        <div class="h-28 theme-card rounded-2xl border border-slate-500/20"></div>
+        <div class="h-28 theme-card rounded-2xl border border-slate-500/20"></div>
       </div>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2 h-72 theme-card rounded-3xl border"></div>
-        <div class="lg:col-span-1 h-72 theme-card rounded-3xl border"></div>
+        <div class="lg:col-span-2 h-72 theme-card rounded-3xl border border-slate-500/20"></div>
+        <div class="lg:col-span-1 h-72 theme-card rounded-3xl border border-slate-500/20"></div>
       </div>
     </div>
 
     <!-- Empty State cuando no hay juegos registrados -->
-    <div id="analytics-empty" class="hidden theme-card border rounded-3xl p-12 text-center flex flex-col items-center justify-center min-h-[360px] space-y-4">
-      <div class="p-4 theme-button border rounded-2xl theme-text-secondary">
+    <div id="analytics-empty" class="hidden theme-card border border-slate-500/20 rounded-3xl p-12 text-center flex flex-col items-center justify-center min-h-[360px] space-y-4">
+      <div class="p-4 theme-button border border-slate-500/20 rounded-2xl theme-text-secondary">
         <Gamepad2 class="w-10 h-10 text-indigo-400" />
       </div>
       <h3 class="text-xl font-bold theme-text-primary">Aún no hay suficientes datos</h3>
       <p class="text-xs sm:text-sm theme-text-secondary max-w-md leading-relaxed">
         Agrega títulos a tu biblioteca y registra tus horas de juego para generar gráficos de rendimiento y hábitos.
       </p>
-      <a href="/search" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-2xl transition-all shadow-lg shadow-indigo-600/25 flex items-center gap-2">
+      <a href="/search" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-2xl transition-all shadow-lg shadow-indigo-600/25 flex items-center gap-2 cursor-pointer">
         <span>Explorar Juegos</span>
         <ArrowRight class="w-4 h-4" />
       </a>
@@ -73,7 +75,7 @@ import {
       
       <!-- Tarjetas de Métricas Clave (Grid de 4 Columnas) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="theme-card border p-5 rounded-2xl shadow-sm space-y-1">
+        <div class="theme-card border border-slate-500/20 p-5 rounded-2xl shadow-sm space-y-1">
           <div class="flex items-center justify-between">
             <p class="text-[11px] font-semibold theme-text-secondary uppercase tracking-wider">Horas Totales</p>
             <Clock class="w-4 h-4 text-indigo-400" />
@@ -81,7 +83,7 @@ import {
           <p id="total-hours" class="text-3xl font-black text-indigo-400">0.0h</p>
         </div>
 
-        <div class="theme-card border p-5 rounded-2xl shadow-sm space-y-1">
+        <div class="theme-card border border-slate-500/20 p-5 rounded-2xl shadow-sm space-y-1">
           <div class="flex items-center justify-between">
             <p class="text-[11px] font-semibold theme-text-secondary uppercase tracking-wider">Promedio / Juego</p>
             <Flame class="w-4 h-4 text-cyan-400" />
@@ -89,7 +91,7 @@ import {
           <p id="avg-hours" class="text-3xl font-black text-cyan-400">0.0h</p>
         </div>
 
-        <div class="theme-card border p-5 rounded-2xl shadow-sm space-y-1">
+        <div class="theme-card border border-slate-500/20 p-5 rounded-2xl shadow-sm space-y-1">
           <div class="flex items-center justify-between">
             <p class="text-[11px] font-semibold theme-text-secondary uppercase tracking-wider">Completitud</p>
             <CheckCircle2 class="w-4 h-4 text-emerald-400" />
@@ -97,7 +99,7 @@ import {
           <p id="completion-rate" class="text-3xl font-black text-emerald-400">0%</p>
         </div>
 
-        <div class="theme-card border p-5 rounded-2xl shadow-sm space-y-1">
+        <div class="theme-card border border-slate-500/20 p-5 rounded-2xl shadow-sm space-y-1">
           <div class="flex items-center justify-between">
             <p class="text-[11px] font-semibold theme-text-secondary uppercase tracking-wider">Valoración Media</p>
             <Star class="w-4 h-4 text-amber-400 fill-amber-400" />
@@ -106,11 +108,72 @@ import {
         </div>
       </div>
 
+      <!-- SECCIÓN NUEVA: METAS ANUALES & LISTAS PERSONALIZADAS -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Progreso de Metas 2026 -->
+        <section class="lg:col-span-2 theme-card border border-slate-500/20 p-6 rounded-3xl shadow-sm space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+            <h2 class="font-bold text-base flex items-center gap-2 theme-text-primary">
+              <Target class="w-5 h-5 text-amber-400" />
+              <span>Avance de Metas Anuales (2026)</span>
+            </h2>
+            <a href="/goals" class="text-xs font-bold text-indigo-400 hover:underline">Ver Objetivos →</a>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-1">
+            <!-- Meta 1: Juegos Completados -->
+            <div class="space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-bold theme-text-primary">Juegos Completados</span>
+                <span id="goal-completed-text" class="font-semibold text-amber-400">0 / 12</span>
+              </div>
+              <div class="w-full theme-button rounded-full h-3 overflow-hidden p-0.5 border border-slate-500/20">
+                <div id="goal-completed-bar" class="bg-gradient-to-r from-amber-500 to-amber-300 h-full rounded-full transition-all duration-500 w-0"></div>
+              </div>
+            </div>
+
+            <!-- Meta 2: Horas de Juego -->
+            <div class="space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-bold theme-text-primary">Horas de Juego</span>
+                <span id="goal-hours-text" class="font-semibold text-indigo-400">0.0 / 100 hrs</span>
+              </div>
+              <div class="w-full theme-button rounded-full h-3 overflow-hidden p-0.5 border border-slate-500/20">
+                <div id="goal-hours-bar" class="bg-gradient-to-r from-indigo-500 to-cyan-400 h-full rounded-full transition-all duration-500 w-0"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Métricas de Listas Personalizadas -->
+        <section class="lg:col-span-1 theme-card border border-slate-500/20 p-6 rounded-3xl shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+            <h2 class="font-bold text-base flex items-center gap-2 theme-text-primary">
+              <FolderHeart class="w-5 h-5 text-indigo-400" />
+              <span>Colecciones</span>
+            </h2>
+            <a href="/lists" class="text-xs font-bold text-indigo-400 hover:underline">Gestionar →</a>
+          </div>
+
+          <div class="space-y-3 pt-1">
+            <div class="flex justify-between items-center p-3 theme-input border border-slate-500/20 rounded-2xl">
+              <span class="text-xs font-semibold theme-text-secondary">Listas Creadas</span>
+              <span id="analytics-lists-count" class="text-base font-bold text-indigo-400">0</span>
+            </div>
+            <div class="flex justify-between items-center p-3 theme-input border border-slate-500/20 rounded-2xl">
+              <span class="text-xs font-semibold theme-text-secondary">Mayor Colección</span>
+              <span id="analytics-top-list" class="text-xs font-bold theme-text-primary truncate max-w-[120px]">Ninguna</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
       <!-- Métricas Secundarias (Top vs Estado) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <!-- Top 5 Juegos Más Jugados -->
-        <section class="lg:col-span-2 theme-card border p-6 rounded-3xl shadow-sm space-y-5">
+        <section class="lg:col-span-2 theme-card border border-slate-500/20 p-6 rounded-3xl shadow-sm space-y-5">
           <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
             <h2 class="font-bold text-base flex items-center gap-2 theme-text-primary">
               <Trophy class="w-5 h-5 text-amber-400" />
@@ -125,7 +188,7 @@ import {
         </section>
 
         <!-- Desglose por Estado de Avance -->
-        <section class="lg:col-span-1 theme-card border p-6 rounded-3xl shadow-sm space-y-5">
+        <section class="lg:col-span-1 theme-card border border-slate-500/20 p-6 rounded-3xl shadow-sm space-y-5">
           <h2 class="font-bold text-base border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
             <PieChart class="w-5 h-5 text-indigo-400" />
             <span>Estado de la Colección</span>
@@ -138,7 +201,7 @@ import {
       </div>
 
       <!-- Desglose por Plataforma (Consolas / Tiendas) -->
-      <section class="theme-card border p-6 rounded-3xl shadow-sm space-y-5">
+      <section class="theme-card border border-slate-500/20 p-6 rounded-3xl shadow-sm space-y-5">
         <h2 class="font-bold text-base border-b border-slate-500/20 pb-3 flex items-center gap-2 theme-text-primary">
           <Layers class="w-5 h-5 text-cyan-400" />
           <span>Distribución por Plataformas</span>
@@ -155,27 +218,36 @@ import {
 
 <script>
   import { supabase } from '../lib/supabase';
+  import { processSyncQueue } from '../lib/syncQueue';
+
+  const currentYear = new Date().getFullYear();
 
   async function loadAnalytics() {
     const skeleton = document.getElementById('analytics-skeleton');
     const content = document.getElementById('analytics-content');
     const emptyBox = document.getElementById('analytics-empty');
-    let games: any[] = [];
 
-    // Lógica con Soporte Offline
+    let games: any[] = [];
+    let goals: any = { target_completed_games: 12, target_hours_played: 100 };
+    let customLists: any[] = [];
+
+    // 1. Cargar Datos con Soporte Offline y Fallback a Caché
     if (!navigator.onLine) {
-      const cached = localStorage.getItem('kazechronik_library_cache');
-      if (cached) {
-        try {
-          games = JSON.parse(cached);
-          if (typeof (window as any).showToast === 'function') {
-            (window as any).showToast('Estadísticas cargadas en Modo Offline', 'info');
-          }
-        } catch (e) {
-          console.error('Error al parsear caché:', e);
-        }
+      const cachedLib = localStorage.getItem('kazechronik_library_cache');
+      if (cachedLib) try { games = JSON.parse(cachedLib); } catch (e) {}
+
+      const cachedGoals = localStorage.getItem(`kazechronik_goals_${currentYear}`);
+      if (cachedGoals) try { goals = JSON.parse(cachedGoals); } catch (e) {}
+
+      const cachedLists = localStorage.getItem('kazechronik_custom_lists_cache');
+      if (cachedLists) try { customLists = JSON.parse(cachedLists); } catch (e) {}
+
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Estadísticas cargadas desde la caché local (Modo Offline)', 'info');
       }
     } else {
+      processSyncQueue();
+
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
@@ -183,19 +255,41 @@ import {
           return;
         }
 
-        const { data, error } = await supabase
+        // Cargar Biblioteca
+        const { data: libraryData } = await supabase
           .from('user_library')
           .select('*')
           .eq('user_id', session.user.id);
 
-        if (error) throw error;
-
-        games = data || [];
+        games = libraryData || [];
         localStorage.setItem('kazechronik_library_cache', JSON.stringify(games));
+
+        // Cargar Metas
+        const { data: goalsData } = await supabase
+          .from('user_goals')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .eq('year', currentYear)
+          .maybeSingle();
+
+        if (goalsData) {
+          goals = goalsData;
+          localStorage.setItem(`kazechronik_goals_${currentYear}`, JSON.stringify(goals));
+        }
+
+        // Cargar Listas
+        const { data: listsData } = await supabase
+          .from('custom_lists')
+          .select('*, items:custom_list_items(id)')
+          .eq('user_id', session.user.id);
+
+        customLists = listsData || [];
+        localStorage.setItem('kazechronik_custom_lists_cache', JSON.stringify(customLists));
+
       } catch (err) {
         console.warn('Usando respaldo de caché local para analíticas:', err);
-        const cached = localStorage.getItem('kazechronik_library_cache');
-        if (cached) games = JSON.parse(cached);
+        const cachedLib = localStorage.getItem('kazechronik_library_cache');
+        if (cachedLib) games = JSON.parse(cachedLib);
       }
     }
 
@@ -229,17 +323,44 @@ import {
     const titlesBadge = document.getElementById('total-titles-badge');
     if (titlesBadge) titlesBadge.textContent = `${totalTitles} ${totalTitles === 1 ? 'título' : 'títulos'} en total`;
 
-    // 1. TOP 5 JUEGOS MÁS JUGADOS
+    // 2. RENDIMIENTO DE METAS ANUALES
+    const targetComp = goals.target_completed_games || 12;
+    const targetHrs = goals.target_hours_played || 100;
+
+    const compPct = Math.min(100, Math.round((completedCount / targetComp) * 100));
+    const hrsPct = Math.min(100, Math.round((totalHours / targetHrs) * 100));
+
+    const goalCompText = document.getElementById('goal-completed-text');
+    const goalCompBar = document.getElementById('goal-completed-bar');
+    if (goalCompText) goalCompText.textContent = `${completedCount} / ${targetComp} (${compPct}%)`;
+    if (goalCompBar) goalCompBar.style.width = `${compPct}%`;
+
+    const goalHrsText = document.getElementById('goal-hours-text');
+    const goalHrsBar = document.getElementById('goal-hours-bar');
+    if (goalHrsText) goalHrsText.textContent = `${totalHours.toFixed(1)} / ${targetHrs} hrs (${hrsPct}%)`;
+    if (goalHrsBar) goalHrsBar.style.width = `${hrsPct}%`;
+
+    // 3. RENDIMIENTO DE LISTAS
+    const listsCountEl = document.getElementById('analytics-lists-count');
+    const topListEl = document.getElementById('analytics-top-list');
+    
+    if (listsCountEl) listsCountEl.textContent = customLists.length.toString();
+    if (topListEl && customLists.length > 0) {
+      const topList = [...customLists].sort((a, b) => (b.items?.length || 0) - (a.items?.length || 0))[0];
+      topListEl.textContent = topList ? `${topList.title} (${topList.items?.length || 0})` : 'Ninguna';
+    }
+
+    // 4. TOP 5 JUEGOS MÁS JUGADOS
     const topGames = [...games]
       .sort((a, b) => (Number(b.hours_played) || 0) - (Number(a.hours_played) || 0))
       .slice(0, 5);
 
-    const topListEl = document.getElementById('top-games-list')!;
+    const topListContainer = document.getElementById('top-games-list')!;
     if (topGames.length === 0) {
-      topListEl.innerHTML = `<p class="text-xs theme-text-secondary italic">No hay registros con horas guardadas.</p>`;
+      topListContainer.innerHTML = `<p class="text-xs theme-text-secondary italic">No hay registros con horas guardadas.</p>`;
     } else {
       const maxHours = Number(topGames[0].hours_played) || 1;
-      topListEl.innerHTML = topGames.map((game, index) => {
+      topListContainer.innerHTML = topGames.map((game, index) => {
         const hrs = Number(game.hours_played) || 0;
         const percentage = Math.min(Math.round((hrs / maxHours) * 100), 100);
 
@@ -252,7 +373,7 @@ import {
               </span>
               <span class="text-xs font-semibold text-indigo-400 shrink-0">${hrs.toFixed(1)} hrs</span>
             </div>
-            <div class="w-full bg-slate-800/60 rounded-full h-2.5 overflow-hidden">
+            <div class="w-full theme-button rounded-full h-2.5 overflow-hidden border border-slate-500/20">
               <div class="bg-gradient-to-r from-indigo-500 to-cyan-400 h-full rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
             </div>
           </div>
@@ -260,7 +381,7 @@ import {
       }).join('');
     }
 
-    // 2. DESGLOSE POR ESTADO
+    // 5. DESGLOSE POR ESTADO
     const statusCounts: Record<string, number> = {
       playing: games.filter(g => g.status === 'playing').length,
       completed: games.filter(g => g.status === 'completed').length,
@@ -273,7 +394,7 @@ import {
       playing: { label: '🔥 Jugando Activamente', color: 'bg-cyan-400' },
       completed: { label: '🏆 Completados', color: 'bg-emerald-400' },
       backlog: { label: '📋 Backlog / Pendientes', color: 'bg-amber-400' },
-      paused: { label: '⏸️ En Pausa', color: 'bg-purple-400' },
+      paused: { label: '⏸️️ En Pausa', color: 'bg-purple-400' },
       dropped: { label: '❌ Abandonados', color: 'bg-rose-400' },
     };
 
@@ -290,14 +411,14 @@ import {
               <span class="theme-text-primary">${info.label}</span>
               <span class="theme-text-secondary">${count} (${pct}%)</span>
             </div>
-            <div class="w-full bg-slate-800/60 rounded-full h-2 overflow-hidden">
+            <div class="w-full theme-button rounded-full h-2 overflow-hidden border border-slate-500/20">
               <div class="${info.color} h-full rounded-full transition-all" style="width: ${pct}%"></div>
             </div>
           </div>
         `;
       }).join('');
 
-    // 3. DESGLOSE POR PLATAFORMA
+    // 6. DESGLOSE POR PLATAFORMA
     const platformCounts: Record<string, number> = {};
     games.forEach(g => {
       const plat = g.platform || 'PC';
@@ -308,12 +429,12 @@ import {
     platformEl.innerHTML = Object.entries(platformCounts).map(([plat, count]) => {
       const pct = totalTitles > 0 ? Math.round((count / totalTitles) * 100) : 0;
       return `
-        <div class="p-4 theme-input border rounded-2xl space-y-2">
+        <div class="p-4 theme-input border border-slate-500/20 rounded-2xl space-y-2 shadow-sm">
           <div class="flex justify-between items-center">
             <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">${plat}</span>
             <span class="text-xs font-mono theme-text-secondary">${count} ${count === 1 ? 'juego' : 'juegos'}</span>
           </div>
-          <div class="w-full bg-slate-800/60 rounded-full h-2 overflow-hidden">
+          <div class="w-full theme-button rounded-full h-2 overflow-hidden border border-slate-500/20">
             <div class="bg-indigo-500 h-full rounded-full" style="width: ${pct}%"></div>
           </div>
         </div>

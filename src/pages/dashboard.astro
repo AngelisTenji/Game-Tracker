@@ -20,12 +20,12 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
           type="text"
           id="search-internal"
           placeholder="Buscar en mi colección..."
-          class="w-full pl-10 pr-4 py-2 theme-input border rounded-2xl text-xs focus:outline-none focus:border-indigo-500 transition-all shadow-sm text-center sm:text-left"
+          class="w-full pl-10 pr-4 py-2 theme-input border border-slate-500/20 rounded-2xl text-xs focus:outline-none focus:border-indigo-500 transition-all shadow-sm text-center sm:text-left"
         />
       </div>
 
-      <!-- BANNER DE METAS ADAPTABLE A CUALQUIER TEMA -->
-      <div class="inline-flex flex-wrap items-center justify-center gap-3 theme-card border p-2 sm:px-5 sm:py-2 rounded-2xl shadow-sm mx-auto max-w-full">
+      <!-- BANNER DE METAS ADAPTABLE -->
+      <div class="inline-flex flex-wrap items-center justify-center gap-3 theme-card border border-slate-500/20 p-2 sm:px-5 sm:py-2 rounded-2xl shadow-sm mx-auto max-w-full">
         <div class="flex items-center gap-2">
           <span class="p-1.5 bg-amber-500/10 text-amber-500 rounded-lg text-xs">🎯</span>
           <div class="text-xs">
@@ -83,10 +83,10 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
         </select>
       </div>
 
-      <!-- Filtros Secundarios Centrados (Plataformas, Tiendas y Etiquetas) -->
+      <!-- Filtros Secundarios Centrados (Plataformas, Tiendas y Multi-Etiquetas) -->
       <div class="flex flex-wrap items-center justify-center gap-3 text-xs">
         <div class="flex items-center gap-2">
-          <select id="filter-platform" class="px-2.5 py-1 theme-input border rounded-lg text-xs cursor-pointer">
+          <select id="filter-platform" class="px-2.5 py-1 theme-input border border-slate-500/20 rounded-lg text-xs cursor-pointer">
             <option value="all">Todas las plataformas</option>
             <option value="PC">PC</option>
             <option value="PS5">PS5</option>
@@ -98,7 +98,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
             <option value="iOS">iOS</option>
           </select>
 
-          <select id="filter-store" class="px-2.5 py-1 theme-input border rounded-lg text-xs cursor-pointer">
+          <select id="filter-store" class="px-2.5 py-1 theme-input border border-slate-500/20 rounded-lg text-xs cursor-pointer">
             <option value="all">Todas las tiendas</option>
             <option value="Steam">Steam</option>
             <option value="Epic Games">Epic Games</option>
@@ -111,8 +111,8 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
           </select>
         </div>
 
-        <!-- Filtro Dinámico de Etiquetas -->
-        <div id="tags-filter-wrapper" class="hidden flex items-center gap-1.5 overflow-x-auto">
+        <!-- FILTRO AVANZADO MULTI-ETIQUETA -->
+        <div id="tags-filter-wrapper" class="hidden flex items-center gap-1.5 overflow-x-auto max-w-full">
           <div id="tags-filter-container" class="flex items-center gap-1"></div>
         </div>
       </div>
@@ -121,7 +121,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
     <!-- GALERÍA DE JUEGOS CON TARJETAS ADAPTABLES -->
     <div id="library-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-2">
       <!-- Skeleton de Carga inicial -->
-      <div class="theme-card border rounded-2xl p-0 overflow-hidden animate-pulse flex flex-col justify-between h-[360px]">
+      <div class="theme-card border border-slate-500/20 rounded-2xl p-0 overflow-hidden animate-pulse flex flex-col justify-between h-[360px]">
         <div class="w-full h-8 bg-slate-500/10"></div>
         <div class="w-full h-44 bg-slate-500/20"></div>
         <div class="p-4 space-y-3 flex-1 flex flex-col justify-between items-center">
@@ -160,7 +160,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
 
   <!-- MODAL DE EDICIÓN DE JUEGO -->
   <div id="edit-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+    <div class="theme-card border border-slate-500/20 w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl relative overflow-hidden">
       <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-500/20">
         <h3 id="modal-game-title" class="text-lg font-bold theme-text-primary truncate">Editar Juego</h3>
         <button id="close-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg hover:bg-slate-500/10 transition-colors cursor-pointer">
@@ -175,7 +175,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
           <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
             Estado de Juego
           </label>
-          <select id="edit-status" class="w-full px-3 py-2.5 theme-input border rounded-xl theme-text-primary text-sm focus:outline-none focus:border-indigo-500 truncate cursor-pointer">
+          <select id="edit-status" class="w-full px-3 py-2.5 theme-input border border-slate-500/20 rounded-xl theme-text-primary text-sm focus:outline-none focus:border-indigo-500 truncate cursor-pointer">
             <option value="playing">Jugando</option>
             <option value="completed">Completado</option>
             <option value="backlog">Pendiente (Backlog)</option>
@@ -188,7 +188,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
           <label class="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
             Horas Jugadas
           </label>
-          <input type="number" step="0.5" min="0" id="edit-hours" class="w-full px-3 py-2.5 theme-input border rounded-xl text-sm focus:outline-none focus:border-indigo-500" />
+          <input type="number" step="0.5" min="0" id="edit-hours" class="w-full px-3 py-2.5 theme-input border border-slate-500/20 rounded-xl text-sm focus:outline-none focus:border-indigo-500" />
         </div>
 
         <div class="flex gap-3 pt-2">
@@ -205,7 +205,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
 
   <!-- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN -->
   <div id="delete-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="theme-card border w-[92vw] max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden text-center">
+    <div class="theme-card border border-slate-500/20 w-[92vw] max-w-sm rounded-2xl p-6 shadow-2xl relative overflow-hidden text-center">
       <div class="mx-auto w-12 h-12 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-2xl flex items-center justify-center mb-4">
         <AlertTriangle class="w-6 h-6" />
       </div>
@@ -234,7 +234,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
   let activeStatusFilter = 'all';
   let activePlatformFilter = 'all';
   let activeStoreFilter = 'all';
-  let activeTagFilter = 'all';
+  let selectedTags = new Set<string>(); // Soporte Multi-Etiquetas
   let searchQuery = '';
   let currentPage = 1;
   let gameToDeleteId: string | null = null;
@@ -328,8 +328,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
       const { data: games, error } = await supabase
         .from('user_library')
         .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false });
+        .eq('user_id', session.user.id);
 
       if (error) throw error;
 
@@ -405,6 +404,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
     renderGrid();
   }
 
+  // RENDERIZADO DEL FILTRO MULTI-ETIQUETA
   function renderTagFilters() {
     const wrapper = document.getElementById('tags-filter-wrapper');
     const container = document.getElementById('tags-filter-container');
@@ -421,27 +421,57 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
 
     wrapper.classList.remove('hidden');
 
+    const activeCount = selectedTags.size;
+
     container.innerHTML = `
-      <span class="text-xs font-semibold theme-text-secondary mr-1">Etiquetas:</span>
-      <button 
-        data-tag="all" 
-        class="tag-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold ${activeTagFilter === 'all' ? 'bg-indigo-600 text-white' : 'theme-button'} transition-all cursor-pointer whitespace-nowrap"
-      >
-        Todas
-      </button>
-      ${allTags.map(tag => `
+      <span class="text-xs font-semibold theme-text-secondary shrink-0 mr-1">
+        Etiquetas ${activeCount > 0 ? `(${activeCount})` : ''}:
+      </span>
+
+      ${activeCount > 0 ? `
         <button 
-          data-tag="${tag}" 
-          class="tag-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold ${activeTagFilter === tag ? 'bg-indigo-600 text-white' : 'theme-button'} transition-all cursor-pointer whitespace-nowrap"
+          id="clear-tags-btn" 
+          class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-all cursor-pointer shrink-0 mr-1"
         >
-          #${tag}
+          ✕ Limpiar
         </button>
-      `).join('')}
+      ` : ''}
+
+      ${allTags.map(tag => {
+        const isSelected = selectedTags.has(tag);
+        return `
+          <button 
+            data-tag="${tag}" 
+            class="tag-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold ${
+              isSelected 
+                ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400' 
+                : 'theme-button border border-slate-500/20'
+            } transition-all cursor-pointer whitespace-nowrap shrink-0"
+          >
+            #${tag}
+          </button>
+        `;
+      }).join('')}
     `;
+
+    document.getElementById('clear-tags-btn')?.addEventListener('click', () => {
+      selectedTags.clear();
+      currentPage = 1;
+      renderTagFilters();
+      renderGrid();
+    });
 
     container.querySelectorAll('.tag-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        activeTagFilter = btn.getAttribute('data-tag') || 'all';
+        const tag = btn.getAttribute('data-tag');
+        if (!tag) return;
+
+        if (selectedTags.has(tag)) {
+          selectedTags.delete(tag);
+        } else {
+          selectedTags.add(tag);
+        }
+
         currentPage = 1;
         renderTagFilters();
         renderGrid();
@@ -454,6 +484,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
     const paginationControls = document.getElementById('pagination-controls');
     if (!container) return;
 
+    // 1. FILTRADO CON SOPORTE MULTI-ETIQUETA
     let filteredGames = allGames.filter(game => {
       const matchStatus = activeStatusFilter === 'all' 
         ? true 
@@ -464,26 +495,41 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
       const matchPlatform = activePlatformFilter === 'all' || game.platform === activePlatformFilter;
       const matchStore = activeStoreFilter === 'all' || game.store === activeStoreFilter;
       const matchSearch = searchQuery === '' || game.title.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchTag = activeTagFilter === 'all' || (game.tags && game.tags.includes(activeTagFilter));
+      
+      // Multi-Etiqueta: El juego debe contener TODAS las etiquetas seleccionadas
+      const matchTags = selectedTags.size === 0 || Array.from(selectedTags).every(tag => 
+        game.tags && game.tags.includes(tag)
+      );
 
-      return matchStatus && matchPlatform && matchStore && matchSearch && matchTag;
+      return matchStatus && matchPlatform && matchStore && matchSearch && matchTags;
     });
 
+    // 2. ORDENAMIENTO DE PRIORIDAD (FAVORITOS PRIMERO + HORAS JUGADAS DESC)
     filteredGames.sort((a, b) => {
+      // Prioridad 1: Favoritos
+      const favA = a.is_favorite ? 1 : 0;
+      const favB = b.is_favorite ? 1 : 0;
+      if (favA !== favB) return favB - favA;
+
+      // Prioridad 2: Estado
       const priorityA = statusPriority[a.status] || 99;
       const priorityB = statusPriority[b.status] || 99;
+      if (priorityA !== priorityB) return priorityA - priorityB;
 
-      if (priorityA !== priorityB) {
-        return priorityA - priorityB;
-      }
+      // Prioridad 3: Horas Jugadas (Descendente)
+      const hoursA = Number(a.hours_played) || 0;
+      const hoursB = Number(b.hours_played) || 0;
+      if (hoursA !== hoursB) return hoursB - hoursA;
+
+      // Prioridad 4: Fecha de Creación
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
 
     if (filteredGames.length === 0) {
       if (paginationControls) paginationControls.classList.add('hidden');
-      container.className = "theme-card border rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px] transition-all";
+      container.className = "theme-card border border-slate-500/20 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[300px] transition-all";
       container.innerHTML = `
-        <div class="p-4 theme-button rounded-2xl mb-4 theme-text-secondary">
+        <div class="p-4 theme-button border border-slate-500/20 rounded-2xl mb-4 theme-text-secondary">
           <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5z"></path></svg>
         </div>
         <h3 class="text-lg font-semibold theme-text-primary">No se encontraron juegos</h3>
@@ -530,9 +576,9 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
       const isFav = game.is_favorite === true;
 
       return `
-        <div class="theme-card border rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-xl group relative">
+        <div class="theme-card border border-slate-500/20 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-xl group relative">
           
-          <!-- CINTILLA SUPERIOR DINÁMICA (Sin bg-slate-900 hardcodeado) -->
+          <!-- CINTILLA SUPERIOR DINÁMICA -->
           <div class="px-3.5 py-2 theme-card border-b border-slate-500/20 flex items-center justify-between text-[11px] font-bold theme-text-secondary">
             <span class="flex items-center gap-1.5 theme-text-primary truncate">
               <span class="text-xs shrink-0">🏪</span>
@@ -543,12 +589,13 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
             </span>
           </div>
 
-          <!-- PORTADA CON CONTRASTE DINÁMICO -->
+          <!-- PORTADA CON RESGUARDO AUTO-CORRECTIVO -->
           <div class="relative overflow-hidden h-44 bg-slate-500/10">
             <a href="/game/${game.id}" class="block w-full h-full">
               <img 
                 src="${game.cover_url || '/placeholder.jpg'}" 
                 alt="Portada de ${game.title}" 
+                onerror="this.onerror=null; this.src='https://media.steampowered.com/steamcommunity/public/images/apps/${Math.abs(game.rawg_id)}/header.jpg'; if(!this.src) this.src='/placeholder.jpg';"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-3">
