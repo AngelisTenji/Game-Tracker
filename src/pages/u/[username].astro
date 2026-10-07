@@ -12,7 +12,12 @@ import {
   CheckCircle2, 
   Star, 
   ExternalLink,
-  BookOpen
+  BookOpen,
+  Edit3,
+  X,
+  Upload,
+  Camera,
+  Image as ImageIcon
 } from 'lucide-astro';
 
 const { username } = Astro.params;
@@ -49,20 +54,36 @@ const { username } = Astro.params;
       
       <!-- Tarjeta de Presentación / Banner Header -->
       <header class="theme-card border border-slate-500/20 rounded-3xl relative overflow-hidden shadow-xl">
-        <!-- Banner Decorativo Adaptable -->
-        <div class="h-28 sm:h-36 bg-gradient-to-r from-indigo-900/60 via-purple-900/40 to-indigo-950/80 border-b border-slate-500/20 w-full relative">
-          <button 
-            id="share-profile-btn"
-            class="absolute top-4 right-4 px-3 py-1.5 bg-slate-950/80 backdrop-blur-md hover:bg-indigo-600 text-white text-xs font-semibold rounded-xl transition-all border border-white/10 flex items-center gap-1.5 cursor-pointer shadow-md"
-          >
-            <Share2 class="w-3.5 h-3.5" />
-            <span>Compartir Perfil</span>
-          </button>
+        <!-- Banner Decorativo Adaptable (Soporta Imagen de Fondo o Gradiente) -->
+        <div id="profile-banner-container" class="h-32 sm:h-44 bg-gradient-to-r from-indigo-900/60 via-purple-900/40 to-indigo-950/80 border-b border-slate-500/20 w-full relative bg-cover bg-center">
+          <div class="absolute inset-0 bg-black/30 backdrop-blur-[2px]"></div>
+
+          <div class="absolute top-4 right-4 flex items-center gap-2 z-10">
+            <!-- Botón Editar Perfil (Visible solo para el dueño de la cuenta) -->
+            <button 
+              id="open-edit-profile-modal-btn"
+              type="button"
+              class="hidden px-3 py-1.5 bg-indigo-600/90 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer backdrop-blur-md"
+            >
+              <Edit3 class="w-3.5 h-3.5" />
+              <span>Editar Perfil</span>
+            </button>
+
+            <!-- Botón Compartir -->
+            <button 
+              id="share-profile-btn"
+              type="button"
+              class="px-3 py-1.5 bg-slate-950/80 backdrop-blur-md hover:bg-indigo-600 text-white text-xs font-semibold rounded-xl transition-all border border-white/10 flex items-center gap-1.5 cursor-pointer shadow-md"
+            >
+              <Share2 class="w-3.5 h-3.5" />
+              <span>Compartir</span>
+            </button>
+          </div>
         </div>
 
-        <div class="p-6 sm:p-8 pt-0 flex flex-col sm:flex-row items-center sm:items-end gap-6 relative -mt-12 sm:-mt-14">
+        <div class="p-6 sm:p-8 pt-0 flex flex-col sm:flex-row items-center sm:items-end gap-6 relative -mt-12 sm:-mt-14 z-10">
           <!-- Avatar con Soporte de Foto o Inicial -->
-          <div id="user-avatar-container" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl theme-card border-4 border-slate-500/20 flex items-center justify-center text-4xl font-black text-indigo-400 shrink-0 shadow-2xl overflow-hidden">
+          <div id="user-avatar-container" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl theme-card border-4 border-slate-500/20 flex items-center justify-center text-4xl font-black text-indigo-400 shrink-0 shadow-2xl overflow-hidden relative group">
             <span id="user-avatar-text">?</span>
           </div>
 
@@ -150,13 +171,105 @@ const { username } = Astro.params;
       </div>
     </article>
   </main>
+
+  <!-- MODAL DE EDICIÓN DE PERFIL IN-SITU -->
+  <div id="edit-profile-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="theme-card border border-slate-500/20 w-[94vw] max-w-lg rounded-3xl p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+        <h3 class="text-base font-bold theme-text-primary flex items-center gap-2">
+          <Edit3 class="w-4 h-4 text-indigo-400" />
+          <span>Editar Perfil de Jugador</span>
+        </h3>
+        <button id="close-edit-modal-btn" type="button" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg cursor-pointer">
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+
+      <form id="in-situ-profile-form" class="space-y-4">
+        <!-- Nombre Visible -->
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary mb-1">Nombre Visible</label>
+          <input 
+            type="text" 
+            id="edit-display-name" 
+            required
+            placeholder="ej: Ángel González"
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+
+        <!-- Biografía -->
+        <div>
+          <label class="block text-xs font-semibold theme-text-secondary mb-1">Biografía Gamer</label>
+          <textarea 
+            id="edit-bio" 
+            rows="3" 
+            placeholder="Escribe algo sobre tus géneros favoritos o lo que estás jugando actualmente..."
+            class="w-full px-4 py-2.5 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500 resize-none"
+          ></textarea>
+        </div>
+
+        <!-- FOTO DE AVATAR (SUBIDA O URL) -->
+        <div class="space-y-2 border-t border-slate-500/20 pt-3">
+          <label class="block text-xs font-semibold theme-text-secondary">Foto de Perfil (Avatar)</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="px-3 py-2 theme-card border border-slate-500/20 hover:border-indigo-500/50 rounded-xl text-xs cursor-pointer flex items-center justify-center gap-2 theme-text-primary transition-all">
+              <Upload class="w-3.5 h-3.5 text-indigo-400" />
+              <span id="avatar-file-label">Subir Foto</span>
+              <input type="file" id="edit-avatar-file" accept="image/*" class="hidden" />
+            </label>
+
+            <input 
+              type="url" 
+              id="edit-avatar-url" 
+              placeholder="o pega URL de foto"
+              class="w-full px-3 py-2 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+        </div>
+
+        <!-- BANNER DE FONDO (SUBIDA O URL) -->
+        <div class="space-y-2 border-t border-slate-500/20 pt-3">
+          <label class="block text-xs font-semibold theme-text-secondary">Banner de Cabecera</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="px-3 py-2 theme-card border border-slate-500/20 hover:border-indigo-500/50 rounded-xl text-xs cursor-pointer flex items-center justify-center gap-2 theme-text-primary transition-all">
+              <ImageIcon class="w-3.5 h-3.5 text-purple-400" />
+              <span id="banner-file-label">Subir Banner</span>
+              <input type="file" id="edit-banner-file" accept="image/*" class="hidden" />
+            </label>
+
+            <input 
+              type="url" 
+              id="edit-banner-url" 
+              placeholder="o pega URL de banner"
+              class="w-full px-3 py-2 theme-input border rounded-xl text-xs focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-500/20">
+          <button type="button" id="cancel-edit-modal-btn" class="px-4 py-2 theme-button border border-slate-500/20 text-xs font-semibold rounded-xl cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" id="save-modal-profile-btn" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </Layout>
 
 <script>
   import { supabase } from '../../lib/supabase';
-  import { processSyncQueue } from '../../lib/syncQueue';
+  import { enqueueAction, processSyncQueue } from '../../lib/syncQueue';
 
   let allUserGames: any[] = [];
+  let currentProfileData: any = null;
+  let isOwner = false;
+
+  let newAvatarData: string | null = null;
+  let newBannerData: string | null = null;
 
   async function loadUserProfile() {
     const pathParts = window.location.pathname.split('/').filter(Boolean);
@@ -165,6 +278,7 @@ const { username } = Astro.params;
     const skeleton = document.getElementById('loading-skeleton');
     const content = document.getElementById('profile-content');
     const errorBox = document.getElementById('error-container');
+    const editBtn = document.getElementById('open-edit-profile-modal-btn');
 
     if (!username) {
       if (skeleton) skeleton.classList.add('hidden');
@@ -175,15 +289,13 @@ const { username } = Astro.params;
     const profileCacheKey = `kazechronik_profile_${username.toLowerCase()}`;
     const gamesCacheKey = `kazechronik_profile_games_${username.toLowerCase()}`;
 
-    let profile: any = null;
-
     if (!navigator.onLine) {
       const cachedProfile = localStorage.getItem(profileCacheKey);
       const cachedGames = localStorage.getItem(gamesCacheKey);
 
       if (cachedProfile) {
         try {
-          profile = JSON.parse(cachedProfile);
+          currentProfileData = JSON.parse(cachedProfile);
           if (cachedGames) allUserGames = JSON.parse(cachedGames);
 
           if (typeof (window as any).showToast === 'function') {
@@ -197,7 +309,7 @@ const { username } = Astro.params;
       processSyncQueue();
     }
 
-    if (!profile) {
+    if (!currentProfileData) {
       try {
         // 1. Obtener perfil
         const { data: userProfile, error: profileErr } = await supabase
@@ -210,14 +322,14 @@ const { username } = Astro.params;
           throw new Error('Perfil no encontrado');
         }
 
-        profile = userProfile;
-        localStorage.setItem(profileCacheKey, JSON.stringify(profile));
+        currentProfileData = userProfile;
+        localStorage.setItem(profileCacheKey, JSON.stringify(currentProfileData));
 
         // 2. Obtener biblioteca pública
         const { data: games } = await supabase
           .from('user_library')
           .select('*')
-          .eq('user_id', profile.id)
+          .eq('user_id', currentProfileData.id)
           .order('hours_played', { ascending: false });
 
         allUserGames = games || [];
@@ -226,7 +338,7 @@ const { username } = Astro.params;
       } catch (err) {
         const cachedProfile = localStorage.getItem(profileCacheKey);
         if (cachedProfile) {
-          profile = JSON.parse(cachedProfile);
+          currentProfileData = JSON.parse(cachedProfile);
           const cachedGames = localStorage.getItem(gamesCacheKey);
           if (cachedGames) allUserGames = JSON.parse(cachedGames);
         } else {
@@ -237,19 +349,42 @@ const { username } = Astro.params;
       }
     }
 
-    // Llenar datos de usuario
-    const displayName = profile.display_name || profile.username;
+    // Comprobar si el usuario actual es el propietario
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && session.user.id === currentProfileData.id) {
+        isOwner = true;
+        if (editBtn) editBtn.classList.remove('hidden');
+      }
+    } catch (e) {}
+
+    renderProfileUI();
+
+    skeleton?.classList.add('hidden');
+    content?.classList.remove('hidden');
+  }
+
+  function renderProfileUI() {
+    if (!currentProfileData) return;
+
+    const displayName = currentProfileData.display_name || currentProfileData.username;
     document.getElementById('user-display-name')!.textContent = displayName;
-    document.getElementById('user-handle')!.textContent = `@${profile.username}`;
-    document.getElementById('user-bio')!.textContent = profile.bio || 'Este jugador aún no ha redactado su biografía.';
+    document.getElementById('user-handle')!.textContent = `@${currentProfileData.username}`;
+    document.getElementById('user-bio')!.textContent = currentProfileData.bio || 'Este jugador aún no ha redactado su biografía.';
     document.title = `Perfil de ${displayName} | KazeChronik`;
 
     // Renderizar Avatar Foto o Inicial
     const avatarContainer = document.getElementById('user-avatar-container')!;
-    if (profile.avatar_url) {
-      avatarContainer.innerHTML = `<img src="${profile.avatar_url}" alt="${displayName}" class="w-full h-full object-cover" />`;
+    if (currentProfileData.avatar_url) {
+      avatarContainer.innerHTML = `<img src="${currentProfileData.avatar_url}" alt="${displayName}" class="w-full h-full object-cover" />`;
     } else {
       avatarContainer.innerHTML = `<span>${displayName.charAt(0).toUpperCase()}</span>`;
+    }
+
+    // Renderizar Banner si existe
+    const bannerContainer = document.getElementById('profile-banner-container');
+    if (bannerContainer && currentProfileData.banner_url) {
+      bannerContainer.style.backgroundImage = `url('${currentProfileData.banner_url}')`;
     }
 
     // Métricas
@@ -262,9 +397,6 @@ const { username } = Astro.params;
 
     renderGamesGrid(allUserGames.slice(0, 6));
     renderReviewsList(allUserGames);
-
-    skeleton?.classList.add('hidden');
-    content?.classList.remove('hidden');
   }
 
   function renderGamesGrid(games: any[]) {
@@ -308,6 +440,108 @@ const { username } = Astro.params;
       </div>
     `).join('');
   }
+
+  // --- LÓGICA DEL MODAL DE EDICIÓN DE PERFIL IN-SITU ---
+  const editModal = document.getElementById('edit-profile-modal');
+  const openEditModalBtn = document.getElementById('open-edit-profile-modal-btn');
+  const closeEditModalBtn = document.getElementById('close-edit-modal-btn');
+  const cancelEditModalBtn = document.getElementById('cancel-edit-modal-btn');
+
+  const editDisplayNameInput = document.getElementById('edit-display-name') as HTMLInputElement;
+  const editBioInput = document.getElementById('edit-bio') as HTMLTextAreaElement;
+  const editAvatarUrlInput = document.getElementById('edit-avatar-url') as HTMLInputElement;
+  const editAvatarFileInput = document.getElementById('edit-avatar-file') as HTMLInputElement;
+  const avatarFileLabel = document.getElementById('avatar-file-label');
+
+  const editBannerUrlInput = document.getElementById('edit-banner-url') as HTMLInputElement;
+  const editBannerFileInput = document.getElementById('edit-banner-file') as HTMLInputElement;
+  const bannerFileLabel = document.getElementById('banner-file-label');
+  const inSituProfileForm = document.getElementById('in-situ-profile-form') as HTMLFormElement;
+
+  openEditModalBtn?.addEventListener('click', () => {
+    if (!currentProfileData) return;
+
+    editDisplayNameInput.value = currentProfileData.display_name || '';
+    editBioInput.value = currentProfileData.bio || '';
+    editAvatarUrlInput.value = currentProfileData.avatar_url || '';
+    editBannerUrlInput.value = currentProfileData.banner_url || '';
+
+    newAvatarData = currentProfileData.avatar_url || null;
+    newBannerData = currentProfileData.banner_url || null;
+
+    editModal?.classList.remove('hidden');
+  });
+
+  closeEditModalBtn?.addEventListener('click', () => editModal?.classList.add('hidden'));
+  cancelEditModalBtn?.addEventListener('click', () => editModal?.classList.add('hidden'));
+
+  // Procesar Archivos Locales (Avatar)
+  editAvatarFileInput?.addEventListener('change', (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      newAvatarData = event.target?.result as string;
+      if (avatarFileLabel) avatarFileLabel.textContent = file.name;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Procesar Archivos Locales (Banner)
+  editBannerFileInput?.addEventListener('change', (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      newBannerData = event.target?.result as string;
+      if (bannerFileLabel) bannerFileLabel.textContent = file.name;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Guardar Cambios de Perfil
+  inSituProfileForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const updatedProfilePayload = {
+      display_name: editDisplayNameInput.value.trim() || currentProfileData.username,
+      bio: editBioInput.value.trim() || null,
+      avatar_url: newAvatarData || editAvatarUrlInput.value.trim() || null,
+      banner_url: newBannerData || editBannerUrlInput.value.trim() || null,
+      updated_at: new Date().toISOString()
+    };
+
+    currentProfileData = { ...currentProfileData, ...updatedProfilePayload };
+    localStorage.setItem(`kazechronik_profile_${currentProfileData.username.toLowerCase()}`, JSON.stringify(currentProfileData));
+
+    renderProfileUI();
+    editModal?.classList.add('hidden');
+
+    if (!navigator.onLine) {
+      enqueueAction('profiles', 'UPDATE', { id: currentProfileData.id, ...updatedProfilePayload });
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Perfil actualizado localmente (se sincronizará al conectar)', 'info');
+      }
+      return;
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(updatedProfilePayload)
+      .eq('id', currentProfileData.id);
+
+    if (!error) {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('¡Perfil actualizado con éxito!', 'success');
+      }
+    } else {
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Error al actualizar: ' + error.message, 'error');
+      }
+    }
+  });
 
   // Controles de Pestañas (Top vs Todos)
   const btnTop = document.getElementById('btn-show-top');

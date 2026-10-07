@@ -3,7 +3,7 @@ export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { ListPlus, Plus, FolderHeart, Trash2, Share2, Gamepad2, Globe, Lock, X } from 'lucide-astro';
+import { ListPlus, Plus, FolderHeart, Trash2, Share2, Gamepad2, Globe, Lock, X, Edit3 } from 'lucide-astro';
 ---
 
 <Layout title="Listas Personalizadas | KazeChronik">
@@ -56,17 +56,19 @@ import { ListPlus, Plus, FolderHeart, Trash2, Share2, Gamepad2, Globe, Lock, X }
     </div>
   </main>
 
-  <!-- MODAL CREAR LISTA -->
+  <!-- MODAL CREAR / EDITAR LISTA -->
   <div id="create-list-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="theme-card border w-[92vw] max-w-md rounded-2xl p-6 shadow-2xl relative space-y-4">
       <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
-        <h3 class="text-base font-bold theme-text-primary">Nueva Lista Personalizada</h3>
+        <h3 id="modal-title-text" class="text-base font-bold theme-text-primary">Nueva Lista Personalizada</h3>
         <button id="close-modal-btn" class="p-1 theme-text-secondary hover:theme-text-primary rounded-lg hover:bg-slate-500/10 cursor-pointer">
           <X class="w-5 h-5" />
         </button>
       </div>
 
       <form id="create-list-form" class="space-y-4">
+        <input type="hidden" id="editing-list-id" value="" />
+
         <div>
           <label class="block text-xs font-semibold theme-text-secondary mb-1">Título de la Lista</label>
           <input 
@@ -98,7 +100,7 @@ import { ListPlus, Plus, FolderHeart, Trash2, Share2, Gamepad2, Globe, Lock, X }
             Cancelar
           </button>
           <button type="submit" id="save-list-btn" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/20 cursor-pointer">
-            Crear Lista
+            Guardar Lista
           </button>
         </div>
       </form>
@@ -156,6 +158,7 @@ import { ListPlus, Plus, FolderHeart, Trash2, Share2, Gamepad2, Globe, Lock, X }
         .select(`
           *,
           items:custom_list_items(
+            id,
             game:user_library(id, title, cover_url)
           )
         `)
@@ -195,7 +198,7 @@ import { ListPlus, Plus, FolderHeart, Trash2, Share2, Gamepad2, Globe, Lock, X }
     if (!grid) return;
 
     grid.innerHTML = customLists.map(list => {
-      const gameCovers = (list.items || []).map((item: any) => item.game?.cover_url || '/placeholder.jpg');
+      const items = list.items || [];
 
       return `
         <div class="theme-card border rounded-3xl p-5 space-y-4 shadow-sm hover:border-indigo-500/40 transition-all flex flex-col justify-between">
@@ -204,27 +207,48 @@ import { ListPlus, Plus, FolderHeart, Trash2, Share2, Gamepad2, Globe, Lock, X }
               <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-lg border flex items-center gap-1 ${list.is_public ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}">
                 ${list.is_public ? '🌐 Pública' : '🔒 Privada'}
               </span>
-              <button onclick="deleteList('${list.id}')" class="text-xs text-rose-500/70 hover:text-rose-400 p-1 cursor-pointer" title="Eliminar lista">
-                🗑️
-              </button>
+
+              <div class="flex items-center gap-1">
+                <button onclick="openEditListModal('${list.id}')" class="text-xs theme-text-secondary hover:text-indigo-400 p-1 cursor-pointer" title="Editar lista">
+                  ✏️
+                </button>
+                <button onclick="deleteList('${list.id}')" class="text-xs text-rose-500/70 hover:text-rose-400 p-1 cursor-pointer" title="Eliminar lista">
+                  🗑️
+                </button>
+              </div>
             </div>
 
             <h3 class="font-bold text-base theme-text-primary line-clamp-1">${list.title}</h3>
             <p class="text-xs theme-text-secondary line-clamp-2 h-8">${list.description || 'Sin descripción.'}</p>
           </div>
 
-          <!-- Muestra de portadas con clases adaptables a temas -->
+          <!-- Muestra de portadas en la lista -->
           <div class="flex items-center gap-1 my-2 theme-input p-2 rounded-2xl border border-slate-500/20 overflow-x-auto min-h-[64px]">
-            ${gameCovers.length > 0 ? gameCovers.map((cover: string) => `
-              <img src="${cover}" class="w-10 h-12 object-cover rounded-lg border border-slate-500/20 shrink-0" />
+            ${items.length > 0 ? items.map((item: any) => `
+              <div class="relative group shrink-0">
+                <img 
+                  src="${item.game?.cover_url || '/placeholder.svg'}" 
+                  onerror="this.src='/placeholder.svg';"
+                  alt="${item.game?.title || 'Juego'}" 
+                  class="w-10 h-12 object-cover rounded-lg border border-slate-500/20" 
+                  title="${item.game?.title || ''}"
+                />
+                <button 
+                  onclick="removeGameFromList('${item.id}', '${list.id}')"
+                  class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full w-4 h-4 text-[9px] font-bold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md cursor-pointer"
+                  title="Quitar de esta lista"
+                >
+                  ×
+                </button>
+              </div>
             `).join('') : '<span class="text-[11px] theme-text-secondary italic px-2">Sin juegos añadidos</span>'}
           </div>
 
           <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-500/20">
-            <span class="font-mono text-indigo-400 font-semibold">${list.items?.length || 0} juegos</span>
+            <span class="font-mono text-indigo-400 font-semibold">${items.length} juegos</span>
             <div class="flex items-center gap-2">
               <a href="/dashboard" class="text-xs text-indigo-400 font-semibold hover:underline">
-                + Ir a la Biblioteca
+                + Biblioteca
               </a>
               <button onclick="copyListLink('${list.id}')" class="text-indigo-400 hover:text-indigo-300 font-semibold p-1 cursor-pointer" title="Compartir enlace">
                 🔗
@@ -236,56 +260,78 @@ import { ListPlus, Plus, FolderHeart, Trash2, Share2, Gamepad2, Globe, Lock, X }
     }).join('');
   }
 
-  // MODAL CONTROLES
+  // CONTROLES DE MODAL (CREACIÓN / EDICIÓN)
   const modal = document.getElementById('create-list-modal');
+  const modalTitleText = document.getElementById('modal-title-text');
+  const editingListIdInput = document.getElementById('editing-list-id') as HTMLInputElement;
+  const listTitleInput = document.getElementById('list-title-input') as HTMLInputElement;
+  const listDescInput = document.getElementById('list-desc-input') as HTMLTextAreaElement;
+  const listPublicCheckbox = document.getElementById('list-public-checkbox') as HTMLInputElement;
+
   const openModalBtn = document.getElementById('open-create-list-modal');
   const closeModalBtn = document.getElementById('close-modal-btn');
   const cancelModalBtn = document.getElementById('cancel-modal-btn');
   const form = document.getElementById('create-list-form') as HTMLFormElement;
 
-  openModalBtn?.addEventListener('click', () => modal?.classList.remove('hidden'));
+  openModalBtn?.addEventListener('click', () => {
+    if (editingListIdInput) editingListIdInput.value = '';
+    if (modalTitleText) modalTitleText.textContent = 'Nueva Lista Personalizada';
+    form.reset();
+    modal?.classList.remove('hidden');
+  });
+
   closeModalBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
   cancelModalBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
+
+  (window as any).openEditListModal = (id: string) => {
+    const list = customLists.find(l => l.id === id);
+    if (!list) return;
+
+    if (editingListIdInput) editingListIdInput.value = list.id;
+    if (modalTitleText) modalTitleText.textContent = 'Editar Lista Personalizada';
+    if (listTitleInput) listTitleInput.value = list.title || '';
+    if (listDescInput) listDescInput.value = list.description || '';
+    if (listPublicCheckbox) listPublicCheckbox.checked = Boolean(list.is_public);
+
+    modal?.classList.remove('hidden');
+  };
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const title = (document.getElementById('list-title-input') as HTMLInputElement).value.trim();
-    const description = (document.getElementById('list-desc-input') as HTMLTextAreaElement).value.trim();
-    const isPublic = (document.getElementById('list-public-checkbox') as HTMLInputElement).checked;
+    const editingId = editingListIdInput.value;
+    const title = listTitleInput.value.trim();
+    const description = listDescInput.value.trim();
+    const isPublic = listPublicCheckbox.checked;
 
     if (!title) return;
 
     if (!navigator.onLine) {
-      const newList = {
-        id: `offline_list_${Date.now()}`,
-        title,
-        description: description || null,
-        is_public: isPublic,
-        items: []
-      };
+      if (editingId) {
+        const idx = customLists.findIndex(l => l.id === editingId);
+        if (idx !== -1) {
+          customLists[idx] = { ...customLists[idx], title, description: description || null, is_public: isPublic };
+        }
+        enqueueAction('custom_lists', 'UPDATE', { id: editingId, title, description: description || null, is_public: isPublic });
+      } else {
+        const newList = {
+          id: `offline_list_${Date.now()}`,
+          title,
+          description: description || null,
+          is_public: isPublic,
+          items: []
+        };
+        customLists.unshift(newList);
+        enqueueAction('custom_lists', 'INSERT', { title, description: description || null, is_public: isPublic });
+      }
 
-      customLists.unshift(newList);
       localStorage.setItem(listsCacheKey, JSON.stringify(customLists));
-
-      enqueueAction('custom_lists', 'INSERT', {
-        title,
-        description: description || null,
-        is_public: isPublic
-      });
-
       modal?.classList.add('hidden');
       form.reset();
-
-      const emptyState = document.getElementById('lists-empty');
-      const grid = document.getElementById('lists-grid');
-      if (emptyState) emptyState.classList.add('hidden');
-      if (grid) grid.classList.remove('hidden');
-
       renderListsGrid();
 
       if (typeof (window as any).showToast === 'function') {
-        (window as any).showToast('Lista creada localmente (se sincronizará al conectar)', 'info');
+        (window as any).showToast('Lista guardada localmente (se sincronizará al conectar)', 'info');
       }
       return;
     }
@@ -293,18 +339,27 @@ import { ListPlus, Plus, FolderHeart, Trash2, Share2, Gamepad2, Globe, Lock, X }
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
-    const { error } = await supabase.from('custom_lists').insert([{
-      user_id: session.user.id,
-      title,
-      description: description || null,
-      is_public: isPublic
-    }]);
+    let error;
+    if (editingId) {
+      const res = await supabase.from('custom_lists')
+        .update({ title, description: description || null, is_public: isPublic })
+        .eq('id', editingId);
+      error = res.error;
+    } else {
+      const res = await supabase.from('custom_lists').insert([{
+        user_id: session.user.id,
+        title,
+        description: description || null,
+        is_public: isPublic
+      }]);
+      error = res.error;
+    }
 
     if (error) {
       if (typeof (window as any).showToast === 'function') {
-        (window as any).showToast('Error al crear lista: ' + error.message, 'error');
+        (window as any).showToast('Error al guardar lista: ' + error.message, 'error');
       } else {
-        alert('Error al crear lista: ' + error.message);
+        alert('Error al guardar lista: ' + error.message);
       }
       return;
     }
@@ -312,10 +367,26 @@ import { ListPlus, Plus, FolderHeart, Trash2, Share2, Gamepad2, Globe, Lock, X }
     modal?.classList.add('hidden');
     form.reset();
     if (typeof (window as any).showToast === 'function') {
-      (window as any).showToast('¡Lista creada correctamente!', 'success');
+      (window as any).showToast(editingId ? '¡Lista actualizada!' : '¡Lista creada correctamente!', 'success');
     }
     loadCustomLists();
   });
+
+  (window as any).removeGameFromList = async (itemId: string, listId: string) => {
+    const listIndex = customLists.findIndex(l => l.id === listId);
+    if (listIndex !== -1) {
+      customLists[listIndex].items = customLists[listIndex].items.filter((i: any) => i.id !== itemId);
+      localStorage.setItem(listsCacheKey, JSON.stringify(customLists));
+      renderListsGrid();
+    }
+
+    if (!navigator.onLine) {
+      enqueueAction('custom_list_items', 'DELETE', { id: itemId });
+      return;
+    }
+
+    await supabase.from('custom_list_items').delete().eq('id', itemId);
+  };
 
   (window as any).deleteList = async (id: string) => {
     if (!confirm('¿Seguro que deseas eliminar esta lista?')) return;

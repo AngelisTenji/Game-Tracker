@@ -8,7 +8,7 @@ import {
   Trash2, 
   Plus, 
   FileText, 
-  Image, 
+  Image as ImageIcon, 
   MapPin, 
   Shield, 
   Puzzle, 
@@ -19,7 +19,9 @@ import {
   Trophy, 
   Award, 
   CheckCircle2, 
-  RefreshCw 
+  RefreshCw,
+  ExternalLink,
+  Upload
 } from 'lucide-astro';
 ---
 
@@ -289,7 +291,7 @@ import {
                   📓 Gamer Notebook
                 </h2>
                 <p class="text-xs theme-text-secondary mt-0.5">
-                  Guarda builds, infografías, ubicaciones de mapa y puzles para este juego.
+                  Guarda builds, infografías, enlaces a guías, mapas y listas de tareas.
                 </p>
               </div>
 
@@ -303,7 +305,7 @@ import {
               </button>
             </div>
 
-            <!-- Formulario de Creación de Nota -->
+            <!-- Formulario de Creación / Edición de Nota -->
             <form id="create-note-form" class="hidden theme-input border border-slate-500/20 p-4 rounded-xl space-y-3">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -332,26 +334,44 @@ import {
               </div>
 
               <div>
-                <label class="block text-[11px] font-semibold theme-text-secondary mb-1">Contenido / Detalles (Usa [ ] y [x] para checklists)</label>
+                <label class="block text-[11px] font-semibold theme-text-secondary mb-1">Contenido / Detalles (Soporta enlaces web y checklists [ ] / [x])</label>
                 <textarea 
                   id="note-content" 
-                  rows="3" 
-                  placeholder="Escribe artefactos, atributos, armas, secuencias de puzle o notas directas..."
+                  rows="4" 
+                  placeholder="Escribe detalles, URLs de guías (https://...) o listas de tareas usando [ ] tarea pendiente y [x] completada..."
                   class="w-full px-3 py-2 theme-card border border-slate-500/20 rounded-lg text-xs focus:outline-none focus:border-indigo-500 resize-none font-mono"
                 ></textarea>
               </div>
 
-              <div>
-                <label class="block text-[11px] font-semibold theme-text-secondary mb-1">URL de Imagen / Infografía (Opcional)</label>
-                <input 
-                  type="url" 
-                  id="note-image-url" 
-                  placeholder="https://i.imgur.com/... o enlace de captura"
-                  class="w-full px-3 py-2 theme-card border border-slate-500/20 rounded-lg text-xs focus:outline-none focus:border-indigo-500"
-                />
+              <!-- OPCIONES DE ADJUNTO DE IMAGEN (SUBIDA DIRECTA O URL) -->
+              <div class="space-y-2">
+                <label class="block text-[11px] font-semibold theme-text-secondary">Adjuntar Captura / Infografía</label>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <label class="px-3 py-2 theme-card border border-slate-500/20 hover:border-indigo-500/50 rounded-lg text-xs cursor-pointer flex items-center justify-center gap-2 theme-text-primary transition-all">
+                    <Upload class="w-3.5 h-3.5 text-indigo-400" />
+                    <span id="file-upload-label">Subir Imagen Local</span>
+                    <input type="file" id="note-image-file" accept="image/*" class="hidden" />
+                  </label>
+
+                  <input 
+                    type="url" 
+                    id="note-image-url" 
+                    placeholder="o pega URL de imagen (https://...)"
+                    class="w-full px-3 py-2 theme-card border border-slate-500/20 rounded-lg text-xs focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <!-- VISTA PREVIA DE IMAGEN DE NOTA -->
+                <div id="note-image-preview-container" class="hidden relative w-full max-h-36 rounded-lg overflow-hidden border border-slate-500/20 bg-slate-500/10">
+                  <img id="note-image-preview" src="" alt="Vista Previa" class="w-full h-full object-cover" />
+                  <button type="button" id="remove-note-image-btn" class="absolute top-2 right-2 p-1 bg-rose-600/80 hover:bg-rose-600 text-white rounded-md text-xs cursor-pointer">
+                    <X class="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
 
-              <div class="flex items-center justify-between pt-1">
+              <div class="flex items-center justify-between pt-2">
                 <label class="flex items-center gap-2 cursor-pointer text-xs theme-text-secondary">
                   <input type="checkbox" id="note-pinned" class="rounded accent-indigo-600" />
                   <span>Fijar nota al inicio (Pin)</span>
@@ -450,7 +470,7 @@ import {
     const platinumBadge = document.getElementById('platinum-badge');
     const achievementsSubtitle = document.getElementById('achievements-subtitle');
 
-    // Gamer Notebook
+    // Gamer Notebook & Subida de Archivos
     const toggleNoteFormBtn = document.getElementById('toggle-note-form-btn');
     const createNoteForm = document.getElementById('create-note-form') as HTMLFormElement;
     const cancelNoteBtn = document.getElementById('cancel-note-btn');
@@ -458,6 +478,11 @@ import {
     const noteCategorySelect = document.getElementById('note-category') as HTMLSelectElement;
     const noteContentInput = document.getElementById('note-content') as HTMLTextAreaElement;
     const noteImageUrlInput = document.getElementById('note-image-url') as HTMLInputElement;
+    const noteImageFileInput = document.getElementById('note-image-file') as HTMLInputElement;
+    const fileUploadLabel = document.getElementById('file-upload-label');
+    const noteImagePreviewContainer = document.getElementById('note-image-preview-container');
+    const noteImagePreview = document.getElementById('note-image-preview') as HTMLImageElement;
+    const removeNoteImageBtn = document.getElementById('remove-note-image-btn');
     const notePinnedCheckbox = document.getElementById('note-pinned') as HTMLInputElement;
     const notesListContainer = document.getElementById('notes-list-container');
 
@@ -473,6 +498,7 @@ import {
     let loadedNotes: any[] = [];
     let gameAchievements: any[] = [];
     let editingNoteId: string | null = null;
+    let currentNoteImageData: string | null = null;
 
     if (!gameId || gameId === 'game') {
       if (skeleton) skeleton.classList.add('hidden');
@@ -615,7 +641,7 @@ import {
       }
     });
 
-    // --- MÓDULO DE LOGROS Y TROFEOS (STEAM + CHECKLIST MANUAL) ---
+    // --- LOGROS Y TROFEOS ---
     async function loadAchievements() {
       const isSteam = data.store === 'Steam' || data.rawg_id < 0;
 
@@ -625,7 +651,6 @@ import {
           : 'Sugerencias de RAWG y checklist manual interactiva.';
       }
 
-      // 1. Carga desde Caché primero
       const cached = localStorage.getItem(achievementsCacheKey);
       if (cached) {
         try {
@@ -639,11 +664,8 @@ import {
       try {
         if (isSteam && data.rawg_id) {
           const appId = Math.abs(data.rawg_id);
-          
-          // OBTIENE EL STEAM ID DEL ALMACENAMIENTO LOCAL O PERFIL
           const userSteamId = localStorage.getItem('kazechronik_steam_id') || '';
 
-          // ENVÍA TANTO EL APPID COMO EL STEAMID DEL JUGADOR
           const res = await fetch(`/api/steam/achievements?appId=${appId}&steamId=${encodeURIComponent(userSteamId)}`);
           const resData = await res.json();
 
@@ -655,7 +677,6 @@ import {
           }
         }
 
-        // Fallback RAWG para consolas o juegos no-Steam
         if (data.rawg_id && data.rawg_id > 0) {
           const rawgKey = 'c53a703142404772979238f656999353';
           const rawgRes = await fetch(`https://api.rawg.io/api/games/${data.rawg_id}/achievements?key=${rawgKey}`);
@@ -710,7 +731,6 @@ import {
       }
 
       achievementsListContainer.innerHTML = gameAchievements.map((ach, idx) => {
-        // Limpiar el nombre técnico si la API no envió el título formateado
         const displayTitle = ach.title ? ach.title.replace(/_/g, ' ') : `Logro ${idx + 1}`;
         const iconSrc = ach.icon || defaultSvgFallback;
 
@@ -757,7 +777,6 @@ import {
       });
     });
 
-    // Cargar logros al inicio
     loadAchievements();
 
     // --- MODAL DE LISTAS ---
@@ -851,7 +870,40 @@ import {
       await loadUserListsForSelection();
     };
 
-    // --- GAMER NOTEBOOK (CON ENCOLE OFFLINE Y CHECKLISTS INTERACTIVAS) ---
+    // --- GAMER NOTEBOOK (SUBIDA DE FOTOS, ENLACES ACTIVOS Y CHECKLISTS) ---
+    noteImageFileInput?.addEventListener('change', (e: any) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        currentNoteImageData = event.target?.result as string;
+        if (noteImagePreview && noteImagePreviewContainer) {
+          noteImagePreview.src = currentNoteImageData;
+          noteImagePreviewContainer.classList.remove('hidden');
+        }
+        if (fileUploadLabel) fileUploadLabel.textContent = file.name;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    noteImageUrlInput?.addEventListener('input', () => {
+      const url = noteImageUrlInput.value.trim();
+      if (url && noteImagePreview && noteImagePreviewContainer) {
+        currentNoteImageData = url;
+        noteImagePreview.src = url;
+        noteImagePreviewContainer.classList.remove('hidden');
+      }
+    });
+
+    removeNoteImageBtn?.addEventListener('click', () => {
+      currentNoteImageData = null;
+      noteImageUrlInput.value = '';
+      if (noteImageFileInput) noteImageFileInput.value = '';
+      if (fileUploadLabel) fileUploadLabel.textContent = 'Subir Imagen Local';
+      if (noteImagePreviewContainer) noteImagePreviewContainer.classList.add('hidden');
+    });
+
     async function loadGameNotes() {
       if (!notesListContainer) return;
 
@@ -892,6 +944,28 @@ import {
       }
     }
 
+    function parseNoteContent(rawText: string) {
+      if (!rawText) return '';
+
+      // Convierte enlaces web en etiquetas <a> clickeables
+      const urlRegex = /(https?:\/\/[^\s<]+)/g;
+      
+      return rawText.split('\n').map((line: string) => {
+        let processedLine = line.replace(urlRegex, (url) => {
+          return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline font-bold inline-flex items-center gap-1">${url} ↗</a>`;
+        });
+
+        if (processedLine.startsWith('[x]') || processedLine.startsWith('[X]')) {
+          return `<span class="line-through opacity-60 text-emerald-400 font-medium flex items-center gap-1.5"><span class="text-emerald-400 font-bold">✓</span> ${processedLine.replace(/^\[[xX]\]/, '').trim()}</span>`;
+        }
+        if (processedLine.startsWith('[ ]')) {
+          return `<span class="font-medium flex items-center gap-1.5"><span class="text-amber-400 font-bold">☐</span> ${processedLine.replace(/^\[ \]/, '').trim()}</span>`;
+        }
+
+        return processedLine;
+      }).join('<br/>');
+    }
+
     function renderNotesList() {
       if (!notesListContainer) return;
 
@@ -899,7 +973,7 @@ import {
         notesListContainer.innerHTML = `
           <div class="p-6 text-center theme-button border border-dashed border-slate-500/20 rounded-xl">
             <p class="text-xs font-semibold theme-text-primary">No hay notas creadas aún</p>
-            <p class="text-[11px] theme-text-secondary mt-1">Crea tu primera nota para guardar builds o ubicaciones de mapa.</p>
+            <p class="text-[11px] theme-text-secondary mt-1">Crea tu primera nota para guardar builds, mapas o imágenes.</p>
           </div>
         `;
         return;
@@ -914,16 +988,7 @@ import {
 
       notesListContainer.innerHTML = loadedNotes.map(n => {
         const cat = catBadges[n.category] || catBadges.general;
-        
-        const formattedContent = (n.content || '').split('\n').map((line: string) => {
-          if (line.startsWith('[x]') || line.startsWith('[X]')) {
-            return `<span class="line-through opacity-60 text-emerald-400 font-medium flex items-center gap-1.5"><span class="text-emerald-400 font-bold">✓</span> ${line.replace(/^\[[xX]\]/, '').trim()}</span>`;
-          }
-          if (line.startsWith('[ ]')) {
-            return `<span class="font-medium flex items-center gap-1.5"><span class="text-amber-400 font-bold">☐</span> ${line.replace(/^\[ \]/, '').trim()}</span>`;
-          }
-          return line;
-        }).join('<br/>');
+        const formattedContent = parseNoteContent(n.content || '');
 
         return `
           <div class="theme-input border border-slate-500/20 rounded-2xl p-4 space-y-2 relative transition-all ${n.is_pinned ? 'border-amber-500/40 bg-amber-500/5 shadow-md' : 'shadow-sm'}">
@@ -949,11 +1014,11 @@ import {
               </div>
             </div>
 
-            ${n.content ? `<div class="text-xs theme-text-secondary leading-relaxed theme-card p-3 rounded-xl border border-slate-500/20">${formattedContent}</div>` : ''}
+            ${n.content ? `<div class="text-xs theme-text-secondary leading-relaxed theme-card p-3 rounded-xl border border-slate-500/20 break-words">${formattedContent}</div>` : ''}
 
             ${n.image_url ? `
-              <div class="mt-2 rounded-xl overflow-hidden border border-slate-500/20 max-h-60 bg-slate-500/10">
-                <img src="${n.image_url}" alt="Guía / Build" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer" onclick="window.open('${n.image_url}', '_blank')" />
+              <div class="mt-2 rounded-xl overflow-hidden border border-slate-500/20 max-h-72 bg-slate-500/10">
+                <img src="${n.image_url}" alt="Guía / Build" class="w-full h-full object-contain hover:scale-102 transition-transform duration-300 cursor-pointer" onclick="window.open('${n.image_url}', '_blank')" />
               </div>
             ` : ''}
           </div>
@@ -963,7 +1028,10 @@ import {
 
     toggleNoteFormBtn?.addEventListener('click', () => {
       editingNoteId = null;
+      currentNoteImageData = null;
       createNoteForm.reset();
+      if (fileUploadLabel) fileUploadLabel.textContent = 'Subir Imagen Local';
+      if (noteImagePreviewContainer) noteImagePreviewContainer.classList.add('hidden');
       const saveBtn = document.getElementById('save-note-btn');
       if (saveBtn) saveBtn.textContent = 'Guardar';
       createNoteForm.classList.toggle('hidden');
@@ -974,11 +1042,17 @@ import {
       if (!note) return;
 
       editingNoteId = noteId;
+      currentNoteImageData = note.image_url || null;
       noteTitleInput.value = note.title || '';
       noteCategorySelect.value = note.category || 'general';
       noteContentInput.value = note.content || '';
       noteImageUrlInput.value = note.image_url || '';
       notePinnedCheckbox.checked = Boolean(note.is_pinned);
+
+      if (currentNoteImageData && noteImagePreview && noteImagePreviewContainer) {
+        noteImagePreview.src = currentNoteImageData;
+        noteImagePreviewContainer.classList.remove('hidden');
+      }
 
       const saveBtn = document.getElementById('save-note-btn');
       if (saveBtn) saveBtn.textContent = 'Actualizar Nota';
@@ -989,7 +1063,9 @@ import {
 
     cancelNoteBtn?.addEventListener('click', () => {
       editingNoteId = null;
+      currentNoteImageData = null;
       createNoteForm.reset();
+      if (noteImagePreviewContainer) noteImagePreviewContainer.classList.add('hidden');
       createNoteForm.classList.add('hidden');
     });
 
@@ -1008,7 +1084,7 @@ import {
         title: title,
         category: noteCategorySelect.value,
         content: noteContentInput.value.trim() || null,
-        image_url: noteImageUrlInput.value.trim() || null,
+        image_url: currentNoteImageData || noteImageUrlInput.value.trim() || null,
         is_pinned: notePinnedCheckbox.checked,
         updated_at: new Date().toISOString()
       };
@@ -1027,6 +1103,8 @@ import {
         localStorage.setItem(notesCacheKey, JSON.stringify(loadedNotes));
         renderNotesList();
         createNoteForm.reset();
+        currentNoteImageData = null;
+        if (noteImagePreviewContainer) noteImagePreviewContainer.classList.add('hidden');
         createNoteForm.classList.add('hidden');
         if (typeof (window as any).showToast === 'function') {
           (window as any).showToast('Nota guardada localmente (se sincronizará al conectar)', 'info');
@@ -1045,7 +1123,9 @@ import {
 
       if (!error) {
         editingNoteId = null;
+        currentNoteImageData = null;
         createNoteForm.reset();
+        if (noteImagePreviewContainer) noteImagePreviewContainer.classList.add('hidden');
         createNoteForm.classList.add('hidden');
         if (typeof (window as any).showToast === 'function') {
           (window as any).showToast('Nota guardada en tu Gamer Notebook', 'success');
@@ -1106,16 +1186,10 @@ import {
 
     loadGameNotes();
 
-    // 3. LISTENERS DE GUARDADO PROGRESO Y RESEÑA (CON ENCOLE OFFLINE)
+    // 3. LISTENERS DE GUARDADO PROGRESO Y RESEÑA
     saveProgressBtn?.addEventListener('click', async () => {
       saveProgressBtn.disabled = true;
-      saveProgressBtn.innerHTML = `
-        <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span>Guardando...</span>
-      `;
+      saveProgressBtn.innerHTML = `<span>Guardando...</span>`;
 
       const updatedProgress = {
         status: statusSelect.value,
@@ -1164,13 +1238,7 @@ import {
 
     saveReviewBtn?.addEventListener('click', async () => {
       saveReviewBtn.disabled = true;
-      saveReviewBtn.innerHTML = `
-        <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span>Guardando Bitácora...</span>
-      `;
+      saveReviewBtn.innerHTML = `<span>Guardando Bitácora...</span>`;
 
       const updatedReview = {
         rating: ratingInput.value ? parseFloat(ratingInput.value) : null,

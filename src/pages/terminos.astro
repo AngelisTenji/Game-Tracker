@@ -3,24 +3,30 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Términos y Condiciones | KazeChronik">
-  <main class="max-w-4xl mx-auto px-6 py-12 text-slate-300">
-    <h1 class="text-4xl font-bold text-white mb-6">Términos y Condiciones</h1>
-    <p class="text-sm text-slate-400 mb-8">Última actualización: 16 de septiembre de 2026</p>
+  <main class="max-w-4xl mx-auto px-6 py-12 theme-text-primary">
+    <h1 class="text-4xl font-bold tracking-tight mb-2">Términos y Condiciones</h1>
+    <p class="text-xs theme-text-secondary mb-8">Última actualización: 5 de octubre de 2026</p>
 
-    <div class="space-y-6 text-slate-300 leading-relaxed">
+    <div class="space-y-6 text-sm leading-relaxed theme-text-secondary">
       <section>
-        <h2 class="text-xl font-semibold text-white mb-2">1. Aceptación de los Términos</h2>
+        <h2 class="text-lg font-semibold theme-text-primary mb-2">1. Aceptación de los Términos</h2>
         <p>Al acceder y utilizar KazeChronik, aceptas cumplir con los presentes términos y condiciones de servicio.</p>
       </section>
 
       <section>
-        <h2 class="text-xl font-semibold text-white mb-2">2. Uso de la Plataforma</h2>
+        <h2 class="text-lg font-semibold theme-text-primary mb-2">2. Uso de la Plataforma</h2>
         <p>KazeChronik es una plataforma de seguimiento y organización de videojuegos. El usuario es responsable de mantener la confidencialidad de las credenciales de su cuenta.</p>
       </section>
 
       <section>
-        <h2 class="text-xl font-semibold text-white mb-2">3. Propiedad Intelectual</h2>
-        <p>Los datos y portadas de los videojuegos mostrados en la plataforma son propiedad de sus respectivos desarrolladores y se obtienen mediante la API pública de RAWG.</p>
+        <h2 class="text-lg font-semibold theme-text-primary mb-2">3. Propiedad Intelectual & Integraciones</h2>
+        <p>Los datos, marcas registradas y portadas de los videojuegos mostrados en la plataforma son propiedad de sus respectivos desarrolladores y editores. Se obtienen mediante las APIs públicas de RAWG y la Web API oficial de Steam.</p>
+      </section>
+
+      <!-- NUEVA SECCIÓN DE TRANSPARENCIA TECNOLÓGICA -->
+      <section class="p-4 theme-card border border-slate-500/20 rounded-2xl">
+        <h2 class="text-base font-semibold theme-text-primary mb-2">4. Transparencia en la Elaboración del Software</h2>
+        <p>KazeChronik es una aplicación concebida y desarrollada por <strong>AngelisTenji</strong>. En cumplimiento con nuestros principios de honestidad con la comunidad, se declara que el código fuente, la arquitectura de sincronización offline y los algoritmos de la plataforma fueron diseñados e implementados utilizando herramientas de Inteligencia Artificial (Gemini de Google) como asistente técnico de programación y desarrollo.</p>
       </section>
     </div>
   </main>

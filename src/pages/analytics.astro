@@ -15,7 +15,8 @@ import {
   Layers,
   Target,
   FolderHeart,
-  ArrowRight
+  ArrowRight,
+  Award
 } from 'lucide-astro';
 ---
 
@@ -31,7 +32,7 @@ import {
           <span>Panel de Estadísticas</span>
         </h1>
         <p class="text-sm theme-text-secondary mt-1">
-          Análisis detallado de tu tiempo de juego, rendimiento, metas y colecciones.
+          Análisis detallado de tu tiempo de juego, rendimiento, trofeos platinados, metas y colecciones.
         </p>
       </div>
 
@@ -43,7 +44,8 @@ import {
 
     <!-- Estado de Carga (Skeleton Adaptable) -->
     <div id="analytics-skeleton" class="animate-pulse space-y-6">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="h-28 theme-card rounded-2xl border border-slate-500/20"></div>
         <div class="h-28 theme-card rounded-2xl border border-slate-500/20"></div>
         <div class="h-28 theme-card rounded-2xl border border-slate-500/20"></div>
         <div class="h-28 theme-card rounded-2xl border border-slate-500/20"></div>
@@ -73,14 +75,14 @@ import {
     <!-- Contenido Principal -->
     <div id="analytics-content" class="hidden space-y-8">
       
-      <!-- Tarjetas de Métricas Clave (Grid de 4 Columnas) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Tarjetas de Métricas Clave (Grid de 5 Columnas) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div class="theme-card border border-slate-500/20 p-5 rounded-2xl shadow-sm space-y-1">
           <div class="flex items-center justify-between">
             <p class="text-[11px] font-semibold theme-text-secondary uppercase tracking-wider">Horas Totales</p>
             <Clock class="w-4 h-4 text-indigo-400" />
           </div>
-          <p id="total-hours" class="text-3xl font-black text-indigo-400">0.0h</p>
+          <p id="total-hours" class="text-2xl font-black text-indigo-400">0.0h</p>
         </div>
 
         <div class="theme-card border border-slate-500/20 p-5 rounded-2xl shadow-sm space-y-1">
@@ -88,15 +90,23 @@ import {
             <p class="text-[11px] font-semibold theme-text-secondary uppercase tracking-wider">Promedio / Juego</p>
             <Flame class="w-4 h-4 text-cyan-400" />
           </div>
-          <p id="avg-hours" class="text-3xl font-black text-cyan-400">0.0h</p>
+          <p id="avg-hours" class="text-2xl font-black text-cyan-400">0.0h</p>
         </div>
 
         <div class="theme-card border border-slate-500/20 p-5 rounded-2xl shadow-sm space-y-1">
           <div class="flex items-center justify-between">
-            <p class="text-[11px] font-semibold theme-text-secondary uppercase tracking-wider">Completitud</p>
-            <CheckCircle2 class="w-4 h-4 text-emerald-400" />
+            <p class="text-[11px] font-semibold theme-text-secondary uppercase tracking-wider">Platinados (100%)</p>
+            <Trophy class="w-4 h-4 text-amber-400" />
           </div>
-          <p id="completion-rate" class="text-3xl font-black text-emerald-400">0%</p>
+          <p id="platinums-count" class="text-2xl font-black text-amber-400">0 🏆</p>
+        </div>
+
+        <div class="theme-card border border-slate-500/20 p-5 rounded-2xl shadow-sm space-y-1">
+          <div class="flex items-center justify-between">
+            <p class="text-[11px] font-semibold theme-text-secondary uppercase tracking-wider">Prom. Logros</p>
+            <Award class="w-4 h-4 text-emerald-400" />
+          </div>
+          <p id="avg-achievements" class="text-2xl font-black text-emerald-400">0%</p>
         </div>
 
         <div class="theme-card border border-slate-500/20 p-5 rounded-2xl shadow-sm space-y-1">
@@ -104,11 +114,11 @@ import {
             <p class="text-[11px] font-semibold theme-text-secondary uppercase tracking-wider">Valoración Media</p>
             <Star class="w-4 h-4 text-amber-400 fill-amber-400" />
           </div>
-          <p id="avg-rating" class="text-3xl font-black text-amber-400">0.0 ★</p>
+          <p id="avg-rating" class="text-2xl font-black text-amber-400">0.0 ★</p>
         </div>
       </div>
 
-      <!-- SECCIÓN NUEVA: METAS ANUALES & LISTAS PERSONALIZADAS -->
+      <!-- SECCIÓN: METAS ANUALES & LISTAS PERSONALIZADAS -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <!-- Progreso de Metas 2026 -->
@@ -307,7 +317,11 @@ import {
     const totalHours = games.reduce((acc, g) => acc + (Number(g.hours_played) || 0), 0);
     const completedCount = games.filter(g => g.status === 'completed').length;
     const avgHours = totalTitles > 0 ? (totalHours / totalTitles) : 0;
-    const completionRate = totalTitles > 0 ? Math.round((completedCount / totalTitles) * 100) : 0;
+
+    // Métricas de Logros & Platinados
+    const platinumsCount = games.filter(g => (Number(g.achievements_progress) || 0) >= 100).length;
+    const totalAchievementsPctSum = games.reduce((acc, g) => acc + (Number(g.achievements_progress) || 0), 0);
+    const avgAchievementsPct = totalTitles > 0 ? Math.round(totalAchievementsPctSum / totalTitles) : 0;
 
     const ratedGames = games.filter(g => g.rating !== null && g.rating !== undefined && Number(g.rating) > 0);
     const avgRating = ratedGames.length > 0
@@ -317,7 +331,8 @@ import {
     // Rellenar métricas superiores
     document.getElementById('total-hours')!.textContent = `${totalHours.toFixed(1)}h`;
     document.getElementById('avg-hours')!.textContent = `${avgHours.toFixed(1)}h`;
-    document.getElementById('completion-rate')!.textContent = `${completionRate}%`;
+    document.getElementById('platinums-count')!.textContent = `${platinumsCount} 🏆`;
+    document.getElementById('avg-achievements')!.textContent = `${avgAchievementsPct}%`;
     document.getElementById('avg-rating')!.textContent = `${avgRating} ★`;
     
     const titlesBadge = document.getElementById('total-titles-badge');
@@ -394,7 +409,7 @@ import {
       playing: { label: '🔥 Jugando Activamente', color: 'bg-cyan-400' },
       completed: { label: '🏆 Completados', color: 'bg-emerald-400' },
       backlog: { label: '📋 Backlog / Pendientes', color: 'bg-amber-400' },
-      paused: { label: '⏸️️ En Pausa', color: 'bg-purple-400' },
+      paused: { label: '⏸ En Pausa', color: 'bg-purple-400' },
       dropped: { label: '❌ Abandonados', color: 'bg-rose-400' },
     };
 

@@ -4,6 +4,7 @@ import Toast from '../components/common/Toast.astro';
 import CookieBanner from '../components/CookieBanner.astro';
 import SEO from '../components/common/SEO.astro';
 import KeyboardShortcuts from '../components/common/KeyboardShortcuts.astro';
+import Footer from '../components/common/Footer.astro';
 
 interface Props {
   title?: string;
@@ -44,7 +45,13 @@ const {
     </script>
   </head>
   <body class="min-h-screen bg-theme-bg text-theme-text transition-colors duration-200 flex flex-col font-sans antialiased">
-    <slot />
+    <div class="flex-1 flex flex-col">
+      <slot />
+    </div>
+
+    <!-- Pie de página Global -->
+    <Footer />
+
     <Toast />
     <CookieBanner />
 

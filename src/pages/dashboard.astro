@@ -1,7 +1,9 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, FolderHeart } from 'lucide-astro';
+import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, FolderHeart, Trophy } from 'lucide-astro';
 ---
 
 <Layout title="Mi Biblioteca | KazeChronik">
@@ -72,6 +74,9 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
         </button>
         <button data-filter="backlog" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold theme-button border border-transparent transition-all cursor-pointer whitespace-nowrap">
           Pendientes (<span id="stat-backlog">0</span>)
+        </button>
+        <button data-filter="platinums" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold theme-button border border-amber-500/30 text-amber-400 transition-all cursor-pointer whitespace-nowrap flex items-center gap-1">
+          <span>🏆 Platinados</span>
         </button>
 
         <!-- Desplegable para Estados Secundarios -->
@@ -484,19 +489,21 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
     const paginationControls = document.getElementById('pagination-controls');
     if (!container) return;
 
-    // 1. FILTRADO CON SOPORTE MULTI-ETIQUETA
+    // 1. FILTRADO CON SOPORTE MULTI-ETIQUETA Y PLATINADOS
     let filteredGames = allGames.filter(game => {
       const matchStatus = activeStatusFilter === 'all' 
         ? true 
         : activeStatusFilter === 'favorites' 
           ? game.is_favorite === true 
-          : game.status === activeStatusFilter;
+          : activeStatusFilter === 'platinums'
+            ? (Number(game.achievements_progress) || 0) >= 100
+            : game.status === activeStatusFilter;
 
       const matchPlatform = activePlatformFilter === 'all' || game.platform === activePlatformFilter;
       const matchStore = activeStoreFilter === 'all' || game.store === activeStoreFilter;
       const matchSearch = searchQuery === '' || game.title.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Multi-Etiqueta: El juego debe contener TODAS las etiquetas seleccionadas
+      // Multi-Etiqueta
       const matchTags = selectedTags.size === 0 || Array.from(selectedTags).every(tag => 
         game.tags && game.tags.includes(tag)
       );
@@ -504,24 +511,20 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
       return matchStatus && matchPlatform && matchStore && matchSearch && matchTags;
     });
 
-    // 2. ORDENAMIENTO DE PRIORIDAD (FAVORITOS PRIMERO + HORAS JUGADAS DESC)
+    // 2. ORDENAMIENTO DE PRIORIDAD
     filteredGames.sort((a, b) => {
-      // Prioridad 1: Favoritos
       const favA = a.is_favorite ? 1 : 0;
       const favB = b.is_favorite ? 1 : 0;
       if (favA !== favB) return favB - favA;
 
-      // Prioridad 2: Estado
       const priorityA = statusPriority[a.status] || 99;
       const priorityB = statusPriority[b.status] || 99;
       if (priorityA !== priorityB) return priorityA - priorityB;
 
-      // Prioridad 3: Horas Jugadas (Descendente)
       const hoursA = Number(a.hours_played) || 0;
       const hoursB = Number(b.hours_played) || 0;
       if (hoursA !== hoursB) return hoursB - hoursA;
 
-      // Prioridad 4: Fecha de Creación
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
 
@@ -574,6 +577,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
       const statusText = statusMap[game.status] || game.status;
       const safeTitle = game.title.replace(/'/g, "\\'");
       const isFav = game.is_favorite === true;
+      const isPlat = (Number(game.achievements_progress) || 0) >= 100;
 
       return `
         <div class="theme-card border border-slate-500/20 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-indigo-500/50 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-xl group relative">
@@ -584,9 +588,12 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
               <span class="text-xs shrink-0">🏪</span>
               <span class="truncate">${game.store || 'Biblioteca'}</span>
             </span>
-            <span class="px-2 py-0.5 bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 rounded-md uppercase text-[10px] shrink-0 ml-1">
-              ${game.platform || 'PC'}
-            </span>
+            <div class="flex items-center gap-1">
+              ${isPlat ? '<span class="text-amber-400 text-xs shrink-0" title="Platinado 100%">🏆</span>' : ''}
+              <span class="px-2 py-0.5 bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 rounded-md uppercase text-[10px] shrink-0">
+                ${game.platform || 'PC'}
+              </span>
+            </div>
           </div>
 
           <!-- PORTADA CON RESGUARDO AUTO-CORRECTIVO -->
@@ -618,7 +625,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
           <!-- CUERPO DE TARJETA -->
           <div class="p-4 flex-1 flex flex-col justify-between text-center space-y-3">
             <div class="space-y-2">
-              <div class="flex justify-center">
+              <div class="flex justify-center gap-1.5 items-center">
                 <span class="text-[10px] uppercase font-bold px-3 py-0.5 border rounded-full ${badgeClass}">
                   ${statusText}
                 </span>
@@ -628,9 +635,11 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
                 <h3 class="font-bold theme-text-primary text-base line-clamp-1">${game.title}</h3>
               </a>
 
-              <p class="text-xs theme-text-secondary font-medium">
-                Tiempo: <strong class="text-indigo-500 font-bold">${game.hours_played || 0} hrs</strong>
-              </p>
+              <div class="flex items-center justify-center gap-3 text-xs theme-text-secondary font-medium">
+                <span>Tiempo: <strong class="text-indigo-500 font-bold">${game.hours_played || 0} hrs</strong></span>
+                <span>•</span>
+                <span>Logros: <strong class="${isPlat ? 'text-amber-400 font-bold' : 'text-indigo-400'}">${game.achievements_progress || 0}%</strong></span>
+              </div>
             </div>
 
             <!-- FRANJA INFERIOR -->
@@ -656,7 +665,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
     }).join('');
   }
 
-  // --- ACCIONES CON CACHÉ LOCAL Y RESILIENCIA OFFLINE ---
+  // ACCIONES CON CACHÉ LOCAL Y RESILIENCIA OFFLINE
   (window as any).toggleFavorite = async (gameId: string, currentFav: boolean) => {
     const newFavStatus = !currentFav;
     
