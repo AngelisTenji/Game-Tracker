@@ -3,7 +3,7 @@ export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/common/Navbar.astro';
-import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, FolderHeart, Trophy } from 'lucide-astro';
+import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, FolderHeart, Trophy, Clock, ArrowUpDown, History } from 'lucide-astro';
 ---
 
 <Layout title="Mi Biblioteca | KazeChronik">
@@ -58,7 +58,24 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
       </div>
     </div>
 
-    <!-- PANEL DE FILTROS CENTRADOS -->
+    <!-- MÓDULO NUEVO: ACTIVIDAD RECIENTE (TIMELINE GAMER) -->
+    <section class="theme-card border border-slate-500/20 p-4 rounded-2xl shadow-sm space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-500/20 pb-2">
+        <h2 class="text-xs font-bold theme-text-primary flex items-center gap-2">
+          <History class="w-4 h-4 text-indigo-400" />
+          <span>Actividad Gamer Reciente</span>
+        </h2>
+        <button id="toggle-timeline-btn" class="text-[11px] text-indigo-400 hover:underline cursor-pointer font-semibold">
+          Ocultar
+        </button>
+      </div>
+
+      <div id="recent-activity-container" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <p class="text-xs theme-text-secondary italic col-span-full py-2">Cargando actividad reciente...</p>
+      </div>
+    </section>
+
+    <!-- PANEL DE FILTROS & ORDENAMIENTO -->
     <div class="space-y-3 pt-2 border-t border-slate-500/10">
       
       <!-- Pestañas de Filtro Rápido Centradas -->
@@ -88,7 +105,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
         </select>
       </div>
 
-      <!-- Filtros Secundarios Centrados (Plataformas, Tiendas y Multi-Etiquetas) -->
+      <!-- Filtros Secundarios y Selector de Ordenamiento -->
       <div class="flex flex-wrap items-center justify-center gap-3 text-xs">
         <div class="flex items-center gap-2">
           <select id="filter-platform" class="px-2.5 py-1 theme-input border border-slate-500/20 rounded-lg text-xs cursor-pointer">
@@ -114,6 +131,18 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
             <option value="Xbox Store">Xbox Store</option>
             <option value="Otro">Otro / Físico</option>
           </select>
+
+          <!-- NUEVO: SELECTOR DE ORDENAMIENTO AVANZADO -->
+          <div class="flex items-center gap-1 bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-2 py-0.5">
+            <ArrowUpDown class="w-3 h-3 text-indigo-400" />
+            <select id="sort-order-select" class="bg-transparent text-indigo-400 font-semibold text-xs focus:outline-none cursor-pointer">
+              <option value="default" class="theme-card">Prioridad Reciente</option>
+              <option value="hours_desc" class="theme-card">Más Horas Jugadas</option>
+              <option value="rating_desc" class="theme-card">Mejor Valorados ★</option>
+              <option value="achievements_desc" class="theme-card">Logros % (Platinados)</option>
+              <option value="alpha_asc" class="theme-card">Nombre (A - Z)</option>
+            </select>
+          </div>
         </div>
 
         <!-- FILTRO AVANZADO MULTI-ETIQUETA -->
@@ -239,7 +268,8 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
   let activeStatusFilter = 'all';
   let activePlatformFilter = 'all';
   let activeStoreFilter = 'all';
-  let selectedTags = new Set<string>(); // Soporte Multi-Etiquetas
+  let activeSortOrder = 'default';
+  let selectedTags = new Set<string>();
   let searchQuery = '';
   let currentPage = 1;
   let gameToDeleteId: string | null = null;
@@ -264,6 +294,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
 
   const platformSelect = document.getElementById('filter-platform') as HTMLSelectElement;
   const storeSelect = document.getElementById('filter-store') as HTMLSelectElement;
+  const sortSelect = document.getElementById('sort-order-select') as HTMLSelectElement;
   const moreStatusSelect = document.getElementById('more-status-filter') as HTMLSelectElement;
   const searchInput = document.getElementById('search-internal') as HTMLInputElement;
 
@@ -299,6 +330,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
           allGames = JSON.parse(cached);
           updateStatsAndRender();
           loadDashboardGoals();
+          renderRecentTimeline();
           if (typeof (window as any).showToast === 'function') {
             (window as any).showToast('Cargado desde la caché local (Modo Offline)', 'info');
           }
@@ -342,6 +374,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
       localStorage.setItem('kazechronik_library_cache', JSON.stringify(allGames));
       updateStatsAndRender();
       loadDashboardGoals();
+      renderRecentTimeline();
 
     } catch (err: any) {
       console.warn('Conexión no disponible. Utilizando copia local:', err?.message);
@@ -350,9 +383,55 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
         allGames = JSON.parse(cached);
         updateStatsAndRender();
         loadDashboardGoals();
+        renderRecentTimeline();
       }
     }
   }
+
+  // RENDERIZADO DE LÍNEA DE TIEMPO / ACTIVIDAD RECIENTE
+  function renderRecentTimeline() {
+    const container = document.getElementById('recent-activity-container');
+    if (!container) return;
+
+    if (allGames.length === 0) {
+      container.innerHTML = `<p class="text-xs theme-text-secondary italic col-span-full py-2">No hay actividad reciente registrada.</p>`;
+      return;
+    }
+
+    const sortedRecent = [...allGames].sort((a, b) => 
+      new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
+    ).slice(0, 3);
+
+    container.innerHTML = sortedRecent.map(g => {
+      const isCompleted = g.status === 'completed';
+      const isPlat = (Number(g.achievements_progress) || 0) >= 100;
+
+      let actionText = 'Actualizado recientemente';
+      if (isPlat) actionText = '🏆 ¡100% Platinado!';
+      else if (isCompleted) actionText = '🏆 ¡Juego Completado!';
+      else if (g.status === 'playing') actionText = `🔥 Jugando (${g.hours_played || 0} hrs)`;
+
+      return `
+        <a href="/game/${g.id}" class="theme-card border border-slate-500/20 p-2.5 rounded-xl flex items-center gap-3 hover:border-indigo-500/40 transition-all shadow-sm">
+          <img src="${g.cover_url || '/placeholder.jpg'}" alt="${g.title}" class="w-10 h-12 object-cover rounded-lg shrink-0" />
+          <div class="overflow-hidden min-w-0 flex-1">
+            <h4 class="text-xs font-bold theme-text-primary truncate">${g.title}</h4>
+            <p class="text-[10px] font-semibold text-indigo-400 mt-0.5 truncate">${actionText}</p>
+          </div>
+        </a>
+      `;
+    }).join('');
+  }
+
+  // BOTÓN OCULTAR/MOSTRAR TIMELINE
+  document.getElementById('toggle-timeline-btn')?.addEventListener('click', (e) => {
+    const btn = e.target as HTMLButtonElement;
+    const container = document.getElementById('recent-activity-container');
+    if (container) {
+      container.classList.toggle('hidden');
+      btn.textContent = container.classList.contains('hidden') ? 'Mostrar' : 'Ocultar';
+    }
+  });
 
   async function loadDashboardGoals() {
     let targetCompleted = 12;
@@ -409,7 +488,6 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
     renderGrid();
   }
 
-  // RENDERIZADO DEL FILTRO MULTI-ETIQUETA
   function renderTagFilters() {
     const wrapper = document.getElementById('tags-filter-wrapper');
     const container = document.getElementById('tags-filter-container');
@@ -489,7 +567,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
     const paginationControls = document.getElementById('pagination-controls');
     if (!container) return;
 
-    // 1. FILTRADO CON SOPORTE MULTI-ETIQUETA Y PLATINADOS
+    // 1. FILTRADO
     let filteredGames = allGames.filter(game => {
       const matchStatus = activeStatusFilter === 'all' 
         ? true 
@@ -503,7 +581,6 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
       const matchStore = activeStoreFilter === 'all' || game.store === activeStoreFilter;
       const matchSearch = searchQuery === '' || game.title.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Multi-Etiqueta
       const matchTags = selectedTags.size === 0 || Array.from(selectedTags).every(tag => 
         game.tags && game.tags.includes(tag)
       );
@@ -511,8 +588,22 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
       return matchStatus && matchPlatform && matchStore && matchSearch && matchTags;
     });
 
-    // 2. ORDENAMIENTO DE PRIORIDAD
+    // 2. APLICAR CRITERIO DE ORDENAMIENTO AVANZADO (SORTING)
     filteredGames.sort((a, b) => {
+      if (activeSortOrder === 'hours_desc') {
+        return (Number(b.hours_played) || 0) - (Number(a.hours_played) || 0);
+      }
+      if (activeSortOrder === 'rating_desc') {
+        return (Number(b.rating) || 0) - (Number(a.rating) || 0);
+      }
+      if (activeSortOrder === 'achievements_desc') {
+        return (Number(b.achievements_progress) || 0) - (Number(a.achievements_progress) || 0);
+      }
+      if (activeSortOrder === 'alpha_asc') {
+        return a.title.localeCompare(b.title);
+      }
+
+      // ORDEN DEFAULT (Prioridad Favorito > Estado > Horas > Fecha)
       const favA = a.is_favorite ? 1 : 0;
       const favB = b.is_favorite ? 1 : 0;
       if (favA !== favB) return favB - favA;
@@ -665,7 +756,13 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
     }).join('');
   }
 
-  // ACCIONES CON CACHÉ LOCAL Y RESILIENCIA OFFLINE
+  // LISTENERS DE ORDENAMIENTO
+  sortSelect?.addEventListener('change', (e) => {
+    activeSortOrder = (e.target as HTMLSelectElement).value;
+    currentPage = 1;
+    renderGrid();
+  });
+
   (window as any).toggleFavorite = async (gameId: string, currentFav: boolean) => {
     const newFavStatus = !currentFav;
     
@@ -775,6 +872,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
     localStorage.setItem('kazechronik_library_cache', JSON.stringify(allGames));
     updateStatsAndRender();
     loadDashboardGoals();
+    renderRecentTimeline();
     closeModal();
 
     if (!navigator.onLine) {
@@ -788,7 +886,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
     saveEditBtn.disabled = true;
     const { error } = await supabase
       .from('user_library')
-      .update({ hours_played: hours, status: status, updated_at: new Date() })
+      .update({ hours_played: hours, status: status, updated_at: new Date().toISOString() })
       .eq('id', id);
 
     saveEditBtn.disabled = false;
@@ -829,6 +927,7 @@ import { Gamepad2, Plus, X, Filter, Search, AlertTriangle, Target, Sparkles, Fol
     localStorage.setItem('kazechronik_library_cache', JSON.stringify(allGames));
     updateStatsAndRender();
     loadDashboardGoals();
+    renderRecentTimeline();
     closeDeleteModal();
 
     if (!navigator.onLine) {

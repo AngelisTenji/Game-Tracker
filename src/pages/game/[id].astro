@@ -21,7 +21,8 @@ import {
   CheckCircle2, 
   RefreshCw,
   ExternalLink,
-  Upload
+  Upload,
+  Sparkles
 } from 'lucide-astro';
 ---
 
@@ -182,7 +183,7 @@ import {
           </div>
         </section>
 
-        <!-- Columna Derecha: Reseña, Logros y Bitácora -->
+        <!-- Columna Derecha: Reseña, Logros, Recomendaciones y Bitácora -->
         <section class="lg:col-span-2 space-y-6">
 
           <!-- SECCIÓN: MÓDULO DE LOGROS Y TROFEOS -->
@@ -233,6 +234,20 @@ import {
               <div class="sm:col-span-2 p-6 text-center theme-button border border-dashed border-slate-500/20 rounded-xl text-xs theme-text-secondary">
                 Haz clic en "Sincronizar Logros" para obtener los trofeos del juego.
               </div>
+            </div>
+          </div>
+
+          <!-- MÓDULO NUEVO: JUEGOS SIMILARES & RECOMENDADOS -->
+          <div id="suggested-games-wrapper" class="theme-card border border-slate-500/20 p-6 rounded-2xl space-y-4 shadow-sm">
+            <div class="flex items-center justify-between border-b border-slate-500/20 pb-3">
+              <h2 class="font-bold text-base theme-text-primary flex items-center gap-2">
+                <Sparkles class="w-5 h-5 text-indigo-400" />
+                <span>Títulos Similares & Recomendados</span>
+              </h2>
+            </div>
+
+            <div id="suggested-games-container" class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+              <p class="text-xs theme-text-secondary italic col-span-full py-2">Buscando recomendaciones...</p>
             </div>
           </div>
 
@@ -779,6 +794,49 @@ import {
 
     loadAchievements();
 
+    // --- MÓDULO DE JUEGOS SIMILARE / RECOMENDADOS (RAWG) ---
+    async function loadSuggestedGames(rawgId: number) {
+      const container = document.getElementById('suggested-games-container');
+      const wrapper = document.getElementById('suggested-games-wrapper');
+
+      if (!container || !wrapper || !rawgId || rawgId < 0 || !navigator.onLine) {
+        if (wrapper) wrapper.classList.add('hidden');
+        return;
+      }
+
+      try {
+        const rawgKey = 'c53a703142404772979238f656999353';
+        const res = await fetch(`https://api.rawg.io/api/games/${rawgId}/suggested?key=${rawgKey}&page_size=4`);
+        const suggestedData = await res.json();
+
+        if (!suggestedData.results || suggestedData.results.length === 0) {
+          wrapper.classList.add('hidden');
+          return;
+        }
+
+        container.innerHTML = suggestedData.results.map((g: any) => `
+          <div class="p-2 theme-input border border-slate-500/20 rounded-xl space-y-2 text-center group flex flex-col justify-between">
+            <div>
+              <img src="${g.background_image || '/placeholder.jpg'}" alt="${g.name}" class="w-full h-20 object-cover rounded-lg group-hover:scale-105 transition-transform" />
+              <h5 class="text-xs font-bold theme-text-primary truncate mt-2">${g.name}</h5>
+            </div>
+            <a href="/search?q=${encodeURIComponent(g.name)}" class="block w-full py-1 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 font-bold text-[10px] rounded-md transition-colors mt-2">
+              + Añadir
+            </a>
+          </div>
+        `).join('');
+      } catch (e) {
+        if (wrapper) wrapper.classList.add('hidden');
+      }
+    }
+
+    if (data.rawg_id) {
+      loadSuggestedGames(data.rawg_id);
+    } else {
+      const wrapper = document.getElementById('suggested-games-wrapper');
+      if (wrapper) wrapper.classList.add('hidden');
+    }
+
     // --- MODAL DE LISTAS ---
     openAddToListBtn?.addEventListener('click', async () => {
       addToListModal?.classList.remove('hidden');
@@ -947,7 +1005,6 @@ import {
     function parseNoteContent(rawText: string) {
       if (!rawText) return '';
 
-      // Convierte enlaces web en etiquetas <a> clickeables
       const urlRegex = /(https?:\/\/[^\s<]+)/g;
       
       return rawText.split('\n').map((line: string) => {

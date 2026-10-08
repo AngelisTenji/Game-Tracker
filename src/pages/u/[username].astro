@@ -3,6 +3,7 @@ export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/common/Navbar.astro';
+import { supabase } from '../../lib/supabase';
 import { 
   Trophy, 
   MessageSquare, 
@@ -21,9 +22,47 @@ import {
 } from 'lucide-astro';
 
 const { username } = Astro.params;
+
+// 1. Obtener datos del perfil en el Servidor para metadatos Open Graph (SEO / Social Preview)
+let profileMetaData = null;
+
+if (username) {
+  try {
+    const { data } = await supabase
+      .from('profiles')
+      .select('display_name, username, bio, avatar_url, banner_url')
+      .eq('username', username.toLowerCase())
+      .maybeSingle();
+      
+    profileMetaData = data;
+  } catch (e) {
+    console.error('Error obteniendo metadatos SSR del perfil:', e);
+  }
+}
+
+const displayName = profileMetaData?.display_name || username || 'Jugador';
+const userBio = profileMetaData?.bio || `Explora la biblioteca y bitácora gamer de @${username} en KazeChronik.`;
+const ogImage = profileMetaData?.avatar_url || profileMetaData?.banner_url || 'https://kazechronik.vercel.app/og-default.jpg';
+const pageTitle = `Perfil de @${username} (${displayName}) | KazeChronik`;
 ---
 
-<Layout title={`Perfil de @${username} | KazeChronik`}>
+<Layout title={pageTitle}>
+  <!-- METADATOS OPEN GRAPH Y TWITTER CARDS PARA VISTA PREVIA EN REDES SOCIALES -->
+  <Fragment slot="head">
+    <meta property="og:type" content="profile" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={userBio} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta property="profile:username" content={username} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={userBio} />
+    <meta name="twitter:image" content={ogImage} />
+  </Fragment>
+
   <Navbar />
 
   <main class="min-h-screen pt-24 pb-16 px-4 max-w-6xl mx-auto theme-text-primary">
@@ -54,12 +93,12 @@ const { username } = Astro.params;
       
       <!-- Tarjeta de Presentación / Banner Header -->
       <header class="theme-card border border-slate-500/20 rounded-3xl relative overflow-hidden shadow-xl">
-        <!-- Banner Decorativo Adaptable (Soporta Imagen de Fondo o Gradiente) -->
+        <!-- Banner Decorativo Adaptable -->
         <div id="profile-banner-container" class="h-32 sm:h-44 bg-gradient-to-r from-indigo-900/60 via-purple-900/40 to-indigo-950/80 border-b border-slate-500/20 w-full relative bg-cover bg-center">
           <div class="absolute inset-0 bg-black/30 backdrop-blur-[2px]"></div>
 
           <div class="absolute top-4 right-4 flex items-center gap-2 z-10">
-            <!-- Botón Editar Perfil (Visible solo para el dueño de la cuenta) -->
+            <!-- Botón Editar Perfil -->
             <button 
               id="open-edit-profile-modal-btn"
               type="button"
@@ -133,7 +172,7 @@ const { username } = Astro.params;
       <!-- Sección de Colección y Reseñas -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <!-- Galería de Juegos Filtrable (Top vs Todos) -->
+        <!-- Galería de Juegos Filtrable -->
         <section class="lg:col-span-2 theme-card border border-slate-500/20 p-6 rounded-3xl shadow-sm space-y-4">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-500/20 pb-4">
             <h2 class="font-bold text-base flex items-center gap-2 theme-text-primary">
