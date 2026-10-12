@@ -1,152 +1,110 @@
-# Biblioteca de juegos y manejo de datos
+# KazeChronik — Documentación Técnica & Arquitectura
 
 ## 1. Descripción del Proyecto
-Aplicación web full-stack para la gestión de biblioteca personal de videojuegos, seguimiento de progreso, horas jugadas, logros y estadísticas visuales. Diseñada para soporte multiusuario.
+KazeChronik es una aplicación web full-stack progresiva (PWA) construida para la gestión integral de bibliotecas personales de videojuegos, registro de horas, análisis de estadísticas, bitácora táctica de notas y seguimiento de trofeos para jugadores.
 
 ---
 
 ## 2. Stack Tecnológico
-- **Frontend:** Astro (SSR), Tailwind CSS, JavaScript / TypeScript.
-- **Backend & DB:** Supabase (Autenticación + PostgreSQL).
-- **API Externa:** RAWG API (o IGDB) para catálogo de datos e imágenes.
+
+- **Frontend & Server Rendering:** Astro (SSR habilitado para Vercel), JavaScript / TypeScript.
+- **Estilos:** Tailwind CSS v4 con variables temáticas custom.
+- **Base de Datos & Autenticación:** Supabase PostgreSQL con Row Level Security (RLS) y Supabase Auth.
+- **APIs de Videojuegos:** RAWG API (Catálogo general, sugerencias y trofeos) y Steam API (Sincronización oficial de logros).
+- **PWA & Offline First:** Service Workers custom (`sw.js`), manifest web y cola de acciones pendiente (`src/lib/syncQueue.ts`).
 
 ---
 
-## 3. Requisitos del Sistema
+## 3. Especificación de Requisitos
 
 ### 3.1. Requisitos Funcionales (RF)
-- **RF-01 Autenticación:** El sistema debe permitir registro e inicio de sesión de usuarios (Supabase Auth).
-- **RF-02 Buscador de Juegos:** El usuario puede buscar títulos consumiendo la API externa.
-- **RF-03 Gestión de Biblioteca (CRUD):**
-  - Agregar juegos a la biblioteca personal asignando: Estado, Plataforma (Dispositivo), Tienda (Distribuidor), Horas jugadas y Logros completados.
-  - Editar datos de seguimiento: *Estado (Jugando, Completado, En Pausa, Abandonado, Pendiente)*, *Plataforma*, *Horas jugadas*, *Logros completados*.
-  - Eliminar juegos de la biblioteca.
-- **RF-04 Visualización de Portadas:** Mostrar tarjetas visuales con la imagen de portada y progreso de cada título.
-- **RF-05 Seguridad de Datos:** Cada usuario solo puede ver y editar su propia biblioteca.
+- **RF-01 Autenticación & Perfiles:** Registro, inicio de sesión (Supabase Auth) y perfiles de usuario personalizables (`/u/[username]`) con avatares, banners y biografía.
+- **RF-02 Búsqueda Externa & Sugerencias:** Búsqueda en directo mediante RAWG API y módulo de recomendación automática de títulos afines.
+- **RF-03 CRUD de Biblioteca & Filtros Avanzados:**
+  - Control de estado: *Jugando*, *Completado*, *En Pausa*, *Abandonado*, *Backlog*.
+  - Clasificación por Plataforma, Tienda y Etiquetas personalizadas.
+  - Ordenamiento por Horas Jugadas, Calificación ★, % de Logros, Prioridad y Alfabético.
+- **RF-04 Gamer Notebook:** Creación de notas enriquecidas por juego con soporte de imágenes locales/URL, listas de verificación (`[ ]` / `[x]`) y enlaces activos.
+- **RF-05 Sincronización de Trofeos:** Lectura de trofeos desde Steam/RAWG con marcas de completitud y badge de Platinado.
+- **RF-06 Metas Anuales:** Definición de objetivos numéricos anuales y barra de progreso de juegos completados.
+- **RF-07 Modo Offline:** Persistencia en `localStorage` con envío diferido de queries mediante `syncQueue`.
 
 ### 3.2. Requisitos No Funcionales (RNF)
-- **RNF-01 Rendimiento:** Carga optimizada de imágenes y páginas con Server-Side Rendering (SSR).
-- **RNF-02 Seguridad:** Políticas de seguridad a nivel de fila (RLS) aplicadas en la base de datos PostgreSQL.
-- **RNF-03 Diseño Responsivo:** Interfaz adaptada a pantallas móviles y de escritorio.
+- **RNF-01 Rendimiento:** Renderizado híbrido en servidor (SSR) y cliente.
+- **RNF-02 SEO & Social Sharing:** Inyección dinámica de metadatos Open Graph (OG) y Twitter Cards en las vistas de juegos y perfiles.
+- **RNF-03 Seguridad RLS:** Isolación total de datos en PostgreSQL para que cada usuario solo gestione sus registros.
 
 ---
 
-## 4. Estructura de Datos (Borrador inicial)
+## 4. Estructura de Base de Datos (PostgreSQL en Supabase)
+
+### Tabla: `profiles`
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| `id` | UUID (PK) | Corresponde con `auth.users.id` |
+| `username` | Text (Unique) | Handle único del usuario |
+| `display_name` | Text | Nombre visible en la plataforma |
+| `bio` | Text | Biografía del jugador |
+| `avatar_url` | Text | URL o DataURL del avatar |
+| `banner_url` | Text | URL o DataURL de cabecera |
 
 ### Tabla: `user_library`
 | Campo | Tipo | Descripción |
 | :--- | :--- | :--- |
-| `id` | UUID / Primary Key | Identificador único del registro |
-| `user_id` | UUID / Foreign Key | ID del usuario propietario (vía Supabase Auth) |
-| `rawg_id` | Integer / String | ID del juego en la API externa |
-| `title` | String | Nombre del videojuego |
-| `cover_url` | String | Enlace a la imagen de portada |
-| `platform` | String | Dispositivo/Consola (ej. PC, PS5, Switch, Android, iOS) |
-| `store` | String | Tienda/Distribuidor (ej. Steam, Epic Games, GOG, PS Store, Play Store) |
-| `status` | Enum / String | `playing`, `completed`, `on_hold`, `dropped`, `backlog` |
-| `hours_played` | Numeric / Float | Horas de juego invertidas |
-| `achievements_progress` | Integer | Porcentaje o cantidad de logros completados |
-| `created_at` | Timestamp | Fecha de adición a la biblioteca |
+| `id` | UUID (PK) | Identificador del registro |
+| `user_id` | UUID (FK) | Propietario del juego |
+| `rawg_id` | BigInt | ID original de RAWG/Steam |
+| `title` | Text | Título del videojuego |
+| `cover_url` | Text | Imagen de portada |
+| `platform` | Text | Plataforma principal |
+| `store` | Text | Tienda / Origen |
+| `status` | Text | Estado de juego (`playing`, `completed`, etc.) |
+| `hours_played` | Numeric | Horas registradas |
+| `rating` | Numeric | Calificación personal (1 a 10) |
+| `review` | Text | Reseña o crítica redactada |
+| `notes` | Text | Notas rápidas de bitácora |
+| `tags` | Array (Text) | Lista de etiquetas asignadas |
+| `is_favorite` | Boolean | Estado de favorito |
+| `achievements_progress` | Integer | Porcentaje de trofeos completados |
+
+### Tabla: `game_notes`
+| Campo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| `id` | UUID (PK) | Identificador de la nota |
+| `game_id` | UUID (FK) | Juego asociado en `user_library` |
+| `user_id` | UUID (FK) | Propietario de la nota |
+| `category` | Text | `builds`, `map`, `puzzle`, `general` |
+| `title` | Text | Título descriptivo |
+| `content` | Text | Texto de la nota / checklists |
+| `image_url` | Text | Captura o infografía adjunta |
+| `is_pinned` | Boolean | Fijado al inicio de la bitácora |
 
 ---
 
-## 🔄 5. Diagramas de Flujo (Lógica del Sistema)
-
-### 5.1. Flujo: Búsqueda y Adición de un Juego a la Biblioteca
-
-```mermaid
-flowchart TD
-    A[Inicio: Usuario entra a la app] --> B{¿Está autenticado?}
-    
-    %% Ruta si NO está autenticado
-    B -- No --> C[Mostrar vista pública / Landing]
-    C --> D[Usuario presiona 'Iniciar Sesión / Registrarse']
-    D --> E[Autenticación con Supabase Auth]
-    E --> F[Redirección al Dashboard Principal]
-
-    %% Ruta si SÍ está autenticado
-    B -- Sí --> F
-
-    %% Proceso de búsqueda
-    F --> G[Usuario escribe el título en la barra de búsqueda]
-    G --> H[Consumo de API Externa: RAWG / IGDB]
-    H --> I{¿Se encontraron resultados?}
-
-    %% Resultados de búsqueda
-    I -- No --> J[Mostrar mensaje: 'No se encontraron juegos']
-    J --> G
-    
-    I -- Sí --> K[Renderizar tarjetas con portada y datos básicos]
-    K --> L[Usuario hace clic en 'Agregar a mi biblioteca']
-    
-    %% Formulario de seguimiento
-    L --> M[Abrir Modal / Formulario de Registro]
-    M --> N[Seleccionar: Estado, Plataforma, Tienda, Horas y Logros]
-    N --> O[Usuario presiona 'Guardar']
-
-    %% Persistencia en Base de Datos
-    O --> P[Enviar payload a Supabase: tabla 'user_library']
-    P --> Q{¿Registro exitoso?}
-    
-    Q -- Error --> R[Mostrar notificación de error / Reintentar]
-    R --> M
-    
-    Q -- Éxito --> S[Actualizar estado local e interfaz del Dashboard]
-    S --> T[Fin: Juego visible en la biblioteca del usuario]
-```
-
-### 5.2. Flujo: Edición y Actualización de Registro en la Biblioteca
-
-```mermaid
-flowchart TD
-    A[Inicio: Usuario explora su biblioteca] --> B[Selecciona un juego de la lista]
-    B --> C[Hace clic en 'Editar' o sobre la tarjeta del juego]
-    C --> D[Cargar datos actuales del registro en el Formulario/Modal]
-    
-    D --> E[Usuario modifica campos: Horas, Estado, Tienda, Logros]
-    E --> F[Usuario presiona 'Guardar Cambios']
-    
-    F --> G{¿Los datos ingresados son válidos?}
-    G -- No (ej. Horas negativas) --> H[Mostrar mensaje de error de validación]
-    H --> E
-    
-    G -- Sí --> I[Enviar query UPDATE a Supabase 'user_library']
-    I --> J{¿Actualización en DB exitosa?}
-    
-    J -- Error (ej. Falla de conexión) --> K[Mostrar notificación: 'Error al actualizar']
-    K --> E
-    
-    J -- Éxito --> L[Actualizar UI del Dashboard en tiempo real]
-    L --> M[Fin: Registro actualizado correctamente]
-```
-
----
-
-## 📁 6. Arquitectura del Proyecto y Estructura de Carpetas
+## 📁 5. Arquitectura del Proyecto
 
 ```text
-game-tracker/
-├── public/                     # Archivos estáticos (favicon, iconos, imágenes locales)
+Game-Tracker/
+├── public/                     # Service Worker, manifest PWA, SVGs e íconos
 ├── src/
-│   ├── components/            # Componentes de UI reutilizables
-│   │   ├── common/            # Botones, Modales, Navbars, Footers
-│   │   ├── dashboard/         # Tarjetas de juegos, Filtros, Métricas/Stats
-│   │   └── search/            # Barra de búsqueda, Resultados de la API
-│   ├── layouts/               # Plantillas base (Layout.astro, AuthLayout.astro)
-│   ├── lib/                   # Configuraciones y clientes de servicios externos
-│   │   ├── supabase.js        # Cliente de Supabase (Auth + DB)
-│   │   └── rawg.js            # Funciones para consumir la API de RAWG/IGDB
-│   ├── pages/                 # Rutas de la aplicación (SSR)
-│   │   ├── api/               # Endpoints/API Routes (si se requieren)
-│   │   ├── index.astro        # Landing page / Portada pública
-│   │   ├── login.astro        # Vista de Inicio de Sesión / Registro
-│   │   └── dashboard.astro    # Vista principal de la biblioteca del usuario
-│   ├── styles/                # Estilos globales y configuración de Tailwind CSS
-│   └── types/                 # Definiciones de TypeScript e interfaces (juegos, usuario)
-├── .env.example               # Plantilla para variables de entorno (API keys, Supabase URL)
-├── .gitignore                 # Archivos omitidos para Git (node_modules, .env)
-├── DOCUMENTACION.md           # Especificaciones del proyecto e ingeniería
-├── README.md                  # Documentación principal del repositorio
-├── astro.config.mjs           # Configuración de Astro (modo SSR + Tailwind)
-└── package.json               # Dependencias del proyecto
+│   ├── components/            # Componentes reutilizables UI
+│   │   ├── common/            # Navbar, Footer, Toast, SEO, Shortcuts
+│   │   └── CookieBanner.astro # Banner de consentimiento
+│   ├── layouts/               # Plantilla base (Layout.astro)
+│   ├── lib/                   # Clientes API y colas de sincronización
+│   │   ├── rawg.js            # Cliente RAWG API
+│   │   ├── supabase.js        # Cliente Supabase
+│   │   └── syncQueue.ts       # Gestor de acciones offline
+│   ├── pages/                 # Páginas de la aplicación (Astro SSR)
+│   │   ├── api/               # Endpoints locales (Steam, búsqueda RAWG)
+│   │   ├── game/[id].astro    # Detalle, Bitácora y Gamer Notebook
+│   │   ├── u/[username].astro # Perfil público de jugador con OG Metas
+│   │   ├── analytics.astro    # Módulo de métricas visuales
+│   │   ├── dashboard.astro    # Biblioteca principal con ordenamiento y timeline
+│   │   ├── goals.astro        # Gestión de metas anuales
+│   │   ├── lists.astro        # Listas personalizadas
+│   │   └── search.astro       # Buscador global
+│   └── styles/                # Tailwind CSS v4 global
+├── DOCUMENTACION.md           # Especificaciones técnicas del proyecto
+└── README.md                  # Presentación para GitHub
 ```

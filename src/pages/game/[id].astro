@@ -121,9 +121,20 @@ import {
               </select>
             </div>
 
-            <!-- Horas Jugadas -->
+            <!-- Horas Jugadas con Sincronización de Steam -->
             <div>
-              <label class="block text-xs font-semibold theme-text-secondary mb-2">Horas Jugadas</label>
+              <div class="flex justify-between items-center mb-2">
+                <label class="text-xs font-semibold theme-text-secondary">Horas Jugadas</label>
+                <button 
+                  type="button" 
+                  id="sync-steam-hours-btn" 
+                  class="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 cursor-pointer transition-colors"
+                  title="Sincronizar horas desde Steam"
+                >
+                  <RefreshCw class="w-3 h-3" />
+                  <span>Sincronizar Steam</span>
+                </button>
+              </div>
               <div class="flex items-center gap-2">
                 <input 
                   type="number" 
@@ -195,12 +206,12 @@ import {
                   <span>Logros & Trofeos</span>
                 </h2>
                 <p id="achievements-subtitle" class="text-xs theme-text-secondary mt-0.5">
-                  Sincronización oficial de trofeos y progreso de completitud.
+                  Sincronización de trofeos y gestión de metas personalizadas.
                 </p>
               </div>
 
-              <!-- BARRA Y BADGE DE PLATINADO -->
-              <div class="flex items-center gap-3">
+              <!-- BARRA Y BADGE DE PLATINADO / ACCIONES -->
+              <div class="flex items-center gap-2 flex-wrap">
                 <div id="platinum-badge" class="hidden px-3 py-1 bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border border-amber-500/40 text-amber-300 font-black text-xs rounded-xl shadow-lg shadow-amber-500/10 items-center gap-1.5 animate-pulse">
                   <span>🏆</span>
                   <span>100% PLATINADO</span>
@@ -208,14 +219,63 @@ import {
 
                 <button 
                   type="button" 
+                  id="toggle-custom-achievement-form-btn" 
+                  class="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <Plus class="w-3.5 h-3.5" />
+                  <span>Crear Logro</span>
+                </button>
+
+                <button 
+                  type="button" 
                   id="sync-achievements-btn" 
                   class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5"
                 >
                   <RefreshCw class="w-3.5 h-3.5" />
-                  <span>Sincronizar Logros</span>
+                  <span>Sincronizar</span>
                 </button>
               </div>
             </div>
+
+            <!-- FORMULARIO DE CREACIÓN DE LOGRO PERSONALIZADO -->
+            <form id="custom-achievement-form" class="hidden theme-input border border-slate-500/20 p-4 rounded-xl space-y-3">
+              <h3 class="text-xs font-bold theme-text-primary flex items-center gap-1.5">
+                <Award class="w-4 h-4 text-amber-400" />
+                <span>Agregar Logro Personalizado</span>
+              </h3>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-semibold theme-text-secondary mb-1">Título del Logro</label>
+                  <input 
+                    type="text" 
+                    id="custom-ach-title" 
+                    required 
+                    placeholder="ej: Derrotar al boss opcional sin recibir daño"
+                    class="w-full px-3 py-2 theme-card border border-slate-500/20 rounded-lg text-xs focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-[11px] font-semibold theme-text-secondary mb-1">Descripción / Requisito</label>
+                  <input 
+                    type="text" 
+                    id="custom-ach-desc" 
+                    placeholder="ej: Completar la mazmorra secreta en dificultad Difícil"
+                    class="w-full px-3 py-2 theme-card border border-slate-500/20 rounded-lg text-xs focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-1">
+                <button type="button" id="cancel-custom-ach-btn" class="px-3 py-1.5 theme-button border border-slate-500/20 text-xs font-semibold rounded-lg cursor-pointer">
+                  Cancelar
+                </button>
+                <button type="submit" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition-all shadow-md cursor-pointer">
+                  Añadir Logro
+                </button>
+              </div>
+            </form>
 
             <!-- CONTADOR DE LOGROS Y BARRA DE PROGRESO -->
             <div class="space-y-2">
@@ -232,7 +292,7 @@ import {
             <!-- CONTENEDOR DE LISTADO DE LOGROS -->
             <div id="achievements-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-1">
               <div class="sm:col-span-2 p-6 text-center theme-button border border-dashed border-slate-500/20 rounded-xl text-xs theme-text-secondary">
-                Haz clic en "Sincronizar Logros" para obtener los trofeos del juego.
+                Haz clic en "Sincronizar Logros" o añade un logro personalizado.
               </div>
             </div>
           </div>
@@ -462,6 +522,7 @@ import {
 
     const statusSelect = document.getElementById('status-select') as HTMLSelectElement;
     const hoursInput = document.getElementById('hours-input') as HTMLInputElement;
+    const syncSteamHoursBtn = document.getElementById('sync-steam-hours-btn');
     const achievementsInput = document.getElementById('achievements-input') as HTMLInputElement;
     const achievementsVal = document.getElementById('achievements-val');
 
@@ -478,6 +539,12 @@ import {
 
     // Módulo de Logros
     const syncAchievementsBtn = document.getElementById('sync-achievements-btn');
+    const toggleCustomAchFormBtn = document.getElementById('toggle-custom-achievement-form-btn');
+    const customAchForm = document.getElementById('custom-achievement-form') as HTMLFormElement;
+    const cancelCustomAchBtn = document.getElementById('cancel-custom-ach-btn');
+    const customAchTitleInput = document.getElementById('custom-ach-title') as HTMLInputElement;
+    const customAchDescInput = document.getElementById('custom-ach-desc') as HTMLInputElement;
+
     const achievementsListContainer = document.getElementById('achievements-list-container');
     const achievementsCountLabel = document.getElementById('achievements-count-label');
     const achievementsPctLabel = document.getElementById('achievements-pct-label');
@@ -521,8 +588,12 @@ import {
       return;
     }
 
+    // Al ajustar manualmente el slider de la izquierda, sincronizamos la base de datos
     achievementsInput?.addEventListener('input', (e: any) => {
-      if (achievementsVal) achievementsVal.textContent = `${e.target.value}%`;
+      const val = parseInt(e.target.value) || 0;
+      if (achievementsVal) achievementsVal.textContent = `${val}%`;
+      data.achievements_progress = val;
+      syncAchievementsProgressToDatabase(val);
     });
 
     // 1. Cargar Registro (Online con Fallback Offline)
@@ -656,21 +727,128 @@ import {
       }
     });
 
-    // --- LOGROS Y TROFEOS ---
-    async function loadAchievements() {
+    // --- SINCRONIZACIÓN DE HORAS DE STEAM ---
+    syncSteamHoursBtn?.addEventListener('click', async () => {
+      const userSteamId = localStorage.getItem('kazechronik_steam_id');
+      
+      if (!userSteamId) {
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Vincula tu Steam ID en Ajustes para sincronizar horas', 'info');
+        } else {
+          alert('Vincula tu Steam ID en Ajustes para sincronizar horas');
+        }
+        return;
+      }
+
+      const appId = Math.abs(data.rawg_id);
+      if (!appId) {
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Este juego no está vinculado a un ID de Steam', 'error');
+        } else {
+          alert('Este juego no está vinculado a un ID de Steam');
+        }
+        return;
+      }
+
+      const iconEl = syncSteamHoursBtn.querySelector('svg');
+      iconEl?.classList.add('animate-spin');
+
+      try {
+        const res = await fetch(`/api/steam/hours?steamId=${encodeURIComponent(userSteamId)}`);
+        const resData = await res.json();
+
+        if (resData.hoursMap && resData.hoursMap[appId] !== undefined) {
+          const newHours = resData.hoursMap[appId];
+          hoursInput.value = newHours.toString();
+          
+          data.hours_played = newHours;
+          localStorage.setItem(cacheKey, JSON.stringify(data));
+
+          if (!navigator.onLine) {
+            enqueueAction('user_library', 'UPDATE', { id: gameId, hours_played: newHours });
+          } else {
+            await supabase
+              .from('user_library')
+              .update({ hours_played: newHours, updated_at: new Date().toISOString() })
+              .eq('id', gameId);
+          }
+
+          if (typeof (window as any).showToast === 'function') {
+            (window as any).showToast(`Horas actualizadas desde Steam: ${newHours}h`, 'success');
+          }
+        } else {
+          if (typeof (window as any).showToast === 'function') {
+            (window as any).showToast('No se encontraron registros de tiempo para este juego en Steam', 'info');
+          }
+        }
+      } catch (e) {
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Error al conectar con la API de Steam', 'error');
+        }
+      } finally {
+        iconEl?.classList.remove('animate-spin');
+      }
+    });
+
+    // --- FUNCIÓN HELPER: ACTUALIZAR Y GUARDAR EN SUPABASE EL PORCENTAJE DE LOGROS ---
+    async function syncAchievementsProgressToDatabase(pct: number) {
+      data.achievements_progress = pct;
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+
+      // 1. Actualizar inmediatamente la caché general de la biblioteca del Dashboard
+      const libCacheStr = localStorage.getItem('kazechronik_library_cache');
+      if (libCacheStr) {
+        try {
+          const libCache = JSON.parse(libCacheStr);
+          const itemIdx = libCache.findIndex((g: any) => g.id === gameId);
+          if (itemIdx !== -1) {
+            libCache[itemIdx].achievements_progress = pct;
+            libCache[itemIdx].updated_at = new Date().toISOString();
+            localStorage.setItem('kazechronik_library_cache', JSON.stringify(libCache));
+          }
+        } catch (e) {
+          console.error('Error al actualizar la caché del Dashboard:', e);
+        }
+      }
+
+      // 2. Guardar en BD si hay conexión o enviar a la cola offline
+      if (!navigator.onLine) {
+        enqueueAction('user_library', 'UPDATE', { id: gameId, achievements_progress: pct });
+        return;
+      }
+
+      await supabase
+        .from('user_library')
+        .update({ achievements_progress: pct, updated_at: new Date().toISOString() })
+        .eq('id', gameId);
+    }
+
+    // Recalcula el porcentaje según los logros actuales y actualiza la BD/Caché
+    function recalculateAndSyncPct() {
+      if (gameAchievements.length === 0) return;
+      const unlockedCount = gameAchievements.filter(a => a.unlocked).length;
+      const totalCount = gameAchievements.length;
+      const pct = Math.round((unlockedCount / totalCount) * 100);
+
+      syncAchievementsProgressToDatabase(pct);
+    }
+
+    // --- LOGROS Y TROFEOS CON GUARDADO AUTOMÁTICO ---
+    async function loadAchievements(isManualSync = false) {
       const isSteam = data.store === 'Steam' || data.rawg_id < 0;
 
       if (achievementsSubtitle) {
         achievementsSubtitle.textContent = isSteam 
           ? 'Sincronizado automáticamente desde la API de Steam.' 
-          : 'Sugerencias de RAWG y checklist manual interactiva.';
+          : 'Trofeos oficiales y metas personalizadas.';
       }
 
       const cached = localStorage.getItem(achievementsCacheKey);
-      if (cached) {
+      if (cached && !isManualSync) {
         try {
           gameAchievements = JSON.parse(cached);
           renderAchievementsList();
+          return;
         } catch (e) {}
       }
 
@@ -685,9 +863,12 @@ import {
           const resData = await res.json();
 
           if (resData.achievements && resData.achievements.length > 0) {
-            gameAchievements = resData.achievements;
+            const customAch = gameAchievements.filter(a => a.isCustom);
+            gameAchievements = [...resData.achievements, ...customAch];
             localStorage.setItem(achievementsCacheKey, JSON.stringify(gameAchievements));
+            
             renderAchievementsList();
+            recalculateAndSyncPct();
             return;
           }
         }
@@ -698,15 +879,21 @@ import {
           const rawgData = await rawgRes.json();
 
           if (rawgData.results && rawgData.results.length > 0) {
-            gameAchievements = rawgData.results.map((a: any) => ({
+            const fetched = rawgData.results.map((a: any) => ({
               id: a.id,
               title: a.name,
               description: a.description || 'Trofeo de la comunidad RAWG',
               icon: a.image,
-              unlocked: false
+              unlocked: false,
+              isCustom: false
             }));
+
+            const customAch = gameAchievements.filter(a => a.isCustom);
+            gameAchievements = [...fetched, ...customAch];
             localStorage.setItem(achievementsCacheKey, JSON.stringify(gameAchievements));
+            
             renderAchievementsList();
+            recalculateAndSyncPct();
           }
         }
       } catch (err) {
@@ -720,7 +907,7 @@ import {
       if (gameAchievements.length === 0) {
         achievementsListContainer.innerHTML = `
           <div class="sm:col-span-2 p-6 text-center theme-button border border-dashed border-slate-500/20 rounded-xl text-xs theme-text-secondary">
-            No hay trofeos o logros registrados para este título.
+            No hay trofeos o logros registrados para este título. ¡Crea el primero arriba!
           </div>
         `;
         return;
@@ -751,27 +938,42 @@ import {
 
         return `
           <div 
-            onclick="toggleAchievementUnlocked(${idx})"
-            class="p-3 theme-input border rounded-xl flex items-center gap-3 transition-all cursor-pointer ${
+            class="p-3 theme-input border rounded-xl flex items-center justify-between gap-3 transition-all ${
               ach.unlocked 
                 ? 'border-amber-500/40 bg-amber-500/5' 
                 : 'border-slate-500/20 opacity-70 hover:opacity-100'
             }"
           >
-            <img 
-              src="${iconSrc}" 
-              alt="${displayTitle}" 
-              onerror="this.src='/placeholder.svg';"
-              class="w-10 h-10 rounded-lg object-cover shrink-0 ${!ach.unlocked ? 'grayscale' : ''}"
-              loading="lazy"
-            />
-            <div class="flex-1 min-w-0">
-              <h4 class="text-xs font-bold theme-text-primary truncate flex items-center justify-between">
-                <span>${displayTitle}</span>
-                ${ach.unlocked ? '<span class="text-amber-400 text-xs">✓</span>' : ''}
-              </h4>
-              <p class="text-[10px] theme-text-secondary line-clamp-2 mt-0.5">${ach.description || 'Logro de jugador'}</p>
+            <div 
+              onclick="toggleAchievementUnlocked(${idx})"
+              class="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+            >
+              <img 
+                src="${iconSrc}" 
+                alt="${displayTitle}" 
+                onerror="this.src='/placeholder.svg';"
+                class="w-10 h-10 rounded-lg object-cover shrink-0 ${!ach.unlocked ? 'grayscale' : ''}"
+                loading="lazy"
+              />
+              <div class="flex-1 min-w-0">
+                <h4 class="text-xs font-bold theme-text-primary truncate flex items-center justify-between">
+                  <span>${displayTitle} ${ach.isCustom ? '<span class="text-[9px] text-amber-400 font-normal ml-1">(Custom)</span>' : ''}</span>
+                  ${ach.unlocked ? '<span class="text-amber-400 text-xs mr-2">✓</span>' : ''}
+                </h4>
+                <p class="text-[10px] theme-text-secondary line-clamp-2 mt-0.5">${ach.description || 'Logro de jugador'}</p>
+              </div>
             </div>
+
+            ${ach.isCustom ? `
+              <button 
+                type="button" 
+                onclick="deleteCustomAchievement(${idx})" 
+                class="p-1 hover:text-rose-400 text-rose-500/70 cursor-pointer shrink-0 text-xs" 
+                title="Eliminar Logro Personalizado"
+              >
+                🗑️
+              </button>
+            ` : ''}
           </div>
         `;
       }).join('');
@@ -782,19 +984,71 @@ import {
         gameAchievements[index].unlocked = !gameAchievements[index].unlocked;
         localStorage.setItem(achievementsCacheKey, JSON.stringify(gameAchievements));
         renderAchievementsList();
+        recalculateAndSyncPct(); // Autosave directo a Supabase/Caché
       }
+    };
+
+    // --- FORMULARIO Y LÓGICA DE LOGROS PERSONALIZADOS ---
+    toggleCustomAchFormBtn?.addEventListener('click', () => {
+      customAchForm?.classList.toggle('hidden');
+    });
+
+    cancelCustomAchBtn?.addEventListener('click', () => {
+      customAchForm?.classList.add('hidden');
+      customAchForm?.reset();
+    });
+
+    customAchForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const title = customAchTitleInput.value.trim();
+      const description = customAchDescInput.value.trim() || 'Logro personal de jugador';
+
+      if (!title) return;
+
+      const newAch = {
+        id: `custom_${Date.now()}`,
+        title,
+        description,
+        icon: '/favicon.svg',
+        unlocked: false,
+        isCustom: true
+      };
+
+      gameAchievements.unshift(newAch);
+      localStorage.setItem(achievementsCacheKey, JSON.stringify(gameAchievements));
+      
+      customAchForm.reset();
+      customAchForm.classList.add('hidden');
+      renderAchievementsList();
+      recalculateAndSyncPct();
+
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast('Logro personalizado añadido', 'success');
+      }
+    });
+
+    (window as any).deleteCustomAchievement = (index: number) => {
+      if (!confirm('¿Deseas eliminar este logro personalizado?')) return;
+
+      gameAchievements.splice(index, 1);
+      localStorage.setItem(achievementsCacheKey, JSON.stringify(gameAchievements));
+      renderAchievementsList();
+      recalculateAndSyncPct();
     };
 
     syncAchievementsBtn?.addEventListener('click', () => {
       syncAchievementsBtn.classList.add('animate-spin');
-      loadAchievements().finally(() => {
+      loadAchievements(true).finally(() => {
         syncAchievementsBtn.classList.remove('animate-spin');
+        if (typeof (window as any).showToast === 'function') {
+          (window as any).showToast('Logros e índice de completitud actualizados', 'success');
+        }
       });
     });
 
     loadAchievements();
 
-    // --- MÓDULO DE JUEGOS SIMILARE / RECOMENDADOS (RAWG) ---
+    // --- MÓDULO DE JUEGOS SIMILARES / RECOMENDADOS (RAWG) ---
     async function loadSuggestedGames(rawgId: number) {
       const container = document.getElementById('suggested-games-container');
       const wrapper = document.getElementById('suggested-games-wrapper');
