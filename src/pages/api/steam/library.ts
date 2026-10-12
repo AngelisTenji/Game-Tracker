@@ -22,10 +22,12 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   try {
-    // 1. Resolver Custom URL
+    // 1. Resolver Custom URL (si no es un SteamID64 numérico de 17 dígitos)
     if (!/^\d{17}$/.test(steamId)) {
+      // Sanitizamos el custom URL aceptando solo caracteres alfanuméricos y guiones
+      const sanitizedVanity = steamId.replace(/[^a-zA-Z0-9_-]/g, '');
       const vanityRes = await fetch(
-        `https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${apiKey}&vanityurl=${encodeURIComponent(steamId)}`
+        `https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${apiKey}&vanityurl=${encodeURIComponent(sanitizedVanity)}`
       );
       const vanityData = await vanityRes.json();
 

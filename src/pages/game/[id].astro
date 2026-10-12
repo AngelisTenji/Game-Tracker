@@ -1256,12 +1256,25 @@ import {
       }
     }
 
+    // Helper de sanitización rápida anti-XSS
+    function escapeHtml(str: string): string {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     function parseNoteContent(rawText: string) {
       if (!rawText) return '';
 
+      // 1. Escapamos primero todo el texto para neutralizar cualquier script o etiqueta inyectada
+      const safeText = escapeHtml(rawText);
       const urlRegex = /(https?:\/\/[^\s<]+)/g;
-      
-      return rawText.split('\n').map((line: string) => {
+
+      // 2. Procesamos enlaces y listas sobre el texto seguro
+      return safeText.split('\n').map((line: string) => {
         let processedLine = line.replace(urlRegex, (url) => {
           return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline font-bold inline-flex items-center gap-1">${url} ↗</a>`;
         });
