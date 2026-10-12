@@ -375,18 +375,25 @@ import { Library, Search, Settings, BarChart2, BookOpen, User, LogOut, WifiOff, 
       }
     }
 
-    // Cierre de Sesión
+    // Cierre de Sesión Seguro con Limpieza de Caché Completa (v1.0.0)
     logoutBtn?.addEventListener('click', async () => {
       logoutBtn.setAttribute('disabled', 'true');
       
-      const { error } = await supabase.auth.signOut();
+      try {
+        const { error } = await supabase.auth.signOut();
 
-      if (!error) {
-        localStorage.removeItem(profileCacheKey);
+        if (!error) {
+          // Limpiar todo el almacenamiento local para evitar filtrado de caché entre usuarios
+          localStorage.clear();
+          window.location.href = '/login';
+        } else {
+          alert('Error al cerrar sesión: ' + error.message);
+          logoutBtn.removeAttribute('disabled');
+        }
+      } catch (err) {
+        // Fallback en caso de desconexión o fallo crítico
+        localStorage.clear();
         window.location.href = '/login';
-      } else {
-        alert('Error al cerrar sesión: ' + error.message);
-        logoutBtn.removeAttribute('disabled');
       }
     });
   }
